@@ -46,4 +46,7 @@ class VerifiedStudy(Contract):
     site: SiteContext
     envelope: Envelope
     citation_checks: tuple[CitationCheck, ...]
-    """One check per citation found anywhere in ``study``."""
+    """One check per distinct regulatory citation found anywhere in ``study``.
+
+    Geometric citations are not checked against the corpus and have no entry.
+    """
