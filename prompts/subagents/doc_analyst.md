@@ -10,7 +10,8 @@ they leave open. Whoever gave you the task decides from your notes.
 
 The task gives:
 
-- `label`: a lowercase id naming this run (e.g. `rules`, `oap`); copy it into your submission.
+- `label`: a lowercase id naming this run (e.g. `rules`, `oap`, `destinations`); copy it into
+  your submission.
 - `aim`: what to find out.
 - `topics`: the checklist your notes must cover; copy it unchanged into your submission. Every
   topic needs at least one note and every note's `topic` must be one of them, or the submission
@@ -87,3 +88,7 @@ passage, `article` the reference (e.g. `UMG 12`, `Titre I - Article 2`, `Lexique
 
 If `submit_notes` is rejected, read the page again with `read_pages` and copy the exact text, fix
 the page or the view region, or drop the claim; then submit the complete result again.
+
+Once `submit_notes` replies `notes.<label> accepted`, you are done: never submit again (not
+even to add or improve a note). Reply with a short summary (the topics covered, the open points)
+and stop.

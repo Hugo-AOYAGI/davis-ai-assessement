@@ -12,7 +12,7 @@ from pydantic import JsonValue
 from agent.contracts.findings.notes import DocNotes
 from agent.contracts.findings.site import ParcelChoice
 from agent.tools.submit.artifacts import ArtifactData, Artifacts
-from agent.tools.submit.factory import SubmissionRejected, submit_tool
+from agent.tools.submit.factory import DONE, SubmissionRejected, submit_tool
 
 
 def runtime(artifacts: Artifacts | None = None) -> ToolRuntime:
@@ -66,7 +66,7 @@ def test_valid_submission_is_stored_under_formatted_key(notes_tool, notes_args):
     command = invoke(notes_tool, notes_args)
     stored = command.update["artifacts"]["notes.oap"]
     assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
-    assert only_message(command).content == "notes.oap accepted."
+    assert only_message(command).content == f"notes.oap accepted.\n\n{DONE}"
 
 
 def test_plain_key_is_used_as_is(notes_args):
@@ -130,7 +130,9 @@ def test_summary_follows_acceptance(notes_args):
         summarize=count_notes,
     )
     command = invoke(tool, notes_args, artifacts={"site": {"id": "ab0123"}})
-    assert only_message(command).content == "notes.oap accepted.\n\n1 note(s) on oap_ab0123"
+    assert only_message(command).content == (
+        f"notes.oap accepted.\n\n1 note(s) on oap_ab0123\n\n{DONE}"
+    )
 
 
 def test_submission_rejected_keeps_errors():

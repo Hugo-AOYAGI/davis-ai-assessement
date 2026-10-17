@@ -39,6 +39,6 @@ zone, do not label limits as road / side / rear, do not discuss what may be buil
 
    If the reply says it was rejected, fix what it lists and submit again.
 
-Your task is done once the reply says `site accepted`. Then answer with a short summary: the
-address, the parcel ids, the site area, the edges by what lies across them, the parcels
-declared public, the rationale and the assumptions.
+Your task is done once the reply says `site accepted`: never submit again after that. Answer
+with a short summary and stop: the address, the parcel ids, the site area, the edges by what
+lies across them, the parcels declared public, the rationale and the assumptions.
