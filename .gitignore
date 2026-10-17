@@ -1,0 +1,13 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.pytest_cache/
+.langgraph_api/
+data/
+outputs/
+multirun/
+
+# External clone (langchain-ai/agent-chat-ui), not our code
+tools/agent-chat-ui/
