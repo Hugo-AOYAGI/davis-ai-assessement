@@ -17,6 +17,8 @@ setup_tracing(
     enabled=_DEFAULTS.policies.tracing.enabled,
     project=_DEFAULTS.policies.tracing.project,
     endpoint=_DEFAULTS.policies.tracing.endpoint,
+    hide_images=_DEFAULTS.policies.tracing.hide_images,
+    base64_max_chars=_DEFAULTS.policies.tracing.base64_max_chars,
 )
 # The server loads this file by path, so ``__name__`` is not under the ``agent`` hierarchy.
 logger = get_logger("agent.entrypoints.graph")

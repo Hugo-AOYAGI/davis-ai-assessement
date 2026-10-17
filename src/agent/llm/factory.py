@@ -46,8 +46,11 @@ def build_model(
     if node not in nodes:
         msg = f"unknown model node {node!r}; configured nodes: {sorted(nodes.keys())}"
         raise KeyError(msg)
+    max_tokens = nodes[node].get("max_tokens")
     cost_logger = (
-        CostLogger(node, load_pricing(models_cfg)) if ledger is None else ledger.logger(node)
+        CostLogger(node, load_pricing(models_cfg), max_tokens)
+        if ledger is None
+        else ledger.logger(node, max_tokens)
     )
     model = instantiate(nodes[node], _convert_="all", callbacks=[cost_logger])
     if not isinstance(model, BaseChatModel):

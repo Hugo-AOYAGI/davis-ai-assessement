@@ -26,10 +26,15 @@ ask for all of them in one batch, now.
    toward your two `ask_user` calls; if it is the second, settle step 4 yourself) and delegate
    again; if the site still cannot be identified, stop and tell the user why.
 2. `zoning_analyst` with the address, the program and the parcel ids of `site`: it knows the
-   site only from your task text. Then `read_artifact` `zone`: the zone, every legend item
+   site only from your task text. Call it alone, and wait for its reply before step 3. Then
+   `read_artifact` `zone`: the zone, every legend item
    checked (`applies` true or false) and the region of the plan it looked at.
 
 ## 3. Read the documents
+
+Steps 2 and 3 run strictly one after the other: never call `doc_analyst` before `zoning_analyst`
+has finished and you have read `zone`, because the zone and legend items are required in each
+task's `context`. Only the two `doc_analyst` calls run in parallel.
 
 Call `task` twice **in the same message**, both with `doc_analyst`, each task written as below
 with its `context` filled in: the zone, the legend items that apply (exact labels), the parcel
@@ -41,6 +46,10 @@ one note per topic and no note outside the list.
 - label: `rules`
 - aim: the regulatory rules for the program in the zone, plus the provisions of every applying
   legend item.
+- documents: the written regulation only (règlement: the zone chapter, the general provisions,
+  the lexique). For an applying legend item that points to another document (e.g. the OAP
+  perimeter), report only what the regulation itself says about it: the OAP is read by the `oap`
+  task.
 - topics: `uses`, `access`, `networks`, `setback_road`, `setback_side`, `setback_rear`,
   `distance_between_buildings`, `footprint`, `height`, `appearance`, `parking`, `green_space`,
   `definitions`, `other`. `definitions` must cover at least hauteur, emprise au sol, voie,
@@ -50,6 +59,7 @@ one note per topic and no note outside the list.
 
 - label: `oap`
 - aim: whether an OAP covers the site, and what it prescribes for the program.
+- documents: the OAP document, plus the zoning plan and `site_view` only to check the perimeter.
 - topics: `perimeter`, `general_orientations`, `building_form`, `mobility_access`,
   `landscape_green`, `programming`, `other`. The `perimeter` note says whether the site lies
   inside the OAP perimeter, comparing the OAP diagrams with `site_view`.

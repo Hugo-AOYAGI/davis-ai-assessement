@@ -16,6 +16,7 @@ from agent.agents.config import read_prompt
 from agent.agents.subagents import AgentGraph, build_tools, subagent_specs
 from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
+from agent.llm.truncation import OutputCapMiddleware
 from agent.observability.logs import get_logger
 from agent.tools.interaction.ask import ask_user_tool
 from agent.tools.interaction.playbook import Playbook, load_playbook_tool
@@ -151,7 +152,7 @@ def build(cfg: DictConfig, ledger: CostLedger | None = None) -> AgentGraph:
             model=model,
             tools=tools,
             system_prompt=read_prompt(cfg.agent.prompt),
-            middleware=[ArtifactsMiddleware()],
+            middleware=[ArtifactsMiddleware(), OutputCapMiddleware()],
             subagents=subagents,
             name="orchestrator",
         )

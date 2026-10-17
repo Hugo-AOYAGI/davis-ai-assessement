@@ -7,6 +7,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.outputs import ChatGeneration, LLMResult
 
 from agent.llm.pricing import ModelPrice, TokenCounts, find_price
+from agent.llm.truncation import stopped_at_output_cap
 from agent.observability.logs import get_logger
 
 _UNKNOWN_MODEL = "unknown"
@@ -41,19 +42,24 @@ class CostLogger(BaseCallbackHandler):
     """Logs tokens and USD cost of every call made by one model node, and keeps running totals.
 
     Works with streamed calls: usage is read from the final message, not from ``llm_output``.
-    Accumulation is thread-safe, so one instance can serve concurrent calls.
+    Accumulation is thread-safe, so one instance can serve concurrent calls. A reply cut off at
+    the output token cap is logged as a warning.
     """
 
-    def __init__(self, node: str, pricing: Mapping[str, ModelPrice]) -> None:
+    def __init__(
+        self, node: str, pricing: Mapping[str, ModelPrice], max_tokens: int | None = None
+    ) -> None:
         """Create a logger for one node.
 
         Args:
             node: Model node name (key in ``models.nodes``), shown on every log line.
             pricing: Prices keyed by model id.
+            max_tokens: The node's output token cap, named in the cut-off warning.
         """
         super().__init__()
         self._node = node
         self._pricing = dict(pricing)
+        self._max_tokens = max_tokens
         self._lock = threading.Lock()
         self._calls = 0
         self._tokens = TokenCounts()
@@ -91,6 +97,12 @@ class CostLogger(BaseCallbackHandler):
             **_kwargs: Run identifiers passed by LangChain, unused.
         """
         message = _response_message(response)
+        if message is not None and stopped_at_output_cap(message):
+            logger.warning(
+                "llm node=%s reply cut off at the output cap max_tokens=%s",
+                self._node,
+                self._max_tokens,
+            )
         if message is None or message.usage_metadata is None:
             return
         model = str(message.response_metadata.get("model_name") or _UNKNOWN_MODEL)
@@ -133,18 +145,19 @@ class CostLedger:
         self._lock = threading.Lock()
         self._loggers: dict[str, CostLogger] = {}
 
-    def logger(self, node: str) -> CostLogger:
+    def logger(self, node: str, max_tokens: int | None = None) -> CostLogger:
         """Return the node's logger, creating it on first use.
 
         Args:
             node: Model node name (key in ``models.nodes``).
+            max_tokens: The node's output token cap, used when the logger is created.
 
         Returns:
             The logger shared by the node's models.
         """
         with self._lock:
             if node not in self._loggers:
-                self._loggers[node] = CostLogger(node, self._pricing)
+                self._loggers[node] = CostLogger(node, self._pricing, max_tokens)
             return self._loggers[node]
 
     def usage(self) -> dict[str, NodeUsage]:

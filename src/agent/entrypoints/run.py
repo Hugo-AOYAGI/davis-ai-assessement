@@ -172,7 +172,13 @@ def main(cfg: DictConfig) -> None:
     load_dotenv(PROJECT_ROOT / ".env", override=False)
     setup_logging(cfg.policies.logging.level)
     tracing = cfg.policies.tracing
-    setup_tracing(enabled=tracing.enabled, project=tracing.project, endpoint=tracing.endpoint)
+    setup_tracing(
+        enabled=tracing.enabled,
+        project=tracing.project,
+        endpoint=tracing.endpoint,
+        hide_images=tracing.hide_images,
+        base64_max_chars=tracing.base64_max_chars,
+    )
     make_unattended(cfg)
     hydra_cfg = HydraConfig.get()
     run_dir = Path(hydra_cfg.runtime.output_dir)

@@ -5,8 +5,9 @@ doc_analyst:
     Reads the planning documents (regulation, OAP, diagrams) for one aim and returns what they
     say as cited notes, one or more per topic, plus the open points they leave; it extracts, it
     does not decide. Give it a `label` (lowercase id naming this run, e.g. `rules`), the `aim`,
-    the `topics` checklist (may be empty) and the `context` you already know (zone, legend items,
-    parcel ids, program). Delivers the artifact `notes.<label>`.
+    the `topics` checklist (may be empty), the `context` you already know (zone, legend items,
+    parcel ids, program) and, optionally, the `documents` it may read. Delivers the artifact
+    `notes.<label>`.
   prompt: prompts/subagents/doc_analyst.md
   model: doc_analyst  # key in models.nodes
   tools:

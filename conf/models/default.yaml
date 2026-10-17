@@ -25,7 +25,9 @@ nodes:
     timeout: 300
   surveyor: *agent
   zoning_analyst: *agent
-  doc_analyst: *agent
+  doc_analyst:  # its submit_notes call carries every note and citation in one reply
+    <<: *agent
+    max_tokens: 32000
   ingest_classifier:
     <<: *agent
     max_tokens: 1024

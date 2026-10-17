@@ -51,6 +51,20 @@ def test_unknown_model_warns_and_costs_nothing(caplog: pytest.LogCaptureFixture)
     assert any(r.levelno == logging.WARNING for r in caplog.records)
 
 
+def test_cut_off_reply_warns_with_node_and_cap(caplog: pytest.LogCaptureFixture):
+    cost_logger = CostLogger("doc_analyst", PRICING, max_tokens=32000)
+    response = result("claude-sonnet-5-5", 10, 32000)
+    [[generation]] = response.generations
+    assert isinstance(generation, ChatGeneration)
+    generation.message.response_metadata["stop_reason"] = "max_tokens"
+    with caplog.at_level(logging.INFO, logger="agent"):
+        cost_logger.on_llm_end(response)
+        cost_logger.on_llm_end(result("claude-sonnet-5-5", 10, 10))
+    warnings = [r.getMessage() for r in caplog.records if r.levelno == logging.WARNING]
+    assert warnings == ["llm node=doc_analyst reply cut off at the output cap max_tokens=32000"]
+    assert cost_logger.calls == 2
+
+
 def test_ignores_results_without_usage():
     cost_logger = CostLogger("orchestrator", PRICING)
     cost_logger.on_llm_end(LLMResult(generations=[[Generation(text="plain")]]))

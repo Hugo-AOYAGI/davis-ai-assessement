@@ -32,6 +32,12 @@ def test_ledger_logger_is_shared_by_the_node_models():
     assert first.callbacks == second.callbacks == [ledger.logger("surveyor")]
 
 
+def test_doc_analyst_has_a_larger_output_budget():
+    nodes = load_config().models.nodes
+    assert nodes.doc_analyst.max_tokens > nodes.orchestrator.max_tokens
+    assert nodes.doc_analyst.model == nodes.orchestrator.model
+
+
 def test_unknown_node_raises():
     with pytest.raises(KeyError, match="unknown model node 'nope'"):
         build_model(load_config().models, "nope")

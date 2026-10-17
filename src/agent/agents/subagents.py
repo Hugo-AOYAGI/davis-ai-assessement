@@ -11,6 +11,7 @@ from omegaconf import DictConfig
 from agent.agents.config import read_prompt
 from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
+from agent.llm.truncation import OutputCapMiddleware
 from agent.observability.logs import get_logger
 from agent.tools.submit.artifacts import ArtifactsMiddleware, ArtifactsState
 
@@ -82,6 +83,7 @@ def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None)
         system_prompt=read_prompt(spec.prompt),
         middleware=[
             ArtifactsMiddleware(),
+            OutputCapMiddleware(),
             AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
         ],
         name=name,

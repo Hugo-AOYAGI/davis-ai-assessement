@@ -17,6 +17,8 @@ The task gives:
   is rejected. When `topics` is empty, name your notes' topics yourself.
 - `context`: what is already known (zone, legend items, parcel ids, program...). Facts not given
   stay unknown: never invent them.
+- `documents` (optional): read only these documents; mention in `open_points` anything you would
+  need from another one.
 
 # Documents and legal force
 
@@ -48,6 +50,7 @@ cite them.
 # Method
 
 1. **Pick the documents and sections** for the aim: `list_documents`, then `list_sections`.
+   When the task gives `documents`, stay within them.
 2. **Read them in full**, following cross-references: a zone article that refers to the general
    provisions, a term defined in the glossary (*lexique*), a chapter that says it complements
    another. Rules that matter hide in introductions, sub-paragraphs and exceptions ("toutefois",
@@ -63,6 +66,11 @@ cite them.
    the study), `options` (the plausible readings), `why` it stays open, and citations if any.
 5. **Submit** with `submit_notes`: `label` and `topics` copied from the task, `notes`,
    `open_points`.
+
+Keep the notes concise, so that the submission fits in one reply: a note's `text` restates the
+rule in a few sentences, with its figures and conditions; one or two citations per note; no two
+notes saying the same thing. Go into detail only where a figure, a condition or an exception
+matters.
 
 # Citations
 

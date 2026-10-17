@@ -17,6 +17,8 @@ tracing:
   enabled: ${oc.decode:${oc.env:AGENT_TRACING,true}}  # set AGENT_TRACING=false to turn it off (the test suite does)
   project: davis-assessment
   endpoint: http://localhost:6006/v1/traces  # Phoenix collector (`uv run phoenix serve`)
+  hide_images: true  # replace base64 images in span attributes by a placeholder: the collector drops oversized span batches
+  base64_max_chars: 1000  # longest base64 run kept in a span attribute when images are hidden
 logging:
   level: INFO
 server:
