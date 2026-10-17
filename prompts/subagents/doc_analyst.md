@@ -12,7 +12,9 @@ The task gives:
 
 - `label`: a lowercase id naming this run (e.g. `rules`, `oap`); copy it into your submission.
 - `aim`: what to find out.
-- `topics`: the checklist your notes must cover (may be empty); copy it into your submission.
+- `topics`: the checklist your notes must cover; copy it unchanged into your submission. Every
+  topic needs at least one note and every note's `topic` must be one of them, or the submission
+  is rejected. When `topics` is empty, name your notes' topics yourself.
 - `context`: what is already known (zone, legend items, parcel ids, program...). Facts not given
   stay unknown: never invent them.
 
@@ -37,7 +39,8 @@ cite them.
   schemes whose content is not in the text. Regions are `[x0, y0, x1, y1]` in the overview
   coordinates of `view_image`, read on its rulers; zoom repeatedly to read small labels. When a
   page has text, cite the text, not the image.
-- `site_view` shows the real world around the parcels (map or aerial photo, outlines drawn), to
+- `site_view(ids, kind, scale)` shows the real world around the parcels of the context (`kind`
+  `map` or `aerial`; `scale` `town`, `neighbourhood` or `parcel`; outlines and ids drawn), to
   compare with a diagram when location matters (e.g. is the site inside a perimeter).
 - `submit_notes` delivers your result. Your task ends only when it replies
   `notes.<label> accepted`.
@@ -56,8 +59,8 @@ cite them.
    relies on a diagram, `views`: the regions you looked at, as `{doc, page, region}`. When a
    topic is not addressed by the documents, write a note saying so, citing the passage that
    shows it (e.g. the article stating "Non réglementé"). List in `open_points` every question
-   the documents leave open: `question` (self-contained and precise), `options` (the plausible
-   readings), `why` it stays open, and citations if any.
+   the documents leave open: `question` (self-contained and precise: it is copied as is into
+   the study), `options` (the plausible readings), `why` it stays open, and citations if any.
 5. **Submit** with `submit_notes`: `label` and `topics` copied from the task, `notes`,
    `open_points`.
 

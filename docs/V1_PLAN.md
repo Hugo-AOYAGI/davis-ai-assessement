@@ -120,3 +120,20 @@ remain in the files it owns. P1 lands first and changes the contracts in their f
 code owned by P2 packages stops type-checking until they port it. Done for P1 and P2 means
 `ruff format` and `ruff check` clean, and `ty check` and `pytest` clean on the files and tests the
 WP owns; P3 makes the whole repository clean.
+
+## As built
+
+Where the merged packages depart from, or add to, the seams above.
+
+| Point | As built |
+|---|---|
+| `describe_parcels` | `describe_parcels(ids, longitude, latitude)`: takes the geocoded address point too (as `find_parcels(longitude, latitude)` does). |
+| `site_view` scales | `scale` is `town`, `neighbourhood` or `parcel` (fits the parcels with a margin); `parcel` is the default. The tool node lives in `conf/geo` (`geo.site_view`); sub-agents list it as `- ${geo.site_view}`. |
+| HTTP adapter | `adapters/http.py`, one level up from `adapters/geo/`, shared by the geo services (`CachedHttp`); `ServiceError` replaces v0's `GeoServiceError`. |
+| Shared page images | `adapters/images/shared.py`: `page_images(...)` is a cached factory, so every `${images.pages}` interpolation gets the same `PageImages` (one cache of decoded pages). |
+| Topic coverage | Validated by `DocNotes` itself (model validator: a note per topic, none outside `topics`), not only by `submit_notes`. |
+| Scanned pages | `images.pages.scan_min_coverage`: a page whose largest image covers this share of it is a scan (native raster used). |
+| Policies | `policies.study.required_notes` (the `doc_analyst` labels the gate requires, `[rules, oap]`) and `policies.evidence.crops_dir` (`data/crops`). |
+| Gate wiring | `submit_study_tool` takes config bundles, visible in `conf/agent/default.yaml`: `StudyInputs` (`tools/study/inputs.py`: artifact and producer of `site`, `zone`, `notes.{label}`, plus the required labels), `GeometrySettings` (`tools/study/gate.py`: edge and envelope knobs), `CitationRules` (`tools/study/checks.py`, built by `citation_rules`). |
+| Report | `runtime/report/program.py` (was `envelope.py`): admissibility, parking and envelope sections. |
+| Run outputs | The CLI copies the study's evidence crops into `<run_dir>/evidence/`; `report.md` links them there. |

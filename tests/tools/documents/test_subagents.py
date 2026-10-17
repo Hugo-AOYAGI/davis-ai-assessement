@@ -9,13 +9,6 @@ from omegaconf import OmegaConf
 from agent.agents.config import load_config
 from agent.agents.subagents import build_subagent
 
-SUBAGENTS = "subagents=[zoning_analyst,doc_analyst]"
-SITE_VIEW = {  # stand-in for the surveyor package's site_view tool node
-    "_target_": "agent.tools.submit.factory.submit_tool",
-    "name": "site_view",
-    "artifact": "unused",
-    "contract": {"_target_": "hydra.utils.get_class", "path": "agent.contracts.evidence.Citation"},
-}
 ZONING_TOOLS = {"list_documents", "site_view", "view_image", "zoom", "submit_zone"}
 DOC_TOOLS = {
     "list_documents",
@@ -42,33 +35,22 @@ def dummy_key(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
 
 
-def config(*overrides):
-    cfg = load_config([SUBAGENTS, *overrides])
-    OmegaConf.update(cfg, "geo.site_view", SITE_VIEW, force_add=True)
-    for node in ("zoning_analyst", "doc_analyst"):
-        if node not in cfg.models.nodes:
-            OmegaConf.update(
-                cfg, f"models.nodes.{node}", cfg.models.nodes.orchestrator, force_add=True
-            )
-    return cfg
-
-
 def tool_names(graph):
     return set(cast(ToolNode, graph.nodes["tools"].bound).tools_by_name)
 
 
 @pytest.mark.parametrize("retrieval", ["navigation", "full_sections"])
 def test_subagents_build_offline(retrieval):
-    cfg = config(f"retrieval={retrieval}")
+    cfg = load_config([f"retrieval={retrieval}"])
     assert tool_names(build_subagent(cfg, "zoning_analyst")) == ZONING_TOOLS
     assert tool_names(build_subagent(cfg, "doc_analyst")) == DOC_TOOLS
 
 
 def test_site_view_comes_from_the_geo_group():
-    cfg = load_config([SUBAGENTS])
+    cfg = load_config()
     for name in ("zoning_analyst", "doc_analyst"):
         nodes = OmegaConf.to_container(cfg.subagents[name].tools, resolve=False)
-        assert "${geo.site_view}" in cast(list, nodes)
+        assert "${geo.site_view}" in cast(list[object], nodes)
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -94,7 +76,7 @@ def run(cfg, name, replies, monkeypatch):
 
 
 def test_doc_analyst_reads_and_submits_through_graph(corpus_dir, monkeypatch):
-    cfg = config(f"retrieval.corpus.directory.relative='{corpus_dir.as_posix()}'")
+    cfg = load_config([f"retrieval.corpus.directory.relative='{corpus_dir.as_posix()}'"])
     replies = [
         call("read_section", {"section_id": "plu_reglement/titre-ii/moulon/umg/10"}, "r1"),
         call("submit_notes", notes("une citation inventée de toutes pièces"), "s1"),
@@ -116,7 +98,7 @@ def test_zoning_analyst_submits_a_region_on_the_plan(monkeypatch):
     }
     inside = {**zone, "region": {**zone["region"], "region": [100, 100, 300, 200]}}
     replies = [call("submit_zone", zone, "s1"), call("submit_zone", inside, "s2")]
-    state, (rejected, accepted) = run(config(), "zoning_analyst", replies, monkeypatch)
+    state, (rejected, accepted) = run(load_config(), "zoning_analyst", replies, monkeypatch)
     assert "region: the overview of plu_reglement_graphique p.1 is" in rejected.content
     assert accepted.content == "zone accepted."
     assert state["artifacts"]["zone"]["region"]["region"] == [100, 100, 300, 200]

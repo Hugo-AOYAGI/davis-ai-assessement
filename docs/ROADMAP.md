@@ -1,15 +1,16 @@
 # Roadmap and deferred decisions
 
-What was intentionally left out of v0, what is still to be designed, and what was considered and
-rejected. v0 scope is in [DESIGN.md](DESIGN.md). Rule of thumb: an item moves into scope when an
-eval failure or a concrete need justifies it, and each move is recorded as a before/after
-comparison.
+What was intentionally left out of v1, what is still to be designed, and what was considered and
+rejected. v1 scope is in [DESIGN.md](DESIGN.md) as refined by [REFINE.md](REFINE.md). Rule of
+thumb: an item moves into scope when an eval failure or a concrete need justifies it, and each
+move is recorded as a before/after comparison.
 
-Build order: thin end-to-end v0 → eval set → eval-driven iteration.
+Build order: thin end-to-end v0 → v1 refactor ([REFINE.md](REFINE.md)) → eval set → eval-driven
+iteration.
 
 ---
 
-## 1. Improvements after v0
+## 1. Improvements after v1
 
 ### Rules and study schema
 - **Typed rule catalogue** replacing free-text rules: `Setback(boundary_type, min, f(H))`,
@@ -32,13 +33,26 @@ Build order: thin end-to-end v0 → eval set → eval-driven iteration.
   the agent misreads programs.
 
 ### Sub-agents
-Split out when evals show failures in the v0 sub-agent or the orchestrator:
-- `program_qualifier`: program → destinations → admissibility verdict.
-- `envelope_engineer` (Opus): rules → envelope parameters → geometry.
-- `critic` (Opus): contradictions, missing rules, unhandled ambiguities, reviewed before `submit_study`.
+Split out of the orchestrator when evals show failures there (names from REFINE §1):
+- `planning_lawyer` (*juriste en urbanisme*): program → destinations → admissibility verdict.
+- `architect` (Opus): rules → envelope parameters → capacity study.
+- `permit_officer` (Opus, *instructeur*): would this file be rejected, on which article?
+  Contradictions, missing rules, unhandled ambiguities, reviewed before `submit_study`.
 
-Unstable stage-like steps (likely site location) may be hardened into deterministic tools
-without changing the architecture.
+Unstable stage-like steps may be hardened into deterministic tools without changing the
+architecture.
+
+### Site and zoning plan
+- **`surveyor` address retries** with spelling variants when the geocoder match is poor.
+- **Full candidate list in the `surveyor` output** if evals need to score the shortlist, not only
+  the chosen parcels.
+- **Georeference the zoning plan once per corpus** (control points in corpus config) if evals
+  show `zoning_analyst` often mislocates the site; code then draws the parcel outline on the plan
+  crop.
+
+### Citations
+- **Cite by note id**: the orchestrator references `doc_analyst` notes instead of copying quotes,
+  if evals show quote drift (the v0 reference run had none: 46/46 verified).
 
 ### Ingestion and retrieval
 - **Ingestion on upload**: an internal API so the UI can ingest new documents, on top of the
@@ -61,13 +75,7 @@ without changing the architecture.
 
 These were deliberately not designed yet (top-down first); decide when building the brick.
 
-- **Raster zoning-map reading**: georeferencing the A0 image, cropping around the parcel, vision
-  prompt, how map evidence is cited (sheet + legend item + crop/coords).
-- **Heading splitter**: regex patterns for zone/article headings, handling repealed articles.
-- **BAN / cadastre adapters**: endpoints, multi-parcel addresses, on-disk caching.
-- **Boundary classification**: road / side / rear limits of the parcel.
-- **Prism geometry implementation**: library, units, CRS.
-- **LLM caching strategy** and cost tracking format.
+- **LLM caching strategy**.
 - **Phoenix experiment layout**: projects, datasets, how Hydra runs map to experiments.
 - **Eval design (Part 2 of the brief)**. Already agreed principles:
   - sub-agents evaluated standalone through their typed outputs,

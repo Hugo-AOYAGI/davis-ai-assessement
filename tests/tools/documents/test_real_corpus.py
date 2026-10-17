@@ -2,21 +2,14 @@
 
 import pytest
 from hydra.utils import instantiate
-from omegaconf import OmegaConf
 
 from agent.adapters.corpus.store import CORPUS_FILE
 from agent.agents.config import load_config
 from agent.agents.subagents import build_tools
 
-CFG = load_config(["subagents=[doc_analyst]", "retrieval=full_sections"])
+CFG = load_config(["retrieval=full_sections"])
 SOURCE = instantiate(CFG.retrieval.corpus, _convert_="all")
 UMG = "plu_reglement/titre-ii/moulon/umg"
-SITE_VIEW = {  # stand-in for the surveyor package's site_view tool node
-    "_target_": "agent.tools.submit.factory.submit_tool",
-    "name": "site_view",
-    "artifact": "unused",
-    "contract": {"_target_": "hydra.utils.get_class", "path": "agent.contracts.evidence.Citation"},
-}
 
 pytestmark = pytest.mark.skipif(
     not (SOURCE.directory / CORPUS_FILE).is_file(),
@@ -26,7 +19,6 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def tools():
-    OmegaConf.update(CFG, "geo.site_view", SITE_VIEW, force_add=True)
     built = build_tools(CFG.subagents.doc_analyst.tools)
     return {tool.name: tool for tool in built}
 

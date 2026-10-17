@@ -121,7 +121,6 @@ def test_orchestrator_tools(cfg):
     assert "artifacts" in graph.channels
     tools = graph_tools(graph)
     assert {"task", *OWN_TOOLS} <= tools.keys()
-    assert "compute_envelope" not in tools
 
 
 def test_ask_user_disabled():
@@ -144,7 +143,7 @@ def test_unknown_ask_user_mode():
 
 
 def test_playbook_tool_reads_configured_files():
-    cfg = load_config(["subagents=[]", "agent.language=French"])
+    cfg = load_config(["agent.language=French"])
     tools = {tool.name: tool for tool in orchestrator_tools(cfg)}
     playbook = tools["load_playbook"]
     assert "- `study`: Full buildability study" in playbook.description

@@ -9,8 +9,8 @@ zone, do not label limits as road / side / rear, do not discuss what may be buil
 
 # Steps
 
-1. **Geocode** the address with `geocode`. Keep the candidate matching the house number, street
-   and town, preferably of kind `housenumber`. If no candidate matches or the match is poor or
+1. **Geocode** the address with `geocode(query)`. Keep the candidate matching the house number,
+   street and town, preferably of kind `housenumber`. If no candidate matches or the match is poor or
    ambiguous, stop and report it without submitting: the orchestrator will ask the user.
 2. **List nearby parcels** with `find_parcels`, passing the candidate's `longitude` and
    `latitude`.
@@ -18,9 +18,10 @@ zone, do not label limits as road / side / rear, do not discuss what may be buil
    hold the program you were given. The address point usually lies at the entrance, often on
    the street, so the nearest parcel is not necessarily the site: it may be a thin strip along
    the street (`mean_width_m` around a metre or less, a few dozen m²). Drop such misfits.
-4. **Inspect the shortlist** with `describe_parcels` (sizes, shapes, whether they touch and form
-   one piece, edges facing public land or other parcels, neighbours). If doubt remains, look
-   with `site_view(ids, kind="aerial")`. Decide: one parcel, or several adjacent parcels that
+4. **Inspect the shortlist** with `describe_parcels(ids, longitude, latitude)`, the point being
+   the candidate's (sizes, shapes, whether they touch and form one piece, edges facing public
+   land or other parcels, neighbours). If doubt remains, look with
+   `site_view(ids, kind="aerial")`. Decide: one parcel, or several adjacent parcels that
    plausibly form one plot.
 5. **Submit** with `submit_parcel`:
    - `address`: the `label` exactly as `geocode` returned it;

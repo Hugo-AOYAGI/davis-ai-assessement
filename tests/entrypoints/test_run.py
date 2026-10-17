@@ -102,13 +102,13 @@ def test_final_text():
 
 
 def test_make_unattended_disables_ask_user():
-    cfg = load_config(["subagents=[]", "policies.ask_user.mode=interactive"])
+    cfg = load_config(["policies.ask_user.mode=interactive"])
     run.make_unattended(cfg)
     assert cfg.policies.ask_user.mode == "disabled"
 
 
 def test_run_study_offline(monkeypatch, verified):
-    cfg = load_config(["subagents=[]"])
+    cfg = load_config()
     state = {"messages": MESSAGES, "artifacts": {"study": verified.model_dump(mode="json")}}
     fake = FakeGraph(state)
     monkeypatch.setattr(run, "build", lambda _cfg: fake)

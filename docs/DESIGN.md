@@ -1,5 +1,7 @@
 # Design
 
+> v1 decisions are in [REFINE.md](REFINE.md), which supersedes this file where they differ.
+
 Regulatory-analysis agent that navigates planning documents (PLU) and produces an auditable
 buildability study for a parcel. Reference case: **4 rue Joliot Curie, 91190 Gif-sur-Yvette**,
 program = one Résidence Sociale Étudiante + one Résidence Jeunes Actifs in two separate buildings.

@@ -41,7 +41,7 @@ def call(name: str, args: dict[str, JsonValue], call_id: str) -> AIMessage:
 @pytest.fixture
 def cfg(monkeypatch, tmp_path) -> DictConfig:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
-    cfg = load_config(["subagents=[surveyor]"])
+    cfg = load_config()
     cfg.geo.http.cache_dir.relative = str(tmp_path)
     return cfg
 

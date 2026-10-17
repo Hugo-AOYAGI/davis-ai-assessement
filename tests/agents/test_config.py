@@ -9,11 +9,10 @@ from agent.llm.factory import build_model
 
 SUBAGENTS = ["surveyor", "zoning_analyst", "doc_analyst"]
 NODES = {"orchestrator", *SUBAGENTS, "ingest_classifier"}
-NO_SUBAGENTS = ["subagents=[]"]
 
 
 def test_groups_compose():
-    cfg = load_config(NO_SUBAGENTS)
+    cfg = load_config()
     assert set(cfg) >= {"models", "agent", "case", "policies", "corpus", "retrieval", "subagents"}
     assert {"geo", "images"} <= set(cfg)
     assert "hydra" not in cfg
@@ -32,14 +31,14 @@ def test_three_subagents_by_default():
 
 
 def test_case_validates_against_contract():
-    cfg = load_config(NO_SUBAGENTS)
+    cfg = load_config()
     case = Case.model_validate(OmegaConf.to_container(cfg.case, resolve=True))
     assert case.corpus_id == cfg.corpus.id
     assert "Résidence Jeunes Actifs" in case.program
 
 
 def test_subagents_can_be_emptied():
-    assert OmegaConf.to_container(load_config(NO_SUBAGENTS).subagents) == {}
+    assert OmegaConf.to_container(load_config(["subagents=[]"]).subagents) == {}
 
 
 def test_unknown_subagent_is_rejected():
@@ -48,13 +47,13 @@ def test_unknown_subagent_is_rejected():
 
 
 def test_overrides_apply():
-    cfg = load_config([*NO_SUBAGENTS, "policies.citations.policy=flag", "case.facts=[a,b]"])
+    cfg = load_config(["policies.citations.policy=flag", "case.facts=[a,b]"])
     assert cfg.policies.citations.policy == "flag"
     assert list(cfg.case.facts) == ["a", "b"]
 
 
 def test_node_override_is_isolated():
-    cfg = load_config([*NO_SUBAGENTS, "models.nodes.surveyor.model=claude-haiku-5-5"])
+    cfg = load_config(["models.nodes.surveyor.model=claude-haiku-5-5"])
     nodes = cfg.models.nodes
     assert nodes.surveyor.model == "claude-haiku-5-5"
     assert nodes.orchestrator.model == "claude-sonnet-5-5"
@@ -63,7 +62,7 @@ def test_node_override_is_isolated():
 
 def test_every_node_instantiates_offline(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
-    models = load_config(NO_SUBAGENTS).models
+    models = load_config().models
     for node in models.nodes:
         model = build_model(models, node)
         assert isinstance(model, ChatAnthropic)

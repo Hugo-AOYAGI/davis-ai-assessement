@@ -1,8 +1,9 @@
 # CLAUDE.md
 
 Regulatory-analysis agent (LangGraph + deepagents, Hydra, Phoenix, Claude models) producing a
-buildability study from planning documents. Read `docs/DESIGN.md` before changing architecture
-and follow `docs/CODING_STANDARDS.md` for every change.
+buildability study from planning documents. Read `docs/DESIGN.md` and `docs/REFINE.md` (which
+wins where they differ) before changing architecture, and follow `docs/CODING_STANDARDS.md` for
+every change.
 
 ## Where things go
 
@@ -10,8 +11,8 @@ and follow `docs/CODING_STANDARDS.md` for every change.
 |---|---|
 | A Pydantic schema shared between modules (`Study`, `Citation`, sub-agent outputs) | `src/agent/contracts/` |
 | Pure deterministic logic (geometry, citation matching), no LangChain, no I/O | `src/agent/runtime/` |
-| Access to the outside world (HTTP APIs, corpus files on disk) | `src/agent/adapters/` (`geo/`, `corpus/`) |
-| Document ingestion (classification, splitting, map storage) | `src/agent/ingest/` |
+| Access to the outside world (HTTP APIs, corpus files and page images on disk) | `src/agent/adapters/` (`geo/`, `corpus/`, `images/`) |
+| Document ingestion (classification, splitting) | `src/agent/ingest/` |
 | Model creation, LLM caching, cost tracking | `src/agent/llm/` (the only place models are instantiated) |
 | A LangChain tool exposed to an agent (thin wrapper over runtime/adapters) | `src/agent/tools/<area>/` |
 | Orchestrator and sub-agent assembly from config | `src/agent/agents/` |
@@ -28,8 +29,9 @@ Layering: `contracts ← runtime ← adapters ← tools ← agents ← entrypoin
 
 `case/` input address + program · `corpus/` corpus id and paths · `models/` per-node model
 settings · `agent/` orchestrator + playbook · `subagents/` enabled sub-agents and their prompts ·
-`retrieval/` navigation vs full sections, tool limits · `policies/` ask_user, citation check,
-caching, tracing.
+`retrieval/` navigation vs full sections, tool limits · `geo/` geographic services, site geometry
+knobs, the shared `site_view` tool node · `images/` corpus page images (render dpi, image sizes) ·
+`policies/` ask_user, citation check, required notes, evidence crops, tracing.
 
 ## Resources
 
@@ -40,6 +42,8 @@ caching, tracing.
 | PLU zoning plan (single raster A0 image) | `ressources/plu_reglement_graphique_91272_20210706.pdf` |
 | OAP (Joliot Curie ch. 8, p.33–36) | `ressources/oap_91272_20210706.pdf` |
 | Design decisions | `docs/DESIGN.md` |
+| v1 decisions (supersede DESIGN where they differ) | `docs/REFINE.md` |
+| v1 seams, work packages, as-built deviations | `docs/V1_PLAN.md` |
 | Coding standards | `docs/CODING_STANDARDS.md` |
 | v0 work packages, file ownership, acceptance criteria | `docs/V0_PLAN.md` |
 | Deferred decisions, post-v0 improvements, rejected options | `docs/ROADMAP.md` |
@@ -89,32 +93,46 @@ that uses it:
 ```yaml
 tools:
   - _target_: agent.tools.geo.geocode.geocode_tool   # factory, called by hydra.utils.instantiate
-    max_results: ${retrieval.max_results}            # knobs as arguments
+    geocoder: ${geo.geocoder}                        # knobs and clients as arguments
+    max_results: ${geo.max_results}
 ```
 
 **Add a sub-agent**: one file `conf/subagents/<name>.yaml`, content nested under `<name>:` (Hydra
 merges all selected files into `subagents`), plus its prompt `prompts/subagents/<name>.md` and a
-model node `models.nodes.<name>`. It must end by calling its `submit_<artifact>` tool:
+model node `models.nodes.<name>`. It must end by calling its submit tool:
 
 ```yaml
-site_locator:
-  description: Turns an address into the site (parcels, polygon, typed boundaries).  # read by the orchestrator
-  prompt: prompts/subagents/site_locator.md
-  model: site_locator            # key in models.nodes
+surveyor:
+  description: Turns the case address into the site under study...  # read by the orchestrator
+  prompt: prompts/subagents/surveyor.md
+  model: surveyor                # key in models.nodes
   tools:
+    - _target_: agent.tools.geo.geocode.geocode_tool
+      geocoder: ${geo.geocoder}
+      max_results: ${geo.max_results}
+    - ${geo.site_view}           # shared ready-made tool node
     - _target_: agent.tools.submit.factory.submit_tool
-      artifact: site             # state key; tool is named submit_site
-      contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.site.SiteContext}
+      name: submit_parcel        # tool name
+      artifact: site             # state key
+      contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.site.ParcelChoice}
+      finalize:                  # ParcelChoice -> Site (built by code)
+        _target_: agent.tools.geo.site.parcel_finalizer
+        surveyor: ${geo.surveyor}
+      summarize: {_target_: hydra.utils.get_method, path: agent.tools.geo.site.summarize_site}
 ```
 
-Enable it with `subagents=[site_locator,...]` (the enabled list in `conf/config.yaml` is WP6's).
+Enable it with `subagents=[surveyor,...]` (default: `surveyor`, `zoning_analyst`, `doc_analyst`
+in `conf/config.yaml`).
 `build_subagent(cfg, name)` returns the standalone graph; the orchestrator delegates to that same
 graph, and evals invoke it with `{"messages": [HumanMessage(task)]}`.
 
 **Artifacts and submit tools**: the graph state has an `artifacts` mapping (`ArtifactsMiddleware`
-in `tools/submit/artifacts.py`). `submit_tool(artifact, contract, finalize=None)` validates the
-model's arguments against the contract, returns `field.path: message` errors to the model, and
-stores the result as JSON under `artifacts[artifact]`. Artifacts written by a sub-agent reach the
+in `tools/submit/artifacts.py`). `submit_tool(*, name, artifact, contract, finalize=None,
+summarize=None)` builds the tool `name`; it validates the model's arguments against the contract,
+returns `field.path: message` errors to the model, and stores the result as JSON under
+`artifacts[artifact]`. `artifact` may hold `{field}` placeholders filled from the submission's
+top-level fields (`notes.{label}` gives `notes.rules`, `notes.oap`); `summarize(stored) -> str` is
+appended to the `<key> accepted.` reply. Artifacts written by a sub-agent reach the
 orchestrator's state. Read one back with `read_artifact(state["artifacts"], key, Contract)`. A
 gate such as `submit_study` passes `finalize(submission, artifacts) -> stored` and raises
 `SubmissionRejected(errors)` to refuse.

@@ -18,7 +18,7 @@ def load_lines(name: str) -> list[Line]:
 
 
 def splitter_config(kind: str) -> SplitterConfig:
-    raw = OmegaConf.to_container(load_config(["subagents=[]"]).corpus.splitter[kind], resolve=True)
+    raw = OmegaConf.to_container(load_config().corpus.splitter[kind], resolve=True)
     return SplitterConfig.model_validate(raw)
 
 

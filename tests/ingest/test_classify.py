@@ -59,7 +59,7 @@ def test_classifier_validates_structured_output(monkeypatch: pytest.MonkeyPatch,
     structured = FakeStructured(answer)
     model = FakeModel(structured)
     monkeypatch.setattr(classify_module, "build_model", lambda cfg, node: model)
-    classify = make_classifier(load_config(["subagents=[]"]).models, "ingest_classifier", "PROMPT")
+    classify = make_classifier(load_config().models, "ingest_classifier", "PROMPT")
     assert classify("sample") == Classification(kind=DocumentKind.OAP, title="OAP")
     assert model.schema is Classification
     system, human = structured.calls[0]

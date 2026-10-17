@@ -9,7 +9,7 @@ from agent.adapters.corpus.store import CORPUS_FILE, load_corpus
 from agent.agents.config import load_config, project_path
 from agent.contracts.inputs.corpus import Corpus, DocumentKind
 
-CORPUS_DIR = project_path(str(load_config(["subagents=[]"]).corpus.dir))
+CORPUS_DIR = project_path(str(load_config().corpus.dir))
 UMG = "plu_reglement/titre-ii/moulon/umg"
 UMG_PAGES = {
     1: 320, 2: 321, 3: 321, 4: 322, 5: 324, 6: 324, 7: 325, 8: 325,

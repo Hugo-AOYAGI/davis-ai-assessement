@@ -69,9 +69,10 @@ class Regime(Contract):
 
 
 class Study(Contract):
-    """The buildability study, submitted through ``submit_study``.
+    """The buildability study.
 
-    The site is not part of it: the gate takes the ``Site`` built from the surveyor's choice.
+    The site is not part of it: the gate reads the `site` artifact built from the surveyor's
+    choice, labels its edges and computes the envelope, returned once the study is accepted.
     """
 
     address: str = Field(min_length=1)

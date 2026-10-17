@@ -43,7 +43,7 @@ def test_logs_and_accumulates(caplog: pytest.LogCaptureFixture):
 
 
 def test_unknown_model_warns_and_costs_nothing(caplog: pytest.LogCaptureFixture):
-    cost_logger = CostLogger("site_locator", PRICING)
+    cost_logger = CostLogger("surveyor", PRICING)
     with caplog.at_level(logging.INFO, logger="agent"):
         cost_logger.on_llm_end(result("mystery-model", 100, 100))
     assert cost_logger.total_usd == 0.0

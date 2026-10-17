@@ -13,8 +13,9 @@ it gives no parcel ids, stop and reply that the site must be located first; neve
 
 - `list_documents` lists the corpus documents: find the zoning plan's document id and page there
   (marked `image only`).
-- `site_view` shows the real world around the parcels, with their outlines and ids drawn on it: a
-  map with street names, or an aerial photo, at town or neighbourhood scale.
+- `site_view(ids, kind, scale)` shows the real world around the parcels, with their outlines and
+  ids drawn on it: `kind` `map` (street names) or `aerial` (photo), `scale` `town`,
+  `neighbourhood` or `parcel`.
 - `view_image(doc, page)` shows a whole page (the overview), with pixel rulers on the top and
   left edges. All coordinates you use are overview coordinates read on these rulers.
 - `zoom(doc, page, region)` shows `region` = `[x0, y0, x1, y1]` (overview coordinates) in detail.
@@ -26,9 +27,10 @@ the plan against the real map. Small labels and hatchings are only legible after
 
 # Method
 
-1. **See the site in the real world**: `site_view` as a map at town scale, then at neighbourhood
-   scale. Note the landmarks around the site: main roads and their shape, junctions, rail lines,
-   rivers, parks, large buildings, the commune limit and the names of neighbouring communes.
+1. **See the site in the real world**: `site_view` with `kind="map"`, `scale="town"`, then
+   `scale="neighbourhood"`. Note the landmarks around the site: main roads and their shape,
+   junctions, rail lines, rivers, parks, large buildings, the commune limit and the names of
+   neighbouring communes.
 2. **Look at the whole plan** with `view_image`: find the legend, the commune outline, the
    landmarks you noted (neighbouring commune names printed outside the outline help), and the
    likely area of the site.

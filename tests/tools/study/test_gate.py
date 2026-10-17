@@ -498,7 +498,7 @@ def test_notes_key_needs_a_label_placeholder():
 
 
 def test_config_node_builds_the_tool(study, findings, tmp_path):
-    cfg = load_config(["subagents=[]"])
+    cfg = load_config()
     node = cfg.agent.tools[1]
     assert node.inputs.labels == ["rules", "oap"]
     with open_dict(cfg):
@@ -511,6 +511,6 @@ def test_config_node_builds_the_tool(study, findings, tmp_path):
 
 
 def test_default_crops_dir_is_under_the_project_root():
-    cfg = load_config(["subagents=[]"])
+    cfg = load_config()
     crops_dir = instantiate(cfg.agent.tools[1].crops_dir)
     assert crops_dir == PROJECT_ROOT / cfg.policies.evidence.crops_dir

@@ -29,7 +29,7 @@ def build_model(models_cfg: DictConfig, node: str) -> BaseChatModel:
 
     Args:
         models_cfg: The ``models`` config group (``pricing`` and ``nodes``).
-        node: Key in ``models.nodes``, e.g. ``orchestrator`` or ``site_locator``.
+        node: Key in ``models.nodes``, e.g. ``orchestrator`` or ``surveyor``.
 
     Returns:
         The configured chat model.

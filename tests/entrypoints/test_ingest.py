@@ -10,7 +10,7 @@ from agent.ingest.pipeline import CorpusSettings
 
 def test_main_runs_the_pipeline_with_overrides(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
-    monkeypatch.setattr(sys, "argv", ["ingest", "corpus.dir=data/elsewhere", "subagents=[]"])
+    monkeypatch.setattr(sys, "argv", ["ingest", "corpus.dir=data/elsewhere"])
     calls: list[tuple[CorpusSettings, Path, object]] = []
     monkeypatch.setattr(
         entrypoint,

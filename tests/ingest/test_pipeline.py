@@ -85,7 +85,7 @@ def test_ingest_corpus_saves_a_loadable_corpus(tmp_path: Path):
 
 
 def test_project_corpus_config_is_valid():
-    loaded = load_settings(load_config(["subagents=[]"]).corpus)
+    loaded = load_settings(load_config().corpus)
     assert loaded.id == "gif-sur-yvette@2021-07-06"
     assert loaded.dir == "data/gif-sur-yvette@2021-07-06"
     assert [d.id for d in loaded.documents] == ["plu_reglement", "plu_reglement_graphique", "oap"]
