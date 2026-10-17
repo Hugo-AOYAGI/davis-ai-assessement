@@ -9,26 +9,29 @@ from langgraph.types import Command
 from pydantic import JsonValue
 
 from agent.contracts.evidence import SourceKind
-from agent.contracts.findings.site import SiteContext
-from agent.contracts.geometry import BoundaryKind
-from agent.tools.geo.site import SiteSelection, preview_site_tool, site_finalizer
+from agent.contracts.findings.site import EdgeSide, ParcelChoice, Site
+from agent.tools.geo.site import parcel_finalizer, summarize_site
 from agent.tools.submit.artifacts import read_artifact
 from agent.tools.submit.factory import submit_tool
 
 LABEL = "4 Rue Joliot-curie 91190 Gif-sur-Yvette"
 PLOT, STRIP = "91272000CR0247", "91272000CR0249"
-SELECTION: dict[str, JsonValue] = {
+CHOICE: dict[str, JsonValue] = {
     "address": LABEL,
     "parcel_ids": [PLOT],
-    "public_parcel_ids": [STRIP],
-    "method": "Geocoded the address, retained the plot nearest to the point.",
-    "assumptions": ["CR0249 is a strip along the street, declared public space."],
+    "rationale": "Address point 2.5 m from CR0247; CR0249 (1.8 m) is a 116 m2 strip.",
+    "assumptions": ["Cadastre is current."],
 }
 
 
-@pytest.fixture
-def submit(surveyor) -> BaseTool:
-    return submit_tool("site", SiteSelection, finalize=site_finalizer(surveyor))
+def make_submit(surveyor) -> BaseTool:
+    return submit_tool(
+        name="submit_parcel",
+        artifact="site",
+        contract=ParcelChoice,
+        finalize=parcel_finalizer(surveyor),
+        summarize=summarize_site,
+    )
 
 
 def runtime() -> ToolRuntime:
@@ -58,97 +61,55 @@ def reply(command: Command[str]) -> ToolMessage:
     return message
 
 
-def test_preview_schema(surveyor):
-    tool = preview_site_tool(surveyor)
-    assert tool.name == "preview_site"
-    properties = tool.args
-    assert set(properties) == {"address", "parcel_ids", "public_parcel_ids"}
-    assert "geocode_address" in properties["address"]["description"]
-    assert "nearest_boundary" in tool.description
+def test_submit_schema(surveyor):
+    submit = make_submit(surveyor)
+    assert submit.name == "submit_parcel"
+    assert set(submit.args) == {"address", "parcel_ids", "rationale", "assumptions"}
 
 
-def test_preview_with_public_strip(surveyor):
-    summary = json.loads(
-        preview_site_tool(surveyor).invoke(
-            {"address": LABEL, "parcel_ids": [PLOT], "public_parcel_ids": [STRIP]}
-        )
-    )
-    assert summary["area_m2"] == pytest.approx(5952, abs=2)
-    assert summary["parcels"] == [{"id": PLOT, "contenance_m2": 5960}]
-    assert set(summary["boundaries"]) == {"road", "side", "rear"}
-    assert summary["boundaries"]["road"]["length_m"] == pytest.approx(91, abs=2)
-    assert summary["boundaries"]["rear"]["edges"] > 0
-    assert summary["nearest_boundary"] == {"kind": "road", "distance_m": 2.5}
-    strip = summary["neighbours"][0]
-    assert strip["id"] == STRIP
-    assert strip["public"] is True
-    assert strip["mean_width_m"] <= 1
-    assert set(strip) == {"id", "contenance_m2", "shared_length_m", "mean_width_m", "public"}
-
-
-def test_preview_without_public_strip_is_enclosed(surveyor):
-    summary = json.loads(
-        preview_site_tool(surveyor).invoke({"address": LABEL, "parcel_ids": [PLOT]})
-    )
-    assert summary["nearest_boundary"]["kind"] == "rear"
-    assert summary["boundaries"]["road"] == {"length_m": 0, "edges": 0}
-
-
-def test_preview_error_is_a_message(surveyor):
-    reply_text = preview_site_tool(surveyor).invoke({"address": "4 rue", "parcel_ids": [PLOT]})
-    assert reply_text.startswith("preview_site failed:")
-    assert "exactly as geocode_address returned it" in reply_text
-
-
-def test_submit_schema(submit):
-    assert submit.name == "submit_site"
-    properties = submit.tool_call_schema["properties"]
-    assert set(properties) == {
-        "address",
-        "parcel_ids",
-        "public_parcel_ids",
-        "method",
-        "assumptions",
-    }
-    assert "runtime" not in properties
-    assert "computed from them" in submit.description
-
-
-def test_submit_stores_site_context(submit):
-    command = invoke(submit, SELECTION)
-    assert reply(command).content == "site accepted."
+def test_submit_stores_the_site(surveyor):
+    command = invoke(make_submit(surveyor), CHOICE)
     update = command.update
     assert isinstance(update, dict)
-    site = read_artifact(update["artifacts"], "site", SiteContext)
+    site = read_artifact(update["artifacts"], "site", Site)
     assert site is not None
     assert site.address == LABEL
-    assert (site.longitude, site.latitude) == (2.165254, 48.709836)
+    assert site.choice == ParcelChoice.model_validate(CHOICE)
     assert [parcel.id for parcel in site.parcels] == [PLOT]
     assert site.area_m2 == pytest.approx(5952, abs=2)
-    assert site.polygon.crs == "EPSG:2154"
-    assert {b.kind for b in site.boundaries} == set(BoundaryKind)
-    assert site.method == SELECTION["method"]
-    assert site.assumptions == ("CR0249 is a strip along the street, declared public space.",)
-    assert [c.doc for c in site.citations] == [
-        "geoplateforme-geocodage",
-        "apicarto-cadastre",
-        "apicarto-cadastre",
-    ]
+    assert {edge.other_side for edge in site.edges} == {EdgeSide.PARCEL}
+    assert [c.doc for c in site.citations] == ["geoplateforme-geocodage", "apicarto-cadastre"]
     assert all(c.source_kind is SourceKind.GEOMETRIC for c in site.citations)
+
+
+def test_submit_reply_summarises_the_site(surveyor):
+    message = reply(invoke(make_submit(surveyor), {**CHOICE, "parcel_ids": [PLOT, STRIP]}))
+    head, body = str(message.content).split("\n\n", 1)
+    assert head == "site accepted."
+    summary = json.loads(body)
+    assert summary["address"] == LABEL
+    assert summary["area_m2"] == pytest.approx(6071, abs=2)
+    assert summary["parcels"] == [
+        {"id": PLOT, "contenance_m2": 5960},
+        {"id": STRIP, "contenance_m2": 116},
+    ]
+    assert summary["edges"]["public_land"]["length_m"] == pytest.approx(91, abs=2)
+    assert summary["neighbours"] == ["91272000CR0227", "91272000CR0256"]
 
 
 @pytest.mark.parametrize(
     ("changes", "message"),
     [
-        ({"address": "4 rue Joliot Curie"}, "exactly as geocode_address returned it"),
-        ({"parcel_ids": [PLOT, "91272000CR0215"], "public_parcel_ids": []}, "separate parts"),
+        ({"address": "4 rue Joliot Curie"}, "exactly as geocode returned it"),
+        ({"parcel_ids": ["91272000CR9999"]}, "not in the cadastre"),
+        ({"parcel_ids": [PLOT, "91272000CR0215"]}, "separate parts"),
     ],
 )
-def test_submit_rejections(submit, changes, message):
-    command = invoke(submit, {**SELECTION, **changes})
+def test_submit_rejections(surveyor, changes, message):
+    command = invoke(make_submit(surveyor), {**CHOICE, **changes})
     message_out = reply(command)
     assert message_out.status == "error"
-    assert "submit_site rejected" in str(message_out.content)
+    assert "submit_parcel rejected" in str(message_out.content)
     assert message in str(message_out.content)
     update = command.update
     assert isinstance(update, dict)
@@ -156,7 +117,7 @@ def test_submit_rejections(submit, changes, message):
 
 
 def test_submit_service_error_is_rejected(broken_surveyor):
-    tool = submit_tool("site", SiteSelection, finalize=site_finalizer(broken_surveyor))
-    message = reply(invoke(tool, SELECTION))
+    message = reply(invoke(make_submit(broken_surveyor), CHOICE))
     assert message.status == "error"
     assert "503" in str(message.content)
+    assert "submit the same choice again" in str(message.content)

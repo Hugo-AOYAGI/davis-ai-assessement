@@ -2,7 +2,7 @@ import httpx
 import pytest
 
 from agent.adapters.geo.geocoder import AddressGeocoder
-from agent.adapters.geo.http import CachedHttp, GeoServiceError
+from agent.adapters.http import CachedHttp, ServiceError
 
 URL = "https://data.geopf.fr/geocodage/search"
 
@@ -35,7 +35,7 @@ def test_search_parses_reference_fixture(tmp_path, replay_transport):
 def test_unexpected_payload_raises(tmp_path, body):
     transport = httpx.MockTransport(lambda request: httpx.Response(200, json=body))
     geocoder = AddressGeocoder(URL, CachedHttp(tmp_path, timeout_s=5, transport=transport))
-    with pytest.raises(GeoServiceError, match="unexpected geocoding payload"):
+    with pytest.raises(ServiceError, match="unexpected geocoding payload"):
         geocoder.search("anything", limit=1)
 
 

@@ -1,8 +1,9 @@
 """Offline geo services for the tool tests, replayed from the adapter fixtures.
 
-Same routing as ``tests/adapters/geo/conftest.py``: ``q`` -> geocoder fixture; ``numero`` ->
-the parcel's fixture or its feature in the around-reference collection; ``geom`` -> neighbours
-of CR0247 when the query centroid lies inside it, else the parcels around the address.
+Same routing as ``tests/adapters/geo/conftest.py``: ``REQUEST=GetMap`` -> ``wms_<LAYERS>.png``;
+``q`` -> geocoder fixture; ``numero`` -> the parcel's fixture or its feature in the
+around-reference collection; ``geom`` -> neighbours of CR0247 when the query centroid lies inside
+it, else the parcels around the address.
 """
 
 import json
@@ -14,10 +15,14 @@ from shapely.geometry import shape
 
 from agent.adapters.geo.cadastre import CadastreClient
 from agent.adapters.geo.geocoder import AddressGeocoder
-from agent.adapters.geo.http import CachedHttp
+from agent.adapters.geo.imagery import ImageryClient, OutlineStyle
+from agent.adapters.geo.records import SurveySettings
 from agent.adapters.geo.survey import SiteSurveyor
+from agent.adapters.http import CachedHttp
 
 FIXTURES = Path(__file__).parents[2] / "adapters" / "geo" / "fixtures"
+LAYERS = {"map": "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2", "aerial": "ORTHOIMAGERY.ORTHOPHOTOS"}
+STYLE = OutlineStyle(rgb=(230, 0, 0), width_px=2, font_px=8, label_background_rgb=(255, 255, 255))
 
 
 def fixture(name: str):
@@ -36,6 +41,9 @@ def _by_id(params: httpx.QueryParams):
 
 def route(request: httpx.Request) -> httpx.Response:
     params = request.url.params
+    if params.get("REQUEST") == "GetMap":
+        image = (FIXTURES / f"wms_{params['LAYERS']}.png").read_bytes()
+        return httpx.Response(200, content=image, headers={"content-type": "image/png"})
     if "q" in params:
         return httpx.Response(200, json=fixture("geocode_reference.json"))
     if "numero" in params:
@@ -52,17 +60,30 @@ def make_surveyor(http: CachedHttp) -> SiteSurveyor:
     return SiteSurveyor(
         geocoder=AddressGeocoder("https://data.geopf.fr/geocodage/search", http),
         cadastre=CadastreClient("https://apicarto.ign.fr/api/cadastre/parcelle", http, 500),
+        settings=SurveySettings(
+            crs="EPSG:2154",
+            geographic_crs="EPSG:4326",
+            decimals=2,
+            grid_size_m=0.05,
+            max_sliver_area_m2=1.0,
+            neighbour_buffer_m=2.0,
+            snap_tolerance_m=0.5,
+            min_shared_ratio=0.5,
+            geocoder_source="geoplateforme-geocodage",
+            cadastre_source="apicarto-cadastre",
+        ),
+    )
+
+
+def make_imagery(http: CachedHttp) -> ImageryClient:
+    return ImageryClient(
+        url="https://data.geopf.fr/wms-r/wms",
+        http=http,
+        version="1.3.0",
         crs="EPSG:2154",
-        geographic_crs="EPSG:4326",
-        decimals=2,
-        grid_size_m=0.05,
-        max_sliver_area_m2=1.0,
-        neighbour_buffer_m=2.0,
-        snap_tolerance_m=0.5,
-        min_shared_ratio=0.5,
-        collinear_angle_deg=20,
-        geocoder_source="geoplateforme-geocodage",
-        cadastre_source="apicarto-cadastre",
+        media_type="image/png",
+        layers=LAYERS,
+        source="IGN Géoplateforme WMS",
     )
 
 
@@ -82,6 +103,11 @@ def surveyor(http) -> SiteSurveyor:
 
 
 @pytest.fixture
+def imagery(http) -> ImageryClient:
+    return make_imagery(http)
+
+
+@pytest.fixture
 def broken_http(tmp_path) -> CachedHttp:
     def unavailable(request: httpx.Request) -> httpx.Response:
         return httpx.Response(503, text="maintenance")
@@ -92,3 +118,13 @@ def broken_http(tmp_path) -> CachedHttp:
 @pytest.fixture
 def broken_surveyor(broken_http) -> SiteSurveyor:
     return make_surveyor(broken_http)
+
+
+@pytest.fixture
+def broken_imagery(broken_http) -> ImageryClient:
+    return make_imagery(broken_http)
+
+
+@pytest.fixture
+def style() -> OutlineStyle:
+    return STYLE

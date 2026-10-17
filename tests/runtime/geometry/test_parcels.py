@@ -6,9 +6,12 @@ import shapely
 from agent.contracts.geometry import Polygon
 from agent.runtime.geometry.parcels import (
     DisjointParcelsError,
+    mean_width,
     polygon_from_rings,
+    shared_length,
     to_contract,
     to_shape,
+    touching,
     union_parcels,
 )
 
@@ -115,3 +118,25 @@ def test_round_trip_contract_shape():
         holes=(((5.0, 5.0), (5.0, 10.0), (10.0, 10.0), (10.0, 5.0), (5.0, 5.0)),),
     )
     assert to_contract(to_shape(contract), "EPSG:2154", 2) == contract
+
+
+def test_mean_width_of_a_strip_and_a_square():
+    assert mean_width(shapely.box(0, 0, 100, 1)) == pytest.approx(0.99, abs=0.01)
+    assert mean_width(shapely.box(0, 0, 40, 40)) == pytest.approx(20)
+    assert mean_width(shapely.Point(0, 0)) == 0
+
+
+def test_touching_within_tolerance():
+    shapes = {
+        "a": shapely.box(0, 0, 10, 10),
+        "b": shapely.box(10.3, 0, 20, 10),
+        "c": shapely.box(30, 0, 40, 10),
+    }
+    assert touching(shapes, 0.5) == {"a": ("b",), "b": ("a",), "c": ()}
+    assert touching(shapes, 0.1) == {"a": (), "b": (), "c": ()}
+
+
+def test_shared_length_along_a_neighbour():
+    site = shapely.box(0, 0, 20, 40)
+    assert shared_length(site, shapely.box(20, 10, 30, 30), 0.5) == pytest.approx(20, abs=1.1)
+    assert shared_length(site, shapely.box(50, 0, 60, 40), 0.5) == 0

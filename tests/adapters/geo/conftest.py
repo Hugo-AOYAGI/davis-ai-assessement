@@ -1,4 +1,4 @@
-"""Offline replay of the geocoder and cadastre services from recorded responses.
+"""Offline replay of the geocoder, cadastre and WMS services from recorded responses.
 
 Routing of ``replay_transport`` (``route``):
 
@@ -8,6 +8,7 @@ Routing of ``replay_transport`` (``route``):
 - ``geom`` param: ``cadastre_neighbours_CR0247.json`` when the query geometry's centroid lies
   inside parcel CR0247 (a buffered parcel outline), else ``cadastre_around_reference.json``
   (a box around the geocoded address).
+- ``REQUEST=GetMap``: ``wms_<LAYERS>.png``, a 64 x 64 image recorded around CR0247.
 
 Any other request fails the test.
 """
@@ -21,6 +22,12 @@ import pytest
 from pydantic import JsonValue, TypeAdapter
 from shapely.geometry import shape
 
+from agent.adapters.geo.cadastre import CadastreClient
+from agent.adapters.geo.geocoder import AddressGeocoder
+from agent.adapters.geo.records import SurveySettings
+from agent.adapters.geo.survey import SiteSurveyor
+from agent.adapters.http import CachedHttp
+
 FIXTURES = Path(__file__).parent / "fixtures"
 _JSON: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
 EMPTY_COLLECTION: JsonValue = {
@@ -30,6 +37,18 @@ EMPTY_COLLECTION: JsonValue = {
     "numberMatched": 0,
     "numberReturned": 0,
 }
+SETTINGS = SurveySettings(
+    crs="EPSG:2154",
+    geographic_crs="EPSG:4326",
+    decimals=2,
+    grid_size_m=0.05,
+    max_sliver_area_m2=1.0,
+    neighbour_buffer_m=2.0,
+    snap_tolerance_m=0.5,
+    min_shared_ratio=0.5,
+    geocoder_source="geocoder",
+    cadastre_source="cadastre",
+)
 
 
 def load_fixture(name: str) -> JsonValue:
@@ -55,6 +74,9 @@ def _by_id(params: httpx.QueryParams) -> JsonValue:
 
 def route(request: httpx.Request) -> httpx.Response:
     params = request.url.params
+    if params.get("REQUEST") == "GetMap":
+        image = (FIXTURES / f"wms_{params['LAYERS']}.png").read_bytes()
+        return httpx.Response(200, content=image, headers={"content-type": "image/png"})
     if "q" in params:
         return httpx.Response(200, json=load_fixture("geocode_reference.json"))
     if "numero" in params:
@@ -78,6 +100,14 @@ class RecordingTransport(httpx.MockTransport):
         super().__init__(record)
 
 
+def make_surveyor(http: CachedHttp) -> SiteSurveyor:
+    return SiteSurveyor(
+        geocoder=AddressGeocoder("https://data.geopf.fr/geocodage/search", http),
+        cadastre=CadastreClient("https://apicarto.ign.fr/api/cadastre/parcelle", http, 500),
+        settings=SETTINGS,
+    )
+
+
 @pytest.fixture
 def replay_transport() -> RecordingTransport:
     return RecordingTransport(route)
@@ -89,3 +119,16 @@ def guard_transport() -> RecordingTransport:
         pytest.fail(f"unexpected network request {request.url}")
 
     return RecordingTransport(refuse)
+
+
+@pytest.fixture
+def surveyor(tmp_path, replay_transport) -> SiteSurveyor:
+    return make_surveyor(CachedHttp(tmp_path, 5, replay_transport))
+
+
+@pytest.fixture
+def broken_surveyor(tmp_path) -> SiteSurveyor:
+    def unavailable(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(503, text="maintenance")
+
+    return make_surveyor(CachedHttp(tmp_path / "broken", 5, httpx.MockTransport(unavailable)))
