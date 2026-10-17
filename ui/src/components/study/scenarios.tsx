@@ -9,9 +9,11 @@ import {
   limitsFor,
   massingBuildings,
   massingTag,
+  hasAlternatives,
   scenarioHint,
   scenarioLabel,
   shortName,
+  warningsOf,
 } from "./envelope";
 import {
   capitalize,
@@ -34,6 +36,41 @@ function Notes({ title, items }: { title: string; items: string[] }) {
           <li key={item}>{item}</li>
         ))}
       </ul>
+    </div>
+  );
+}
+
+/** Red banner for a scenario whose buildings do not fit, with the reasons. */
+export function NoFitBanner({ scenario }: { scenario: Scenario }) {
+  const warnings = warningsOf(scenario);
+  if (scenario.fits && warnings.length === 0) return null;
+  return (
+    <div
+      role="alert"
+      className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border p-3 text-sm"
+    >
+      <TriangleAlert
+        aria-hidden
+        className="mt-0.5 size-4 shrink-0"
+      />
+      <div>
+        <p>
+          <span className="font-semibold">
+            {scenario.fits
+              ? "Warnings"
+              : "The buildings do not fit on the plot"}
+          </span>
+          {!scenario.fits &&
+            " with the required spacing: the figures are not a buildable layout."}
+        </p>
+        {warnings.length > 0 && (
+          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+            {warnings.map((w) => (
+              <li key={w}>{w}</li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }
@@ -68,6 +105,13 @@ function BoundCard({
         </div>
         {!scenario.fits && <NoFit />}
       </div>
+      {warningsOf(scenario).length > 0 && (
+        <ul className="text-destructive mt-2 list-disc space-y-0.5 pl-5 text-xs">
+          {warningsOf(scenario).map((w) => (
+            <li key={w}>{w}</li>
+          ))}
+        </ul>
+      )}
       <dl className="mt-2 grid grid-cols-2 gap-2 text-sm">
         <div>
           <dt className="text-muted-foreground text-xs">Ground area</dt>
@@ -91,6 +135,12 @@ function BoundCard({
           </dd>
         </div>
       </dl>
+      {hasAlternatives(scenario) && (
+        <p className="text-muted-foreground mt-2 text-xs">
+          One massing per max height: alternatives over the whole footprint, the
+          total is the largest, not their sum.
+        </p>
+      )}
       {scenario.buildings.length > 0 && (
         <ul className="mt-2 divide-y border-t text-xs">
           {scenario.buildings.map((b, i) => (
@@ -210,22 +260,7 @@ export function ProposalView({
 
   return (
     <div className="space-y-3">
-      {!proposal.fits && (
-        <div className="border-destructive/40 bg-destructive/5 text-destructive flex items-start gap-2 rounded-lg border p-3 text-sm">
-          <TriangleAlert
-            aria-hidden
-            className="mt-0.5 size-4 shrink-0"
-          />
-          <p>
-            <span className="font-semibold">
-              The buildings do not fit on the plot
-            </span>{" "}
-            with the required spacing: a part is empty or the gap does not fit.
-            The figures below are not a buildable layout; the assumptions give
-            the reason.
-          </p>
-        </div>
-      )}
+      <NoFitBanner scenario={proposal} />
       {buildings.length === 0 ? (
         <p className="text-muted-foreground text-sm">No building placed.</p>
       ) : (
@@ -264,7 +299,7 @@ export function ProposalView({
           <tbody className="divide-y border-y">
             {buildings.map((b, i) => {
               const max = limitsFor(envelope, b.building)?.max_height_m.value;
-              const empty = b.footprint === null || b.footprint_area_m2 <= 0;
+              const empty = b.footprint == null || b.footprint_area_m2 <= 0;
               return (
                 <tr
                   key={`${b.building}-${i}`}

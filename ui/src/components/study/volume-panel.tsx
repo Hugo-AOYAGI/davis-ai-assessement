@@ -9,6 +9,7 @@ import { buildingColor, FOOTPRINT_COLOR } from "./colors";
 import {
   buildingColors,
   groundArea,
+  hasAlternatives,
   isCapped,
   isDrawable,
   levelsOf,
@@ -18,6 +19,7 @@ import {
   scenarioHint,
   scenarioLabel,
   storeyHeight,
+  warningsOf,
 } from "./envelope";
 import { formatArea, formatLength, formatVolume } from "./format";
 import { polygonArea } from "./geometry";
@@ -127,6 +129,20 @@ function Caption({
       {!scenario.fits && (
         <p className="text-destructive">
           The buildings do not fit with the required spacing in this scenario.
+        </p>
+      )}
+      {warningsOf(scenario).map((w) => (
+        <p
+          key={w}
+          className="text-destructive"
+        >
+          {w}
+        </p>
+      ))}
+      {hasAlternatives(scenario) && (
+        <p>
+          One massing per max height, drawn over the same footprint: they are
+          alternatives, and the volume is the largest one&apos;s.
         </p>
       )}
       {stepped && (

@@ -101,8 +101,9 @@ export interface Boundary {
 
 /** `max(min_m, height_ratio × H)`, metres; at least one of the two is set. */
 export interface Distance {
+  /** Defaults to null. */
   min_m: number | null;
-  /** `H/2` → 0.5. */
+  /** `H/2` → 0.5; defaults to null. */
   height_ratio: number | null;
   rule: string;
   citations: Citation[];
@@ -170,9 +171,9 @@ export interface Level {
 }
 
 export interface BuildingMassing {
-  /** A building label, or several joined when a bound groups a height band. */
+  /** A building label; in a bound, the labels sharing one max height joined by `", "`. */
   building: string;
-  /** Its ground part. */
+  /** Its ground part; `null` when nothing remains for it. */
   footprint: Polygon | null;
   /**
    * May be below the polygon's area when a footprint or green-space cap
@@ -188,15 +189,20 @@ export interface BuildingMassing {
 export type ScenarioName = "largest" | "windows" | "proposal";
 
 export interface Scenario {
-  name: ScenarioName | (string & {});
+  name: ScenarioName;
   /** Plot minus setbacks at ground level; `null` when nothing remains. */
   footprint: Polygon | null;
+  /** Area of `footprint`, before any cap. */
   footprint_area_m2: number;
+  /** In a bound: one massing per distinct max height, alternatives over the whole footprint. */
   buildings: BuildingMassing[];
-  /** Every building fits with the required spacing. */
+  /** Every building has room, with the required spacing. */
   fits: boolean;
+  /** Sum of the buildings' volumes; in a bound, the largest alternative's. */
   total_volume_m3: number;
   assumptions: string[];
+  /** Why the buildings do not fit, when they do not. */
+  warnings: string[];
 }
 
 /** The `envelope` artifact. */

@@ -860,14 +860,14 @@
     ],
     "citations": [
       {
-        "doc": "geoplateforme-geocodage",
+        "doc": "geocoder",
         "page": null,
         "article": null,
         "quote": "label=4 Rue Joliot-curie 91190 Gif-sur-Yvette; id=91272_1599_00004; lon=2.165254; lat=48.709836",
         "source_kind": "geometric"
       },
       {
-        "doc": "apicarto-cadastre",
+        "doc": "cadastre",
         "page": null,
         "article": null,
         "quote": "idu=91272000CR0247; contenance=5960",
@@ -1157,6 +1157,1378 @@
         "citations": []
       }
     ]
+  },
+  "envelope": {
+    "rules": {
+      "setbacks": [
+        {
+          "kind": "road",
+          "on_limit_allowed": true,
+          "with_windows": {
+            "min_m": 1.0,
+            "height_ratio": null,
+            "rule": "On the alignment, or set back at least 1 m (UMG 6.3).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 324,
+                "article": "UMG 6.3",
+                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 1.0,
+            "height_ratio": null,
+            "rule": "On the alignment, or set back at least 1 m (UMG 6.3).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 324,
+                "article": "UMG 6.3",
+                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "side",
+          "on_limit_allowed": true,
+          "with_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "On the limit, or at least 6 m from facades with views (UMG 7.2.1).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 3.0,
+            "height_ratio": null,
+            "rule": "On the limit, or at least 3 m from facades without views (UMG 7.2.1).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "rear",
+          "on_limit_allowed": true,
+          "with_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "Same rule as side limits: at least 6 m with views (UMG 7.1.1, 7.2.1).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 3.0,
+            "height_ratio": null,
+            "rule": "Same rule as side limits: at least 3 m without views (UMG 7.2.1).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        }
+      ],
+      "buildings": [
+        {
+          "building": "Résidence Sociale Étudiante (RSE)",
+          "max_height_m": {
+            "value": 20.0,
+            "rule": "Housing: 20 m, measured from the natural ground (UMG 10.1, 10.2).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.1",
+                "quote": "à partir du sol naturel existant avant travaux;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "max_storeys": {
+            "value": 6.0,
+            "rule": "Housing: R+5, i.e. 6 storeys (UMG 10.2).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "building": "Résidence Jeunes Actifs",
+          "max_height_m": {
+            "value": 20.0,
+            "rule": "Housing: 20 m, measured from the natural ground (UMG 10.1, 10.2).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.1",
+                "quote": "à partir du sol naturel existant avant travaux;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "max_storeys": {
+            "value": 6.0,
+            "rule": "Housing: R+5, i.e. 6 storeys (UMG 10.2).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        }
+      ],
+      "spacing_with_windows": {
+        "min_m": 10.0,
+        "height_ratio": null,
+        "rule": "At least 10 m when one of the facing facades has views (UMG 8.1).",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 8.1",
+            "quote": "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comporte des vues.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "spacing_without_windows": {
+        "min_m": 6.0,
+        "height_ratio": null,
+        "rule": "At least 6 m when neither facing facade has views (UMG 8.1).",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 8.1",
+            "quote": "6 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vue.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "max_footprint_ratio": {
+        "value": null,
+        "rule": "Footprint not regulated by UMG 9; project must be compatible with the OAP, which gives no figure.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 9",
+            "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "min_green_ratio": {
+        "value": 0.2,
+        "rule": "At least 20% of plot as green space (planted, 60 cm topsoil), of which at least 10% pleine terre (UMG 13.3). Surface car parks and green roofs do not count.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace vert 20% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 330,
+            "article": "UMG 13.1",
+            "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
+    },
+    "layout": {
+      "cut": "across_long_axis",
+      "first_share": 0.5,
+      "order": [
+        "Résidence Jeunes Actifs",
+        "Résidence Sociale Étudiante (RSE)"
+      ],
+      "facing_windows": true,
+      "heights_m": [
+        15.0,
+        20.0
+      ],
+      "oap": [
+        {
+          "prescription": {
+            "topic": "building form - height",
+            "text": "Height stepping must reach an average of R+4 for residential buildings.",
+            "citations": [
+              {
+                "doc": "oap",
+                "page": 33,
+                "article": "OAP 8 - morphologie",
+                "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "how": "Résidence Jeunes Actifs at 15 m (R+4) on the street, Résidence Sociale Étudiante (RSE) at 20 m (R+5) behind it."
+        },
+        {
+          "prescription": {
+            "topic": "building form - siting",
+            "text": "Build on the alignment along the road, without a continuous front.",
+            "citations": [
+              {
+                "doc": "oap",
+                "page": 34,
+                "article": "OAP 8 - implantation",
+                "quote": "Le principe d’une implantation des constructions à l’alignement le long de la voie doit être retenu. Ce principe ne doit toutefois pas aboutir à la création d’un front bâti uniforme et continu.",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "how": "The first part starts 1 m from rue Joliot-Curie; the 10 m gap between the two buildings breaks the front."
+        }
+      ],
+      "reasons": "The plot is cut across its long axis so that each residence gets its own share of the plot. The young workers' residence goes on the street side, lower (15 m), to step the heights down towards the street as the OAP asks; the student residence takes the back at the full 20 m. Facing facades have windows, so the 10 m spacing applies."
+    },
+    "site_area_m2": 5951.632500010313,
+    "min_green_area_m2": 1190.3265000020626,
+    "bounds": [
+      {
+        "name": "largest",
+        "footprint": {
+          "crs": "EPSG:2154",
+          "exterior": [
+            [
+              638556.2,
+              6845932.1
+            ],
+            [
+              638553.9,
+              6845849.85
+            ],
+            [
+              638606.65,
+              6845848.35
+            ],
+            [
+              638609.25,
+              6845848.75
+            ],
+            [
+              638611.85,
+              6845849.5
+            ],
+            [
+              638614.3,
+              6845850.6
+            ],
+            [
+              638622.7,
+              6845855.45
+            ],
+            [
+              638624.15,
+              6845857.0
+            ],
+            [
+              638625.1,
+              6845858.85
+            ],
+            [
+              638641.7,
+              6845858.4
+            ],
+            [
+              638641.8,
+              6845866.0
+            ],
+            [
+              638626.45,
+              6845895.1
+            ],
+            [
+              638626.4,
+              6845904.85
+            ],
+            [
+              638623.95,
+              6845913.75
+            ],
+            [
+              638611.75,
+              6845927.95
+            ],
+            [
+              638605.05,
+              6845930.75
+            ],
+            [
+              638556.2,
+              6845932.1
+            ]
+          ],
+          "holes": []
+        },
+        "footprint_area_m2": 5951.632500010313,
+        "buildings": [
+          {
+            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
+            "footprint": {
+              "crs": "EPSG:2154",
+              "exterior": [
+                [
+                  638556.2,
+                  6845932.1
+                ],
+                [
+                  638605.05,
+                  6845930.75
+                ],
+                [
+                  638611.75,
+                  6845927.95
+                ],
+                [
+                  638623.95,
+                  6845913.75
+                ],
+                [
+                  638626.4,
+                  6845904.85
+                ],
+                [
+                  638626.45,
+                  6845895.1
+                ],
+                [
+                  638641.8,
+                  6845866.0
+                ],
+                [
+                  638641.7,
+                  6845858.4
+                ],
+                [
+                  638625.1,
+                  6845858.85
+                ],
+                [
+                  638624.15,
+                  6845857.0
+                ],
+                [
+                  638622.7,
+                  6845855.45
+                ],
+                [
+                  638614.3,
+                  6845850.6
+                ],
+                [
+                  638611.85,
+                  6845849.5
+                ],
+                [
+                  638609.25,
+                  6845848.75
+                ],
+                [
+                  638606.65,
+                  6845848.35
+                ],
+                [
+                  638553.9,
+                  6845849.85
+                ],
+                [
+                  638556.2,
+                  6845932.1
+                ]
+              ],
+              "holes": []
+            },
+            "footprint_area_m2": 4761.3060000082505,
+            "max_height_m": 20.0,
+            "levels": [
+              {
+                "from_m": 0.0,
+                "to_m": 20.0,
+                "area_m2": 4761.3060000082505
+              }
+            ],
+            "volume_m3": 95226.120000165
+          }
+        ],
+        "fits": true,
+        "total_volume_m3": 95226.120000165,
+        "assumptions": [
+          "Each limit at its smallest allowed distance, 0 where building on it is allowed: the legal maximum.",
+          "Ground area 5951.6 m² exceeds the site area minus the minimum green area (20%), 4761.3 m²: every building's areas are scaled by 0.800; the footprints show where to build, not how much."
+        ],
+        "warnings": []
+      },
+      {
+        "name": "windows",
+        "footprint": {
+          "crs": "EPSG:2154",
+          "exterior": [
+            [
+              638618.5222539209,
+              6845910.86043671
+            ],
+            [
+              638620.4041562934,
+              6845904.024138295
+            ],
+            [
+              638620.4500788939,
+              6845895.069231173
+            ],
+            [
+              638620.4772010767,
+              6845894.807615788
+            ],
+            [
+              638620.4757608618,
+              6845894.544602196
+            ],
+            [
+              638620.5377011696,
+              6845894.224043468
+            ],
+            [
+              638620.5713683957,
+              6845893.899295847
+            ],
+            [
+              638620.6490080637,
+              6845893.647998601
+            ],
+            [
+              638620.6989069281,
+              6845893.389757772
+            ],
+            [
+              638620.8221949751,
+              6845893.0874424465
+            ],
+            [
+              638620.9185704134,
+              6845892.775502908
+            ],
+            [
+              638621.0437439174,
+              6845892.544181016
+            ],
+            [
+              638621.1430642757,
+              6845892.300636997
+            ],
+            [
+              638635.7804232278,
+              6845864.551637291
+            ],
+            [
+              638635.7147782287,
+              6845859.562617354
+            ],
+            [
+              638625.1270984786,
+              6845859.849632769
+            ],
+            [
+              638625.0564349804,
+              6845859.84460203
+            ],
+            [
+              638624.9856022588,
+              6845859.843435029
+            ],
+            [
+              638624.9588548376,
+              6845859.837655017
+            ],
+            [
+              638624.9315591102,
+              6845859.835711756
+            ],
+            [
+              638624.8632348485,
+              6845859.81699192
+            ],
+            [
+              638624.7939908196,
+              6845859.802028561
+            ],
+            [
+              638624.7688849678,
+              6845859.791141449
+            ],
+            [
+              638624.7424928307,
+              6845859.783910394
+            ],
+            [
+              638624.6791334555,
+              6845859.7522208495
+            ],
+            [
+              638624.6141391416,
+              6845859.724036169
+            ],
+            [
+              638624.5916396619,
+              6845859.708460341
+            ],
+            [
+              638624.5671653512,
+              6845859.696219378
+            ],
+            [
+              638624.5112057319,
+              6845859.652777939
+            ],
+            [
+              638624.4529588239,
+              6845859.612455058
+            ],
+            [
+              638624.4339303594,
+              6845859.592789085
+            ],
+            [
+              638624.4123144085,
+              6845859.576008627
+            ],
+            [
+              638624.3659050431,
+              6845859.5224847235
+            ],
+            [
+              638624.3166439357,
+              6845859.471573227
+            ],
+            [
+              638624.3018177381,
+              6845859.448572859
+            ],
+            [
+              638624.2838908373,
+              6845859.427897772
+            ],
+            [
+              638624.2488152119,
+              6845859.366348299
+            ],
+            [
+              638624.2104329818,
+              6845859.306804685
+            ],
+            [
+              638623.3242658031,
+              6845857.581110706
+            ],
+            [
+              638622.071265434,
+              6845856.241696518
+            ],
+            [
+              638613.844018734,
+              6845851.491440983
+            ],
+            [
+              638611.5049080583,
+              6845850.4412280265
+            ],
+            [
+              638609.0345070339,
+              6845849.728612347
+            ],
+            [
+              638606.5876741643,
+              6845849.35217652
+            ],
+            [
+              638559.9255289192,
+              6845850.679062166
+            ],
+            [
+              638562.0299948476,
+              6845925.9365937365
+            ],
+            [
+              638603.7673572791,
+              6845924.783155881
+            ],
+            [
+              638608.1251434626,
+              6845922.961991506
+            ],
+            [
+              638618.5222539209,
+              6845910.86043671
+            ]
+          ],
+          "holes": []
+        },
+        "footprint_area_m2": 4637.5090104500205,
+        "buildings": [
+          {
+            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
+            "footprint": {
+              "crs": "EPSG:2154",
+              "exterior": [
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ],
+                [
+                  638620.4500788939,
+                  6845895.069231173
+                ],
+                [
+                  638620.4772010767,
+                  6845894.807615788
+                ],
+                [
+                  638620.4757608618,
+                  6845894.544602196
+                ],
+                [
+                  638620.5377011696,
+                  6845894.224043468
+                ],
+                [
+                  638620.5713683957,
+                  6845893.899295847
+                ],
+                [
+                  638620.6490080637,
+                  6845893.647998601
+                ],
+                [
+                  638620.6989069281,
+                  6845893.389757772
+                ],
+                [
+                  638620.8221949751,
+                  6845893.0874424465
+                ],
+                [
+                  638620.9185704134,
+                  6845892.775502908
+                ],
+                [
+                  638621.0437439174,
+                  6845892.544181016
+                ],
+                [
+                  638621.1430642757,
+                  6845892.300636997
+                ],
+                [
+                  638635.7804232278,
+                  6845864.551637291
+                ],
+                [
+                  638635.7147782287,
+                  6845859.562617354
+                ],
+                [
+                  638625.1270984786,
+                  6845859.849632769
+                ],
+                [
+                  638625.0564349804,
+                  6845859.84460203
+                ],
+                [
+                  638624.9856022588,
+                  6845859.843435029
+                ],
+                [
+                  638624.9588548376,
+                  6845859.837655017
+                ],
+                [
+                  638624.9315591102,
+                  6845859.835711756
+                ],
+                [
+                  638624.8632348485,
+                  6845859.81699192
+                ],
+                [
+                  638624.7939908196,
+                  6845859.802028561
+                ],
+                [
+                  638624.7688849678,
+                  6845859.791141449
+                ],
+                [
+                  638624.7424928307,
+                  6845859.783910394
+                ],
+                [
+                  638624.6791334555,
+                  6845859.7522208495
+                ],
+                [
+                  638624.6141391416,
+                  6845859.724036169
+                ],
+                [
+                  638624.5916396619,
+                  6845859.708460341
+                ],
+                [
+                  638624.5671653512,
+                  6845859.696219378
+                ],
+                [
+                  638624.5112057319,
+                  6845859.652777939
+                ],
+                [
+                  638624.4529588239,
+                  6845859.612455058
+                ],
+                [
+                  638624.4339303594,
+                  6845859.592789085
+                ],
+                [
+                  638624.4123144085,
+                  6845859.576008627
+                ],
+                [
+                  638624.3659050431,
+                  6845859.5224847235
+                ],
+                [
+                  638624.3166439357,
+                  6845859.471573227
+                ],
+                [
+                  638624.3018177381,
+                  6845859.448572859
+                ],
+                [
+                  638624.2838908373,
+                  6845859.427897772
+                ],
+                [
+                  638624.2488152119,
+                  6845859.366348299
+                ],
+                [
+                  638624.2104329818,
+                  6845859.306804685
+                ],
+                [
+                  638623.3242658031,
+                  6845857.581110706
+                ],
+                [
+                  638622.071265434,
+                  6845856.241696518
+                ],
+                [
+                  638613.844018734,
+                  6845851.491440983
+                ],
+                [
+                  638611.5049080583,
+                  6845850.4412280265
+                ],
+                [
+                  638609.0345070339,
+                  6845849.728612347
+                ],
+                [
+                  638606.5876741643,
+                  6845849.35217652
+                ],
+                [
+                  638559.9255289192,
+                  6845850.679062166
+                ],
+                [
+                  638562.0299948476,
+                  6845925.9365937365
+                ],
+                [
+                  638603.7673572791,
+                  6845924.783155881
+                ],
+                [
+                  638608.1251434626,
+                  6845922.961991506
+                ],
+                [
+                  638618.5222539209,
+                  6845910.86043671
+                ],
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ]
+              ],
+              "holes": []
+            },
+            "footprint_area_m2": 4637.509010450022,
+            "max_height_m": 20.0,
+            "levels": [
+              {
+                "from_m": 0.0,
+                "to_m": 20.0,
+                "area_m2": 4637.509010450022
+              }
+            ],
+            "volume_m3": 92750.18020900045
+          }
+        ],
+        "fits": true,
+        "total_volume_m3": 92750.18020900045,
+        "assumptions": [
+          "Every facade facing a limit has windows: each limit at its distance with windows (else without, else 0 where building on it is allowed)."
+        ],
+        "warnings": []
+      }
+    ],
+    "proposal": {
+      "name": "proposal",
+      "footprint": {
+        "crs": "EPSG:2154",
+        "exterior": [
+          [
+            638618.5222539209,
+            6845910.86043671
+          ],
+          [
+            638620.4041562934,
+            6845904.024138295
+          ],
+          [
+            638620.4500788939,
+            6845895.069231173
+          ],
+          [
+            638620.4772010767,
+            6845894.807615788
+          ],
+          [
+            638620.4757608618,
+            6845894.544602196
+          ],
+          [
+            638620.5377011696,
+            6845894.224043468
+          ],
+          [
+            638620.5713683957,
+            6845893.899295847
+          ],
+          [
+            638620.6490080637,
+            6845893.647998601
+          ],
+          [
+            638620.6989069281,
+            6845893.389757772
+          ],
+          [
+            638620.8221949751,
+            6845893.0874424465
+          ],
+          [
+            638620.9185704134,
+            6845892.775502908
+          ],
+          [
+            638621.0437439174,
+            6845892.544181016
+          ],
+          [
+            638621.1430642757,
+            6845892.300636997
+          ],
+          [
+            638635.7804232278,
+            6845864.551637291
+          ],
+          [
+            638635.7147782287,
+            6845859.562617354
+          ],
+          [
+            638625.1270984786,
+            6845859.849632769
+          ],
+          [
+            638625.0564349804,
+            6845859.84460203
+          ],
+          [
+            638624.9856022588,
+            6845859.843435029
+          ],
+          [
+            638624.9588548376,
+            6845859.837655017
+          ],
+          [
+            638624.9315591102,
+            6845859.835711756
+          ],
+          [
+            638624.8632348485,
+            6845859.81699192
+          ],
+          [
+            638624.7939908196,
+            6845859.802028561
+          ],
+          [
+            638624.7688849678,
+            6845859.791141449
+          ],
+          [
+            638624.7424928307,
+            6845859.783910394
+          ],
+          [
+            638624.6791334555,
+            6845859.7522208495
+          ],
+          [
+            638624.6141391416,
+            6845859.724036169
+          ],
+          [
+            638624.5916396619,
+            6845859.708460341
+          ],
+          [
+            638624.5671653512,
+            6845859.696219378
+          ],
+          [
+            638624.5112057319,
+            6845859.652777939
+          ],
+          [
+            638624.4529588239,
+            6845859.612455058
+          ],
+          [
+            638624.4339303594,
+            6845859.592789085
+          ],
+          [
+            638624.4123144085,
+            6845859.576008627
+          ],
+          [
+            638624.3659050431,
+            6845859.5224847235
+          ],
+          [
+            638624.3166439357,
+            6845859.471573227
+          ],
+          [
+            638624.3018177381,
+            6845859.448572859
+          ],
+          [
+            638624.2838908373,
+            6845859.427897772
+          ],
+          [
+            638624.2488152119,
+            6845859.366348299
+          ],
+          [
+            638624.2104329818,
+            6845859.306804685
+          ],
+          [
+            638623.3242658031,
+            6845857.581110706
+          ],
+          [
+            638622.071265434,
+            6845856.241696518
+          ],
+          [
+            638613.844018734,
+            6845851.491440983
+          ],
+          [
+            638611.5049080583,
+            6845850.4412280265
+          ],
+          [
+            638609.0345070339,
+            6845849.728612347
+          ],
+          [
+            638606.5876741643,
+            6845849.35217652
+          ],
+          [
+            638559.9255289192,
+            6845850.679062166
+          ],
+          [
+            638562.0299948476,
+            6845925.9365937365
+          ],
+          [
+            638603.7673572791,
+            6845924.783155881
+          ],
+          [
+            638608.1251434626,
+            6845922.961991506
+          ],
+          [
+            638618.5222539209,
+            6845910.86043671
+          ]
+        ],
+        "holes": []
+      },
+      "footprint_area_m2": 4637.5090104500205,
+      "buildings": [
+        {
+          "building": "Résidence Jeunes Actifs",
+          "footprint": {
+            "crs": "EPSG:2154",
+            "exterior": [
+              [
+                638620.4500788939,
+                6845895.069231173
+              ],
+              [
+                638620.4772010767,
+                6845894.807615788
+              ],
+              [
+                638620.4757608618,
+                6845894.544602196
+              ],
+              [
+                638620.5377011696,
+                6845894.224043468
+              ],
+              [
+                638620.5713683957,
+                6845893.899295847
+              ],
+              [
+                638620.6490080637,
+                6845893.647998601
+              ],
+              [
+                638620.6989069281,
+                6845893.389757772
+              ],
+              [
+                638620.8221949751,
+                6845893.0874424465
+              ],
+              [
+                638620.9185704134,
+                6845892.775502908
+              ],
+              [
+                638621.0437439174,
+                6845892.544181016
+              ],
+              [
+                638621.1430642757,
+                6845892.300636997
+              ],
+              [
+                638635.7804232278,
+                6845864.551637291
+              ],
+              [
+                638635.7147782287,
+                6845859.562617358
+              ],
+              [
+                638635.7147782285,
+                6845859.562617354
+              ],
+              [
+                638625.1270984786,
+                6845859.849632769
+              ],
+              [
+                638625.0564349804,
+                6845859.84460203
+              ],
+              [
+                638624.9856022588,
+                6845859.843435029
+              ],
+              [
+                638624.9588548376,
+                6845859.837655017
+              ],
+              [
+                638624.9315591102,
+                6845859.835711756
+              ],
+              [
+                638624.8632348485,
+                6845859.81699192
+              ],
+              [
+                638624.7939908196,
+                6845859.802028561
+              ],
+              [
+                638624.7688849678,
+                6845859.791141449
+              ],
+              [
+                638624.7424928307,
+                6845859.783910394
+              ],
+              [
+                638624.6791334555,
+                6845859.7522208495
+              ],
+              [
+                638624.6141391416,
+                6845859.724036169
+              ],
+              [
+                638624.5916396619,
+                6845859.708460341
+              ],
+              [
+                638624.5671653512,
+                6845859.696219378
+              ],
+              [
+                638624.5112057319,
+                6845859.652777939
+              ],
+              [
+                638624.4529588239,
+                6845859.612455058
+              ],
+              [
+                638624.4339303594,
+                6845859.592789085
+              ],
+              [
+                638624.4123144085,
+                6845859.576008627
+              ],
+              [
+                638624.3659050431,
+                6845859.5224847235
+              ],
+              [
+                638624.3166439357,
+                6845859.471573227
+              ],
+              [
+                638624.3018177381,
+                6845859.448572859
+              ],
+              [
+                638624.2838908373,
+                6845859.427897772
+              ],
+              [
+                638624.2488152119,
+                6845859.366348299
+              ],
+              [
+                638624.2104329818,
+                6845859.306804685
+              ],
+              [
+                638623.3242658031,
+                6845857.581110706
+              ],
+              [
+                638622.071265434,
+                6845856.241696518
+              ],
+              [
+                638613.844018734,
+                6845851.491440983
+              ],
+              [
+                638611.5049080583,
+                6845850.4412280265
+              ],
+              [
+                638609.0345070339,
+                6845849.728612347
+              ],
+              [
+                638606.5876741643,
+                6845849.35217652
+              ],
+              [
+                638595.7079678401,
+                6845849.661552055
+              ],
+              [
+                638597.8132340157,
+                6845924.947701764
+              ],
+              [
+                638603.7673572791,
+                6845924.783155881
+              ],
+              [
+                638608.1251434626,
+                6845922.961991506
+              ],
+              [
+                638618.5222539209,
+                6845910.86043671
+              ],
+              [
+                638620.4041562934,
+                6845904.024138295
+              ],
+              [
+                638620.4500788939,
+                6845895.069231173
+              ]
+            ],
+            "holes": []
+          },
+          "footprint_area_m2": 1941.9572484430078,
+          "max_height_m": 15.0,
+          "levels": [
+            {
+              "from_m": 0.0,
+              "to_m": 15.0,
+              "area_m2": 1941.9572484430078
+            }
+          ],
+          "volume_m3": 29129.358726645118
+        },
+        {
+          "building": "Résidence Sociale Étudiante (RSE)",
+          "footprint": {
+            "crs": "EPSG:2154",
+            "exterior": [
+              [
+                638562.0299948476,
+                6845925.9365937365
+              ],
+              [
+                638587.8170499306,
+                6845925.223952501
+              ],
+              [
+                638585.7120073118,
+                6845849.945797378
+              ],
+              [
+                638559.9255289192,
+                6845850.679062166
+              ],
+              [
+                638562.0299948476,
+                6845925.9365937365
+              ]
+            ],
+            "holes": []
+          },
+          "footprint_area_m2": 1942.4359576733648,
+          "max_height_m": 20.0,
+          "levels": [
+            {
+              "from_m": 0.0,
+              "to_m": 20.0,
+              "area_m2": 1942.4359576733648
+            }
+          ],
+          "volume_m3": 38848.7191534673
+        }
+      ],
+      "fits": true,
+      "total_volume_m3": 67978.07788011241,
+      "assumptions": [
+        "Every facade facing a limit has windows: each limit at its distance with windows (else without, else 0 where building on it is allowed)."
+      ],
+      "warnings": []
+    },
+    "open_points": []
   },
   "citation_checks": [
     {
@@ -1712,954 +3084,5 @@
       ],
       "path": "data/crops/oap_p35_530-1300-1370-1890.png"
     }
-  ],
-  "envelope": {
-    "rules": {
-      "setbacks": [
-        {
-          "kind": "road",
-          "on_limit_allowed": true,
-          "with_windows": {
-            "min_m": 1,
-            "height_ratio": null,
-            "rule": "On the alignment, or set back at least 1 m (UMG 6.3).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 324,
-                "article": "UMG 6.3",
-                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "without_windows": {
-            "min_m": 1,
-            "height_ratio": null,
-            "rule": "On the alignment, or set back at least 1 m (UMG 6.3).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 324,
-                "article": "UMG 6.3",
-                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
-                "source_kind": "regulatory"
-              }
-            ]
-          }
-        },
-        {
-          "kind": "side",
-          "on_limit_allowed": true,
-          "with_windows": {
-            "min_m": 6,
-            "height_ratio": null,
-            "rule": "On the limit, or at least 6 m from facades with views (UMG 7.2.1).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 325,
-                "article": "UMG 7.2.1",
-                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "without_windows": {
-            "min_m": 3,
-            "height_ratio": null,
-            "rule": "On the limit, or at least 3 m from facades without views (UMG 7.2.1).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 325,
-                "article": "UMG 7.2.1",
-                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
-                "source_kind": "regulatory"
-              }
-            ]
-          }
-        },
-        {
-          "kind": "rear",
-          "on_limit_allowed": true,
-          "with_windows": {
-            "min_m": 6,
-            "height_ratio": null,
-            "rule": "Same rule as side limits: at least 6 m with views (UMG 7.1.1, 7.2.1).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 325,
-                "article": "UMG 7.2.1",
-                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "without_windows": {
-            "min_m": 3,
-            "height_ratio": null,
-            "rule": "Same rule as side limits: at least 3 m without views (UMG 7.2.1).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 325,
-                "article": "UMG 7.2.1",
-                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
-                "source_kind": "regulatory"
-              }
-            ]
-          }
-        }
-      ],
-      "buildings": [
-        {
-          "building": "Résidence Sociale Étudiante (RSE)",
-          "max_height_m": {
-            "value": 20,
-            "rule": "Housing: 20 m, measured from the natural ground (UMG 10.1, 10.2).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.2",
-                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-                "source_kind": "regulatory"
-              },
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.1",
-                "quote": "à partir du sol naturel existant avant travaux;",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "max_storeys": {
-            "value": 6,
-            "rule": "Housing: R+5, i.e. 6 storeys (UMG 10.2).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.2",
-                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-                "source_kind": "regulatory"
-              }
-            ]
-          }
-        },
-        {
-          "building": "Résidence Jeunes Actifs",
-          "max_height_m": {
-            "value": 20,
-            "rule": "Housing: 20 m, measured from the natural ground (UMG 10.1, 10.2).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.2",
-                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-                "source_kind": "regulatory"
-              },
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.1",
-                "quote": "à partir du sol naturel existant avant travaux;",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "max_storeys": {
-            "value": 6,
-            "rule": "Housing: R+5, i.e. 6 storeys (UMG 10.2).",
-            "citations": [
-              {
-                "doc": "plu_reglement",
-                "page": 326,
-                "article": "UMG 10.2",
-                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-                "source_kind": "regulatory"
-              }
-            ]
-          }
-        }
-      ],
-      "spacing_with_windows": {
-        "min_m": 10,
-        "height_ratio": null,
-        "rule": "At least 10 m when one of the facing facades has views (UMG 8.1).",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 325,
-            "article": "UMG 8.1",
-            "quote": "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comporte des vues.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "spacing_without_windows": {
-        "min_m": 6,
-        "height_ratio": null,
-        "rule": "At least 6 m when neither facing facade has views (UMG 8.1).",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 8.1",
-            "quote": "6 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vue.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "max_footprint_ratio": {
-        "value": null,
-        "rule": "Footprint not regulated by UMG 9; project must be compatible with the OAP, which gives no figure.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 9",
-            "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "min_green_ratio": {
-        "value": 0.2,
-        "rule": "At least 20% of plot as green space (planted, 60 cm topsoil), of which at least 10% pleine terre (UMG 13.3). Surface car parks and green roofs do not count.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 331,
-            "article": "UMG 13.3",
-            "quote": "En espace vert 20% au moins de la superficie du terrain.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 331,
-            "article": "UMG 13.3",
-            "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 330,
-            "article": "UMG 13.1",
-            "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
-            "source_kind": "regulatory"
-          }
-        ]
-      }
-    },
-    "layout": {
-      "cut": "across_long_axis",
-      "first_share": 0.5,
-      "order": [
-        "Résidence Jeunes Actifs",
-        "Résidence Sociale Étudiante (RSE)"
-      ],
-      "facing_windows": true,
-      "heights_m": [
-        15,
-        20
-      ],
-      "oap": [
-        {
-          "prescription": {
-            "topic": "building form - height",
-            "text": "Height stepping must reach an average of R+4 for residential buildings.",
-            "citations": [
-              {
-                "doc": "oap",
-                "page": 33,
-                "article": "OAP 8 - morphologie",
-                "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "how": "Résidence Jeunes Actifs at 15 m (R+4) on the street, Résidence Sociale Étudiante (RSE) at 20 m (R+5) behind it."
-        },
-        {
-          "prescription": {
-            "topic": "building form - siting",
-            "text": "Build on the alignment along the road, without a continuous front.",
-            "citations": [
-              {
-                "doc": "oap",
-                "page": 34,
-                "article": "OAP 8 - implantation",
-                "quote": "Le principe d’une implantation des constructions à l’alignement le long de la voie doit être retenu. Ce principe ne doit toutefois pas aboutir à la création d’un front bâti uniforme et continu.",
-                "source_kind": "regulatory"
-              }
-            ]
-          },
-          "how": "The first part starts 1 m from rue Joliot-Curie; the 10 m gap between the two buildings breaks the front."
-        }
-      ],
-      "reasons": "The plot is cut across its long axis so that each residence gets its own share of the plot. The young workers' residence goes on the street side, lower (15 m), to step the heights down towards the street as the OAP asks; the student residence takes the back at the full 20 m. Facing facades have windows, so the 10 m spacing applies."
-    },
-    "site_area_m2": 5951.632500010313,
-    "min_green_area_m2": 1190.3265000020626,
-    "bounds": [
-      {
-        "name": "largest",
-        "footprint": {
-          "crs": "EPSG:2154",
-          "exterior": [
-            [
-              638556.2,
-              6845932.1
-            ],
-            [
-              638553.9,
-              6845849.85
-            ],
-            [
-              638606.65,
-              6845848.35
-            ],
-            [
-              638609.25,
-              6845848.75
-            ],
-            [
-              638611.85,
-              6845849.5
-            ],
-            [
-              638614.3,
-              6845850.6
-            ],
-            [
-              638622.7,
-              6845855.45
-            ],
-            [
-              638624.15,
-              6845857.0
-            ],
-            [
-              638625.1,
-              6845858.85
-            ],
-            [
-              638641.7,
-              6845858.4
-            ],
-            [
-              638641.8,
-              6845866.0
-            ],
-            [
-              638626.45,
-              6845895.1
-            ],
-            [
-              638626.4,
-              6845904.85
-            ],
-            [
-              638623.95,
-              6845913.75
-            ],
-            [
-              638611.75,
-              6845927.95
-            ],
-            [
-              638605.05,
-              6845930.75
-            ],
-            [
-              638556.2,
-              6845932.1
-            ]
-          ],
-          "holes": []
-        },
-        "footprint_area_m2": 5951.632500010313,
-        "buildings": [
-          {
-            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
-            "footprint": {
-              "crs": "EPSG:2154",
-              "exterior": [
-                [
-                  638556.2,
-                  6845932.1
-                ],
-                [
-                  638553.9,
-                  6845849.85
-                ],
-                [
-                  638606.65,
-                  6845848.35
-                ],
-                [
-                  638609.25,
-                  6845848.75
-                ],
-                [
-                  638611.85,
-                  6845849.5
-                ],
-                [
-                  638614.3,
-                  6845850.6
-                ],
-                [
-                  638622.7,
-                  6845855.45
-                ],
-                [
-                  638624.15,
-                  6845857.0
-                ],
-                [
-                  638625.1,
-                  6845858.85
-                ],
-                [
-                  638641.7,
-                  6845858.4
-                ],
-                [
-                  638641.8,
-                  6845866.0
-                ],
-                [
-                  638626.45,
-                  6845895.1
-                ],
-                [
-                  638626.4,
-                  6845904.85
-                ],
-                [
-                  638623.95,
-                  6845913.75
-                ],
-                [
-                  638611.75,
-                  6845927.95
-                ],
-                [
-                  638605.05,
-                  6845930.75
-                ],
-                [
-                  638556.2,
-                  6845932.1
-                ]
-              ],
-              "holes": []
-            },
-            "footprint_area_m2": 4761.3060000082505,
-            "max_height_m": 20,
-            "levels": [
-              {
-                "from_m": 0,
-                "to_m": 20,
-                "area_m2": 4761.3060000082505
-              }
-            ],
-            "volume_m3": 95226.12000016501
-          }
-        ],
-        "fits": true,
-        "total_volume_m3": 95226.12000016501,
-        "assumptions": [
-          "Every limit built on, as UMG 6 and 7 allow: the legal maximum.",
-          "No footprint ratio set: the ground area is not capped by a ratio.",
-          "The minimum green space (20 % of the site, 1,190 m²) caps the ground area at 4,761 m²: the setback footprint (5,952 m²) is scaled down by 0.80."
-        ]
-      },
-      {
-        "name": "windows",
-        "footprint": {
-          "crs": "EPSG:2154",
-          "exterior": [
-            [
-              638618.522,
-              6845910.86
-            ],
-            [
-              638620.404,
-              6845904.024
-            ],
-            [
-              638620.45,
-              6845895.069
-            ],
-            [
-              638620.559,
-              6845893.962
-            ],
-            [
-              638620.717,
-              6845893.329
-            ],
-            [
-              638621.143,
-              6845892.301
-            ],
-            [
-              638635.78,
-              6845864.552
-            ],
-            [
-              638635.715,
-              6845859.563
-            ],
-            [
-              638625.127,
-              6845859.85
-            ],
-            [
-              638624.794,
-              6845859.802
-            ],
-            [
-              638624.487,
-              6845859.64
-            ],
-            [
-              638624.259,
-              6845859.392
-            ],
-            [
-              638623.324,
-              6845857.581
-            ],
-            [
-              638622.071,
-              6845856.242
-            ],
-            [
-              638613.844,
-              6845851.491
-            ],
-            [
-              638611.505,
-              6845850.441
-            ],
-            [
-              638609.035,
-              6845849.729
-            ],
-            [
-              638606.588,
-              6845849.352
-            ],
-            [
-              638559.926,
-              6845850.679
-            ],
-            [
-              638562.03,
-              6845925.937
-            ],
-            [
-              638603.767,
-              6845924.783
-            ],
-            [
-              638608.125,
-              6845922.962
-            ],
-            [
-              638618.522,
-              6845910.86
-            ]
-          ],
-          "holes": []
-        },
-        "footprint_area_m2": 4637.484741359917,
-        "buildings": [
-          {
-            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
-            "footprint": {
-              "crs": "EPSG:2154",
-              "exterior": [
-                [
-                  638618.522,
-                  6845910.86
-                ],
-                [
-                  638620.404,
-                  6845904.024
-                ],
-                [
-                  638620.45,
-                  6845895.069
-                ],
-                [
-                  638620.559,
-                  6845893.962
-                ],
-                [
-                  638620.717,
-                  6845893.329
-                ],
-                [
-                  638621.143,
-                  6845892.301
-                ],
-                [
-                  638635.78,
-                  6845864.552
-                ],
-                [
-                  638635.715,
-                  6845859.563
-                ],
-                [
-                  638625.127,
-                  6845859.85
-                ],
-                [
-                  638624.794,
-                  6845859.802
-                ],
-                [
-                  638624.487,
-                  6845859.64
-                ],
-                [
-                  638624.259,
-                  6845859.392
-                ],
-                [
-                  638623.324,
-                  6845857.581
-                ],
-                [
-                  638622.071,
-                  6845856.242
-                ],
-                [
-                  638613.844,
-                  6845851.491
-                ],
-                [
-                  638611.505,
-                  6845850.441
-                ],
-                [
-                  638609.035,
-                  6845849.729
-                ],
-                [
-                  638606.588,
-                  6845849.352
-                ],
-                [
-                  638559.926,
-                  6845850.679
-                ],
-                [
-                  638562.03,
-                  6845925.937
-                ],
-                [
-                  638603.767,
-                  6845924.783
-                ],
-                [
-                  638608.125,
-                  6845922.962
-                ],
-                [
-                  638618.522,
-                  6845910.86
-                ]
-              ],
-              "holes": []
-            },
-            "footprint_area_m2": 4637.484741359917,
-            "max_height_m": 20,
-            "levels": [
-              {
-                "from_m": 0,
-                "to_m": 20,
-                "area_m2": 4637.484741359917
-              }
-            ],
-            "volume_m3": 92749.69482719834
-          }
-        ],
-        "fits": true,
-        "total_volume_m3": 92749.69482719834,
-        "assumptions": [
-          "Every facade has windows: 1 m from the road, 6 m from the other limits.",
-          "No footprint ratio set: the ground area is not capped by a ratio."
-        ]
-      }
-    ],
-    "proposal": {
-      "name": "proposal",
-      "footprint": {
-        "crs": "EPSG:2154",
-        "exterior": [
-          [
-            638618.522,
-            6845910.86
-          ],
-          [
-            638620.404,
-            6845904.024
-          ],
-          [
-            638620.45,
-            6845895.069
-          ],
-          [
-            638620.559,
-            6845893.962
-          ],
-          [
-            638620.717,
-            6845893.329
-          ],
-          [
-            638621.143,
-            6845892.301
-          ],
-          [
-            638635.78,
-            6845864.552
-          ],
-          [
-            638635.715,
-            6845859.563
-          ],
-          [
-            638625.127,
-            6845859.85
-          ],
-          [
-            638624.794,
-            6845859.802
-          ],
-          [
-            638624.487,
-            6845859.64
-          ],
-          [
-            638624.259,
-            6845859.392
-          ],
-          [
-            638623.324,
-            6845857.581
-          ],
-          [
-            638622.071,
-            6845856.242
-          ],
-          [
-            638613.844,
-            6845851.491
-          ],
-          [
-            638611.505,
-            6845850.441
-          ],
-          [
-            638609.035,
-            6845849.729
-          ],
-          [
-            638606.588,
-            6845849.352
-          ],
-          [
-            638559.926,
-            6845850.679
-          ],
-          [
-            638562.03,
-            6845925.937
-          ],
-          [
-            638603.767,
-            6845924.783
-          ],
-          [
-            638608.125,
-            6845922.962
-          ],
-          [
-            638618.522,
-            6845910.86
-          ]
-        ],
-        "holes": []
-      },
-      "footprint_area_m2": 4637.484741359917,
-      "buildings": [
-        {
-          "building": "Résidence Jeunes Actifs",
-          "footprint": {
-            "crs": "EPSG:2154",
-            "exterior": [
-              [
-                638620.404,
-                6845904.024
-              ],
-              [
-                638620.45,
-                6845895.069
-              ],
-              [
-                638620.559,
-                6845893.962
-              ],
-              [
-                638620.717,
-                6845893.329
-              ],
-              [
-                638621.143,
-                6845892.301
-              ],
-              [
-                638635.78,
-                6845864.552
-              ],
-              [
-                638635.715,
-                6845859.563
-              ],
-              [
-                638625.127,
-                6845859.85
-              ],
-              [
-                638624.742,
-                6845859.784
-              ],
-              [
-                638624.259,
-                6845859.392
-              ],
-              [
-                638623.324,
-                6845857.581
-              ],
-              [
-                638622.071,
-                6845856.242
-              ],
-              [
-                638613.844,
-                6845851.491
-              ],
-              [
-                638611.505,
-                6845850.441
-              ],
-              [
-                638609.035,
-                6845849.729
-              ],
-              [
-                638606.588,
-                6845849.352
-              ],
-              [
-                638595.705,
-                6845849.662
-              ],
-              [
-                638597.81,
-                6845924.948
-              ],
-              [
-                638603.767,
-                6845924.783
-              ],
-              [
-                638608.125,
-                6845922.962
-              ],
-              [
-                638618.522,
-                6845910.86
-              ],
-              [
-                638620.404,
-                6845904.024
-              ]
-            ],
-            "holes": []
-          },
-          "footprint_area_m2": 1942.1844818741968,
-          "max_height_m": 15,
-          "levels": [
-            {
-              "from_m": 0,
-              "to_m": 15,
-              "area_m2": 1942.1844818741968
-            }
-          ],
-          "volume_m3": 29132.767228112953
-        },
-        {
-          "building": "Résidence Sociale Étudiante (RSE)",
-          "footprint": {
-            "crs": "EPSG:2154",
-            "exterior": [
-              [
-                638559.926,
-                6845850.679
-              ],
-              [
-                638562.03,
-                6845925.937
-              ],
-              [
-                638587.814,
-                6845925.224
-              ],
-              [
-                638585.709,
-                6845849.946
-              ],
-              [
-                638559.926,
-                6845850.679
-              ]
-            ],
-            "holes": []
-          },
-          "footprint_area_m2": 1942.1844818525346,
-          "max_height_m": 20,
-          "levels": [
-            {
-              "from_m": 0,
-              "to_m": 20,
-              "area_m2": 1942.1844818525346
-            }
-          ],
-          "volume_m3": 38843.689637050695
-        }
-      ],
-      "fits": true,
-      "total_volume_m3": 67976.45686516365,
-      "assumptions": [
-        "Cut across the long axis of the setback footprint with windows, 50 % of the usable area to the first part.",
-        "Facing facades have windows: 10 m between the two buildings (UMG 8.1).",
-        "Heights are the layout's (15 m and 20 m), within each building's 20 m maximum."
-      ]
-    },
-    "open_points": []
-  }
+  ]
 }

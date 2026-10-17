@@ -48,8 +48,8 @@ export const findBound = (envelope: EnvelopeStudy, name: string) =>
 
 /**
  * Ground area the scenario's buildings take. Proposal parts are disjoint and
- * add up; a bound's massings (one per height band, "how much", not "where")
- * share the same ground, so the largest one counts.
+ * add up; a bound's massings (one per distinct max height) are alternatives
+ * over the same footprint, so the largest one counts, as for its volume.
  */
 export function groundArea(scenario: Scenario): number {
   const areas = scenario.buildings.map((b) => b.footprint_area_m2);
@@ -66,9 +66,17 @@ export function groundArea(scenario: Scenario): number {
 export const isCapped = (scenario: Scenario) =>
   scenario.buildings.some(
     (b) =>
-      b.footprint !== null &&
+      b.footprint != null &&
       b.footprint_area_m2 < polygonArea(b.footprint) * 0.995,
   );
+
+/** Why the buildings do not fit; tolerant of studies stored without it. */
+export const warningsOf = (scenario: Scenario): string[] =>
+  scenario.warnings ?? [];
+
+/** A bound holding several alternatives (buildings of different max heights). */
+export const hasAlternatives = (scenario: Scenario) =>
+  scenario.name !== "proposal" && scenario.buildings.length > 1;
 
 /** `0.5` → `H/2`, `1` → `H`, `0.4` → `0,4 × H`. */
 function formatRatio(ratio: number): string {
@@ -83,10 +91,10 @@ function formatRatio(ratio: number): string {
 /** `6 m`, `H/2`, `H/2, min 4 m`. */
 export function formatDistance(d: Distance): string {
   const parts: string[] = [];
-  if (d.height_ratio !== null) parts.push(formatRatio(d.height_ratio));
-  if (d.min_m !== null) {
+  if (d.height_ratio != null) parts.push(formatRatio(d.height_ratio));
+  if (d.min_m != null) {
     parts.push(
-      d.height_ratio === null
+      d.height_ratio == null
         ? formatLength(d.min_m)
         : `min ${formatLength(d.min_m)}`,
     );
@@ -147,7 +155,7 @@ export function levelsOf(massing: BuildingMassing): Level[] {
 
 /** A massing has a ground polygon and some height. */
 export const isDrawable = (massing: BuildingMassing) =>
-  massing.footprint !== null && levelsOf(massing).length > 0;
+  massing.footprint != null && levelsOf(massing).length > 0;
 
 /** Floor-to-floor height for floor lines: max height / max storeys, else 3 m. */
 export function storeyHeight(limits: BuildingLimits | undefined): number {
