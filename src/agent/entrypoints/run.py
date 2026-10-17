@@ -3,9 +3,11 @@
 Usage: ``uv run python -m agent.entrypoints.run [hydra overrides...]``, e.g.
 ``case=reference models.nodes.orchestrator.effort=low``. Outputs land in the Hydra run dir
 (``outputs/<date>/<time>``): ``verified_study.json``, ``report.md``, ``run_summary.json`` and
-``final_message.md``, plus the agent's log lines in ``agent.log``.
+``final_message.md``, the evidence crops linked by the report in ``evidence/``, plus the agent's
+log lines in ``agent.log``.
 """
 
+import shutil
 import time
 from pathlib import Path
 
@@ -41,6 +43,7 @@ _CONFIG_DIR = str(PROJECT_ROOT / "conf")
 _CONFIG_NAME = "config"
 _HYDRA_VERSION_BASE = "1.3"
 _STUDY_ARTIFACT = "study"
+_EVIDENCE_DIR = "evidence"
 _UNATTENDED_ASK_USER = "disabled"
 
 
@@ -106,16 +109,41 @@ def run_study(
     return metrics, messages, verified
 
 
+def copy_evidence(verified: VerifiedStudy, root: Path, target: Path) -> None:
+    """Copy the study's evidence crops next to the report, keeping their file names.
+
+    A crop file that no longer exists is skipped with a warning; its link stays in the report.
+
+    Args:
+        verified: The accepted study.
+        root: Directory the crop paths are relative to (the project root).
+        target: Directory the crops are copied into.
+    """
+    for crop in verified.evidence:
+        source = root / crop.path
+        if not source.is_file():
+            logger.warning("evidence crop %s is missing, not copied", source)
+            continue
+        target.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target / source.name)
+
+
 def write_outputs(
-    run_dir: Path, summary: RunSummary, verified: VerifiedStudy | None, *, max_quote_chars: int
+    run_dir: Path,
+    summary: RunSummary,
+    verified: VerifiedStudy | None,
+    *,
+    max_quote_chars: int,
+    root: Path,
 ) -> None:
-    """Write the summary and, when a study was accepted, the study and its report.
+    """Write the summary and, when a study was accepted, the study, its report and its crops.
 
     Args:
         run_dir: Hydra run directory.
         summary: The run summary.
         verified: The accepted study, if any.
         max_quote_chars: Quote truncation length in the report's citations table.
+        root: Directory the crop paths are relative to (the project root).
     """
     (run_dir / "run_summary.json").write_text(summary.model_dump_json(indent=2), encoding="utf-8")
     if verified is None:
@@ -123,7 +151,8 @@ def write_outputs(
     (run_dir / "verified_study.json").write_text(
         verified.model_dump_json(indent=2), encoding="utf-8"
     )
-    report = render_report(verified, max_quote_chars=max_quote_chars)
+    copy_evidence(verified, root, run_dir / _EVIDENCE_DIR)
+    report = render_report(verified, max_quote_chars=max_quote_chars, crops_link_base=_EVIDENCE_DIR)
     (run_dir / "report.md").write_text(report, encoding="utf-8")
 
 
@@ -149,7 +178,13 @@ def main(cfg: DictConfig) -> None:
     metrics, messages, verified = run_study(cfg, case, overrides)
     summary = run_summary(metrics, verified)
     (run_dir / "final_message.md").write_text(final_text(messages), encoding="utf-8")
-    write_outputs(run_dir, summary, verified, max_quote_chars=cfg.policies.report.max_quote_chars)
+    write_outputs(
+        run_dir,
+        summary,
+        verified,
+        max_quote_chars=cfg.policies.report.max_quote_chars,
+        root=PROJECT_ROOT,
+    )
     logger.info(
         "run done: accepted=%s cost=$%.4f wall=%.0fs rejected=%d dir=%s",
         summary.accepted,

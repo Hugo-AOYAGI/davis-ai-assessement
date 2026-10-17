@@ -4,19 +4,15 @@ from agent.contracts.evidence import (
     Ambiguity,
     Citation,
     CitationCheck,
+    ImageRegion,
     Limit,
     Resolution,
     Rule,
     SourceKind,
+    StoredCrop,
 )
-from agent.contracts.findings.map import Overlay
-from agent.contracts.findings.regulation import (
-    Admissibility,
-    ParkingBasis,
-    ParkingRule,
-    Verdict,
-)
-from agent.contracts.findings.site import Parcel, SiteContext
+from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
+from agent.contracts.findings.zone import LegendItem, ZoneFindings
 from agent.contracts.geometry import (
     Boundary,
     BoundaryKind,
@@ -24,7 +20,15 @@ from agent.contracts.geometry import (
     EnvelopeParameters,
     Polygon,
 )
-from agent.contracts.study import Regime, Study, VerifiedStudy
+from agent.contracts.study import (
+    Admissibility,
+    ParkingBasis,
+    ParkingRule,
+    Regime,
+    Study,
+    Verdict,
+    VerifiedStudy,
+)
 
 SQUARE = ((0.0, 0.0), (40.0, 0.0), (40.0, 30.0), (0.0, 30.0), (0.0, 0.0))
 INNER = ((5.0, 4.0), (36.0, 4.0), (36.0, 25.0), (5.0, 25.0), (5.0, 4.0))
@@ -67,24 +71,54 @@ def limit(value, citation=HEIGHT):
     return Limit(value=value, rule="see article", citations=() if value is None else (citation,))
 
 
+KINDS = (BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR, BoundaryKind.SIDE)
+PLAN = ImageRegion(doc="plu_reglement_graphique", page=1, region=(10, 20, 110, 90))
+DIAGRAM = ImageRegion(doc="oap", page=34, region=(120, 400, 900, 1100))
+
+
 @pytest.fixture
 def site():
     polygon = Polygon(crs="EPSG:2154", exterior=SQUARE)
-    kinds = (BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR, BoundaryKind.SIDE)
-    return SiteContext(
+    sides = (EdgeSide.PUBLIC_LAND, EdgeSide.PARCEL, EdgeSide.PARCEL, EdgeSide.PARCEL)
+    return Site(
         address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
         longitude=2.16,
         latitude=48.71,
+        choice=ParcelChoice(
+            address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
+            parcel_ids=("91272000AB0123",),
+            rationale="Address point 2.5 m from AB0123; AB0124 rejected: 116 m² strip.",
+            assumptions=("Cadastre is current.",),
+        ),
         parcels=(Parcel(id="91272000AB0123", area_m2=1200, polygon=polygon),),
         polygon=polygon,
         area_m2=1200,
-        boundaries=tuple(
-            Boundary(kind=kind, start=start, end=end)
-            for kind, start, end in zip(kinds, SQUARE[:-1], SQUARE[1:], strict=True)
+        edges=tuple(
+            Edge(start=start, end=end, length_m=1, other_side=side)
+            for side, start, end in zip(sides, SQUARE[:-1], SQUARE[1:], strict=True)
         ),
-        method="geocoded, single parcel",
-        assumptions=("Road limit is the southern edge.",),
         citations=(CADASTRE, GEOCODER),
+    )
+
+
+@pytest.fixture
+def boundaries():
+    return tuple(
+        Boundary(kind=kind, start=start, end=end)
+        for kind, start, end in zip(KINDS, SQUARE[:-1], SQUARE[1:], strict=True)
+    )
+
+
+@pytest.fixture
+def zone():
+    return ZoneFindings(
+        zone="UMG",
+        overlays=(
+            LegendItem(item="Espace boisé classé", applies=False, note="none drawn"),
+            LegendItem(item="Linéaire commercial", applies=True, note="along the street"),
+        ),
+        rationale="Site found by the road layout near the Saclay limit.",
+        region=PLAN,
     )
 
 
@@ -96,13 +130,7 @@ def study():
         regime=Regime(
             zone="UMG",
             overlays=(
-                Overlay(name="Espace boisé classé", applies=False, rationale="none drawn"),
-                Overlay(
-                    name="Linéaire commercial",
-                    applies=True,
-                    rationale="along the street",
-                    citations=(USES,),
-                ),
+                LegendItem(item="Linéaire commercial", applies=True, note="along the street"),
             ),
             oap_applicable=True,
             oap_prescriptions=(
@@ -176,5 +204,24 @@ def envelope():
 
 
 @pytest.fixture
-def verified(study, site, envelope):
-    return VerifiedStudy(study=study, site=site, envelope=envelope, citation_checks=CHECKS)
+def verified(study, site, boundaries, zone, envelope):
+    return VerifiedStudy(
+        study=study,
+        site=site,
+        boundaries=boundaries,
+        zone=zone,
+        envelope=envelope,
+        citation_checks=CHECKS,
+        evidence=(
+            StoredCrop(
+                region=PLAN,
+                pixels=(35, 70, 386, 316),
+                path="data/crops/plu_reglement_graphique_p1_10-20-110-90.png",
+            ),
+            StoredCrop(
+                region=DIAGRAM,
+                pixels=(240, 800, 1800, 2200),
+                path="data/crops/oap_p34_120-400-900-1100.png",
+            ),
+        ),
+    )

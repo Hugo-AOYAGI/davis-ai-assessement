@@ -1,11 +1,66 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 from agent.contracts.evidence import Limit
 from agent.contracts.geometry import Envelope, EnvelopeParameters
+from agent.contracts.study import Admissibility, ParkingBasis, ParkingRule
 from agent.runtime.report.citations import CitationIndex
 from agent.runtime.report.markdown import NONE, area, bullets, metres, number, percent, table
 
 NOT_SET = "not set"
+BASIS_LABELS = {
+    ParkingBasis.FLOOR_AREA_M2: "m² of floor area",
+    ParkingBasis.UNIT: "unit",
+    ParkingBasis.OTHER: "(other basis)",
+}
+
+
+def admissibility_section(entries: Sequence[Admissibility], index: CitationIndex) -> str:
+    """Render one row per building with its destination and verdict.
+
+    Args:
+        entries: Admissibility of each building of the program.
+        index: Citation numbering of the report.
+
+    Returns:
+        The ``Program admissibility`` section.
+    """
+    rows = (
+        (
+            entry.building,
+            entry.stated_use,
+            entry.destination,
+            entry.verdict.value,
+            "\n".join(entry.conditions) or "none",
+            index.refs(entry.citations),
+        )
+        for entry in entries
+    )
+    headers = ("Building", "Stated use", "Destination", "Verdict", "Conditions", "Sources")
+    return f"## Program admissibility\n\n{table(headers, rows)}"
+
+
+def _ratio(rule: ParkingRule) -> str:
+    """Render a parking ratio, e.g. ``1 space per 150 m² of floor area``."""
+    spaces = number(rule.spaces, 2)
+    noun = "space" if rule.spaces == 1 else "spaces"
+    per = "" if rule.per == 1 else f"{number(rule.per, 2)} "
+    return f"{spaces} {noun} per {per}{BASIS_LABELS[rule.basis]}"
+
+
+def parking_section(rules: Sequence[ParkingRule], index: CitationIndex) -> str:
+    """Render the parking requirement of each use.
+
+    Args:
+        rules: Parking rules of the study.
+        index: Citation numbering of the report.
+
+    Returns:
+        The ``Parking`` section.
+    """
+    if not rules:
+        return "## Parking\n\nNo parking requirement recorded."
+    rows = ((rule.use, _ratio(rule), rule.rule, index.refs(rule.citations)) for rule in rules)
+    return f"## Parking\n\n{table(('Use', 'Ratio', 'Rule', 'Sources'), rows)}"
 
 
 def _storeys(value: float) -> str:

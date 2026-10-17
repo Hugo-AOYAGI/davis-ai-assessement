@@ -1,6 +1,7 @@
 from collections.abc import Iterable, Sequence
+from pathlib import PurePosixPath
 
-from agent.contracts.evidence import Citation, CitationCheck
+from agent.contracts.evidence import Citation, CitationCheck, StoredCrop
 from agent.runtime.report.markdown import NONE, one_line, table
 
 ELLIPSIS = "…"
@@ -96,3 +97,30 @@ def citations_section(checks: Sequence[CitationCheck], max_quote_chars: int) -> 
     )
     headers = ("#", "Document", "Page", "Article", "Quote", "Status", "Score")
     return f"## Citations\n\n{table(headers, rows)}"
+
+
+def _caption(crop: StoredCrop) -> str:
+    """Render where a crop comes from: document, page and overview region."""
+    box = ", ".join(str(value) for value in crop.region.region)
+    return f"{crop.region.doc} p.{crop.region.page}, region [{box}]"
+
+
+def evidence_section(crops: Sequence[StoredCrop], link_base: str) -> str:
+    """Render the evidence crops as Markdown images with their source as caption.
+
+    Args:
+        crops: Crops saved by the gate.
+        link_base: Directory the crop files are linked from; each image links to
+            ``<link_base>/<file name>``.
+
+    Returns:
+        The ``Evidence`` section.
+    """
+    if not crops:
+        return "## Evidence\n\nNo image evidence saved."
+    figures = (
+        f"![{_caption(crop)}]({PurePosixPath(link_base, PurePosixPath(crop.path).name)})"
+        f"\n\n*{_caption(crop)} (overview pixels)*"
+        for crop in crops
+    )
+    return "## Evidence\n\n" + "\n\n".join(figures)

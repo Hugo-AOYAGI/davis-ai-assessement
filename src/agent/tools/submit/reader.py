@@ -8,13 +8,13 @@ from agent.tools.submit.artifacts import ArtifactsState
 
 DESCRIPTION = """Read an artifact delivered by a sub-agent (or by submit_study), as JSON.
 
-A sub-agent's reply to `task` is only a summary. Its artifact holds the full typed findings,
-with citations that were already verified against the documents: read it before using the
-findings, and reuse those citations verbatim in the study rather than retyping them.
+A sub-agent's reply to `task` is only a summary. Its artifact holds the full findings, with
+citations that were already verified against the documents: read it before using the findings,
+and reuse those citations verbatim in the study rather than retyping them.
 
-The artifact name is the one in the sub-agent's submit tool: `submit_site` stores `site`,
-`submit_regulation_findings` stores `regulation_findings`, and so on. An unknown name returns
-the list of artifacts delivered so far."""
+Artifact names: `site` (surveyor), `zone` (zoning_analyst), `notes.<label>` (doc_analyst, one
+per task label, e.g. `notes.rules` and `notes.oap`) and `study` (submit_study). An unknown name
+returns the list of artifacts delivered so far."""
 
 
 def read_artifact_tool() -> BaseTool:
@@ -25,7 +25,7 @@ def read_artifact_tool() -> BaseTool:
     """
 
     def read(
-        name: Annotated[str, "Artifact name, e.g. `site` or `regulation_findings`."],
+        name: Annotated[str, "Artifact name, e.g. `zone` or `notes.rules`."],
         runtime: ToolRuntime[None, ArtifactsState],
     ) -> str:
         """Return the artifact stored under ``name``."""

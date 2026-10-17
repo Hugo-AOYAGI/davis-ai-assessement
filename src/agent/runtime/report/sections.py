@@ -1,17 +1,13 @@
+import math
 from collections.abc import Sequence
 
 from agent.contracts.evidence import Ambiguity, Rule
-from agent.contracts.findings.regulation import Admissibility, ParkingBasis, ParkingRule
-from agent.contracts.findings.site import SiteContext
+from agent.contracts.findings.site import Site
+from agent.contracts.findings.zone import ZoneFindings
+from agent.contracts.geometry import Boundary, BoundaryKind
 from agent.contracts.study import Regime
 from agent.runtime.report.citations import CitationIndex
-from agent.runtime.report.markdown import area, bullets, number, one_line, table
-
-BASIS_LABELS = {
-    ParkingBasis.FLOOR_AREA_M2: "m² of floor area",
-    ParkingBasis.UNIT: "unit",
-    ParkingBasis.OTHER: "(other basis)",
-}
+from agent.runtime.report.markdown import area, bullets, metres, number, one_line, table
 
 
 def _with_refs(text: str, refs: str) -> str:
@@ -19,35 +15,45 @@ def _with_refs(text: str, refs: str) -> str:
     return f"{text} {refs}" if refs else text
 
 
-def site_section(site: SiteContext, index: CitationIndex) -> str:
-    """Render the site: address, parcels, area, method, assumptions and geometric sources.
+def _limits(boundaries: Sequence[Boundary]) -> str:
+    """Render the number and total length of the site's edges of each kind."""
+    rows = []
+    for kind in BoundaryKind:
+        edges = [boundary for boundary in boundaries if boundary.kind is kind]
+        length = sum(math.dist(edge.start, edge.end) for edge in edges)
+        if edges:
+            rows.append((kind.value, str(len(edges)), metres(length)))
+    return table(("Kind", "Edges", "Total length"), rows)
+
+
+def site_section(site: Site, boundaries: Sequence[Boundary], index: CitationIndex) -> str:
+    """Render the site: parcels, the surveyor's choice, limits by kind and geometric sources.
 
     Args:
-        site: Site context accepted by the gate.
+        site: Site built from the surveyor's parcel choice.
+        boundaries: The site's edges labelled road / side / rear by the gate.
         index: Citation numbering of the report.
 
     Returns:
         The ``Site`` section.
     """
     facts = bullets(
-        (
-            f"Address: {one_line(site.address)}",
-            f"Site area: {area(site.area_m2)}",
-            f"Identification method: {site.method}",
-        ),
-        empty="",
+        (f"Address: {one_line(site.address)}", f"Site area: {area(site.area_m2)}"), empty=""
     )
     parcels = table(
         ("Parcel", "Area (m²)"),
         ((parcel.id, number(parcel.area_m2, 1)) for parcel in site.parcels),
     )
-    assumptions = bullets(site.assumptions, empty="None stated.")
+    assumptions = bullets(site.choice.assumptions, empty="None stated.")
     sources = bullets(
         (f"{index.refs((citation,))}: {one_line(citation.quote)}" for citation in site.citations),
         empty="None.",
     )
     return (
-        f"## Site\n\n{facts}\n\n### Parcels\n\n{parcels}\n\n### Assumptions\n\n{assumptions}"
+        f"## Site\n\n{facts}\n\n### Parcels\n\n{parcels}"
+        f"\n\n### Parcel choice\n\n{site.choice.rationale.strip()}"
+        f"\n\n### Assumptions\n\n{assumptions}"
+        f"\n\n### Limits\n\n{_limits(boundaries)}"
         f"\n\n### Geometric sources\n\n{sources}"
     )
 
@@ -59,81 +65,35 @@ def _rule_items(rules: Sequence[Rule], index: CitationIndex) -> list[str]:
     ]
 
 
-def regime_section(regime: Regime, index: CitationIndex) -> str:
-    """Render the zone, the overlays checked and the OAP.
+def regime_section(regime: Regime, zone: ZoneFindings, index: CitationIndex) -> str:
+    """Render the zone, the zoning plan reading, the applying legend items and the OAP.
 
     Args:
         regime: Regulatory regime of the study.
+        zone: What the zoning analyst read on the plan.
         index: Citation numbering of the report.
 
     Returns:
         The ``Regulatory regime`` section.
     """
-    zone = _with_refs(f"Zone: **{regime.zone}**", index.refs(regime.citations))
-    overlays = (
-        table(
-            ("Overlay", "Applies", "Rationale", "Sources"),
-            (
-                (o.name, "yes" if o.applies else "no", o.rationale, index.refs(o.citations))
-                for o in regime.overlays
-            ),
-        )
+    zone_line = _with_refs(f"Zone: **{regime.zone}**", index.refs(regime.citations))
+    applying = (
+        table(("Legend item", "Note"), ((item.item, item.note) for item in regime.overlays))
         if regime.overlays
-        else "No overlay checked."
+        else "No legend item applies to the site."
     )
+    others = [item.item for item in zone.overlays if not item.applies]
+    if others:
+        applying += f"\n\nChecked on the plan, not applying: {'; '.join(others)}."
     oap = "OAP applicable: **yes**" if regime.oap_applicable else "OAP applicable: **no**"
     prescriptions = bullets(_rule_items(regime.oap_prescriptions, index), empty="")
     oap_block = f"{oap}\n\n{prescriptions}" if prescriptions else oap
-    return f"## Regulatory regime\n\n{zone}\n\n### Overlays\n\n{overlays}\n\n### OAP\n\n{oap_block}"
-
-
-def admissibility_section(entries: Sequence[Admissibility], index: CitationIndex) -> str:
-    """Render one row per building with its destination and verdict.
-
-    Args:
-        entries: Admissibility of each building of the program.
-        index: Citation numbering of the report.
-
-    Returns:
-        The ``Program admissibility`` section.
-    """
-    rows = (
-        (
-            entry.building,
-            entry.stated_use,
-            entry.destination,
-            entry.verdict.value,
-            "\n".join(entry.conditions) or "none",
-            index.refs(entry.citations),
-        )
-        for entry in entries
+    return (
+        f"## Regulatory regime\n\n{zone_line}"
+        f"\n\n### Zoning plan reading\n\nZone read on the plan: **{zone.zone}**. "
+        f"{one_line(zone.rationale)}"
+        f"\n\n### Applying legend items\n\n{applying}\n\n### OAP\n\n{oap_block}"
     )
-    headers = ("Building", "Stated use", "Destination", "Verdict", "Conditions", "Sources")
-    return f"## Program admissibility\n\n{table(headers, rows)}"
-
-
-def _ratio(rule: ParkingRule) -> str:
-    """Render a parking ratio, e.g. ``1 space per 150 m² of floor area``."""
-    spaces = number(rule.spaces, 2)
-    noun = "space" if rule.spaces == 1 else "spaces"
-    per = "" if rule.per == 1 else f"{number(rule.per, 2)} "
-    return f"{spaces} {noun} per {per}{BASIS_LABELS[rule.basis]}"
-
-
-def parking_section(rules: Sequence[ParkingRule], index: CitationIndex) -> str:
-    """Render the parking requirement of each use.
-
-    Args:
-        rules: Parking rules of the study.
-        index: Citation numbering of the report.
-
-    Returns:
-        The ``Parking`` section.
-    """
-    if not rules:
-        return "## Parking\n\nNo parking requirement recorded."
-    rows = ((rule.use, _ratio(rule), rule.rule, index.refs(rule.citations)) for rule in rules)
-    return f"## Parking\n\n{table(('Use', 'Ratio', 'Rule', 'Sources'), rows)}"
 
 
 def conditions_section(rules: Sequence[Rule], index: CitationIndex) -> str:

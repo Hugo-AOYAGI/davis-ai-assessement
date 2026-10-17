@@ -10,7 +10,7 @@ type ArtifactData = dict[str, JsonValue]
 """A contract dumped with ``model_dump(mode="json")``, so checkpointers can serialise it."""
 
 type Artifacts = dict[str, ArtifactData]
-"""Artifacts by name (``site``, ``map_findings``, ``study``...)."""
+"""Artifacts by name (``site``, ``zone``, ``notes.<label>``, ``study``)."""
 
 
 def merge_artifacts(left: Artifacts | None, right: Artifacts | None) -> Artifacts:
@@ -30,7 +30,11 @@ def merge_artifacts(left: Artifacts | None, right: Artifacts | None) -> Artifact
 
 
 class ArtifactsState(AgentState):
-    """Agent state extended with the artifacts delivered through ``submit_<artifact>`` tools."""
+    """Agent state extended with the artifacts delivered through the submit tools.
+
+    ``submit_parcel`` (surveyor) stores ``site``, ``submit_zone`` (zoning_analyst) ``zone``,
+    ``submit_notes`` (doc_analyst) ``notes.<label>`` and ``submit_study`` ``study``.
+    """
 
     artifacts: NotRequired[Annotated[Artifacts, merge_artifacts]]
 
@@ -52,7 +56,7 @@ def read_artifact[C: Contract](
 
     Args:
         artifacts: The ``artifacts`` value of the graph state (absent before the first submit).
-        key: Artifact name, e.g. ``site``.
+        key: Artifact name, e.g. ``site`` or ``notes.rules``.
         contract: Contract the artifact was stored from.
 
     Returns:

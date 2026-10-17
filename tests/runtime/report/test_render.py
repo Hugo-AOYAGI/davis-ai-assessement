@@ -1,6 +1,11 @@
 from agent.contracts.evidence import Citation, CitationCheck, Limit, SourceKind
 from agent.runtime.report.render import render_report
 
+
+def render(verified, max_quote_chars=200):
+    return render_report(verified, max_quote_chars=max_quote_chars, crops_link_base="evidence")
+
+
 HEADINGS = (
     "# Buildability study: 4 rue Joliot Curie, 91190 Gif-sur-Yvette",
     "## Summary",
@@ -11,6 +16,7 @@ HEADINGS = (
     "## Parking",
     "## Other conditions",
     "## Ambiguities",
+    "## Evidence",
     "## Citations",
 )
 
@@ -20,27 +26,32 @@ def line_with(report, *fragments):
 
 
 def test_headings_in_order(verified):
-    lines = render_report(verified, max_quote_chars=200).splitlines()
+    lines = render(verified).splitlines()
     positions = [lines.index(heading) for heading in HEADINGS]
     assert positions == sorted(positions)
 
 
 def test_header_summary_and_site(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     assert "**Program:** RSE + RJA, two buildings" in report
     assert "The program is **buildable** in zone UMG." in report
     assert "| 91272000AB0123 | 1200 |" in report
     assert "- Site area: 1200 m²" in report
-    assert "- Road limit is the southern edge." in report
+    assert "- Cadastre is current." in report
+    assert "### Parcel choice\n\nAddress point 2.5 m from AB0123; AB0124 rejected" in report
+    assert "| road | 1 | 40 m |" in report
+    assert "| side | 2 | 60 m |" in report
+    assert "| rear | 1 | 40 m |" in report
     assert "- (cadastre): 91272000AB0123" in report
     assert "- (ban): 4 Rue Joliot Curie" in report
 
 
 def test_regime_and_admissibility(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     assert "Zone: **UMG** [1, 3]" in report
-    assert "| Espace boisé classé | no | none drawn |  |" in report
-    assert "| Linéaire commercial | yes | along the street | [3] |" in report
+    assert "Zone read on the plan: **UMG**. Site found by the road layout" in report
+    assert "| Linéaire commercial | along the street |" in report
+    assert "Checked on the plan, not applying: Espace boisé classé." in report
     assert "OAP applicable: **yes**" in report
     assert "- **landscape**: Keep a planted strip. [5]" in report
     row = line_with(report, "| B |")
@@ -49,7 +60,7 @@ def test_regime_and_admissibility(verified):
 
 
 def test_envelope_parameters(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     assert "| Setback from road limits | 5 m | see article | [2] |" in report
     assert "| Maximum height | 20 m | see article | [1] |" in report
     assert "| Maximum storeys | 6 | see article | [1] |" in report
@@ -58,7 +69,7 @@ def test_envelope_parameters(verified):
 
 
 def test_computed_envelope(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     assert "| Buildable footprint after setbacks | 651 m² |" in report
     assert "| Minimum green area | 240 m² |" in report
     assert "| Maximum volume | 13020 m³ |" in report
@@ -76,7 +87,7 @@ def test_missing_computed_values_render_as_dash(verified):
             "max_volume_m3": None,
         }
     )
-    report = render_report(verified.model_copy(update={"envelope": envelope}), max_quote_chars=200)
+    report = render(verified.model_copy(update={"envelope": envelope}))
     assert (
         "| Buildable footprint after setbacks | 0 m² (nothing remains after setbacks) |" in report
     )
@@ -86,7 +97,7 @@ def test_missing_computed_values_render_as_dash(verified):
 
 
 def test_parking_conditions_and_ambiguities(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     assert (
         "| résidence étudiante | 1 space per 150 m² of floor area | 1 place / 150 m² SDP | [4] |"
         in (report)
@@ -100,7 +111,7 @@ def test_parking_conditions_and_ambiguities(verified):
 
 
 def test_citations_table(verified):
-    report = render_report(verified, max_quote_chars=200)
+    report = render(verified)
     citations = report.split("## Citations", 1)[1]
     assert "| 1 | plu_reglement | 327 | UMG 10 | La hauteur maximale est fixée à 20 mètres |" in (
         citations
@@ -122,7 +133,7 @@ def test_raster_citation_is_numbered_but_not_text_verifiable(verified):
     regime = verified.study.regime.model_copy(update={"citations": (plan,)})
     study = verified.study.model_copy(update={"regime": regime})
     check = CitationCheck(citation=plan, verified=False, score=0.0, text_verifiable=False)
-    report = render_report(
+    report = render(
         verified.model_copy(
             update={"study": study, "citation_checks": (*verified.citation_checks, check)}
         ),
@@ -137,7 +148,7 @@ def test_raster_citation_is_numbered_but_not_text_verifiable(verified):
 
 
 def test_long_quote_truncated(verified):
-    report = render_report(verified, max_quote_chars=60)
+    report = render(verified, max_quote_chars=60)
     row = line_with(report.split("## Citations", 1)[1], "| 5 |")
     quote = row.split(" | ")[4]
     assert quote.endswith("…")
@@ -147,9 +158,7 @@ def test_long_quote_truncated(verified):
 def test_uncited_and_unchecked_citations(verified):
     regime = verified.study.regime.model_copy(update={"citations": (verified.site.citations[0],)})
     study = verified.study.model_copy(update={"regime": regime, "ambiguities": ()})
-    report = render_report(
-        verified.model_copy(update={"study": study, "citation_checks": ()}), max_quote_chars=200
-    )
+    report = render(verified.model_copy(update={"study": study, "citation_checks": ()}))
     assert "Zone: **UMG** (cadastre)" in report
     assert "| Maximum height | 20 m | see article | (plu_reglement, p.327) |" in report
     assert "No regulatory citation was checked." in report
@@ -161,12 +170,25 @@ def test_table_cells_escape_newlines(verified):
         update={"max_storeys": Limit(value=None, rule="R+5\nplus attic | roof")}
     )
     study = verified.study.model_copy(update={"envelope": parameters})
-    report = render_report(verified.model_copy(update={"study": study}), max_quote_chars=200)
+    report = render(verified.model_copy(update={"study": study}))
     assert "| Maximum storeys | not set | R+5<br>plus attic \\| roof |  |" in report
 
 
 def test_deterministic(verified):
-    assert render_report(verified, max_quote_chars=200) == render_report(
-        verified, max_quote_chars=200
+    assert render(verified) == render(verified)
+    assert render(verified).endswith("\n")
+
+
+def test_evidence_links_crops_under_the_base(verified):
+    report = render(verified)
+    evidence = report.split("## Evidence", 1)[1].split("## Citations", 1)[0]
+    assert (
+        "![plu_reglement_graphique p.1, region [10, 20, 110, 90]]"
+        "(evidence/plu_reglement_graphique_p1_10-20-110-90.png)" in evidence
     )
-    assert render_report(verified, max_quote_chars=200).endswith("\n")
+    assert "*oap p.34, region [120, 400, 900, 1100] (overview pixels)*" in evidence
+
+
+def test_no_evidence(verified):
+    report = render(verified.model_copy(update={"evidence": ()}))
+    assert "## Evidence\n\nNo image evidence saved." in report

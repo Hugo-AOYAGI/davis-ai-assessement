@@ -7,43 +7,39 @@ from agent.agents.config import PROJECT_ROOT, load_config, project_path, read_pr
 from agent.contracts.inputs.case import Case
 from agent.llm.factory import build_model
 
-NODES = {
-    "orchestrator",
-    "site_locator",
-    "zoning_map_reader",
-    "regulation_researcher",
-    "oap_analyst",
-    "ingest_classifier",
-}
+SUBAGENTS = ["surveyor", "zoning_analyst", "doc_analyst"]
+NODES = {"orchestrator", *SUBAGENTS, "ingest_classifier"}
+NO_SUBAGENTS = ["subagents=[]"]
 
 
-def test_defaults_compose():
-    cfg = load_config()
+def test_groups_compose():
+    cfg = load_config(NO_SUBAGENTS)
     assert set(cfg) >= {"models", "agent", "case", "policies", "corpus", "retrieval", "subagents"}
+    assert {"geo", "images"} <= set(cfg)
     assert "hydra" not in cfg
     assert set(cfg.models.nodes) == NODES
     assert cfg.agent.model in cfg.models.nodes
     assert cfg.policies.ask_user.mode == "interactive"
+    assert cfg.retrieval.mode == "full_sections"
+    assert list(cfg.policies.study.required_notes) == ["rules", "oap"]
+    assert cfg.policies.evidence.crops_dir == "data/crops"
+
+
+def test_three_subagents_by_default():
+    cfg = load_config()
+    assert list(cfg.subagents) == SUBAGENTS
+    assert {spec.model for spec in cfg.subagents.values()} <= set(cfg.models.nodes)
 
 
 def test_case_validates_against_contract():
-    cfg = load_config()
+    cfg = load_config(NO_SUBAGENTS)
     case = Case.model_validate(OmegaConf.to_container(cfg.case, resolve=True))
     assert case.corpus_id == cfg.corpus.id
     assert "Résidence Jeunes Actifs" in case.program
 
 
-def test_four_subagents_by_default():
-    assert list(load_config().subagents) == [
-        "site_locator",
-        "zoning_map_reader",
-        "regulation_researcher",
-        "oap_analyst",
-    ]
-
-
 def test_subagents_can_be_emptied():
-    assert OmegaConf.to_container(load_config(["subagents=[]"]).subagents) == {}
+    assert OmegaConf.to_container(load_config(NO_SUBAGENTS).subagents) == {}
 
 
 def test_unknown_subagent_is_rejected():
@@ -52,29 +48,29 @@ def test_unknown_subagent_is_rejected():
 
 
 def test_overrides_apply():
-    cfg = load_config(["policies.citations.policy=flag", "case.facts=[a,b]"])
+    cfg = load_config([*NO_SUBAGENTS, "policies.citations.policy=flag", "case.facts=[a,b]"])
     assert cfg.policies.citations.policy == "flag"
     assert list(cfg.case.facts) == ["a", "b"]
 
 
 def test_node_override_is_isolated():
-    cfg = load_config(["models.nodes.site_locator.model=claude-haiku-5-5"])
+    cfg = load_config([*NO_SUBAGENTS, "models.nodes.surveyor.model=claude-haiku-5-5"])
     nodes = cfg.models.nodes
-    assert nodes.site_locator.model == "claude-haiku-5-5"
+    assert nodes.surveyor.model == "claude-haiku-5-5"
     assert nodes.orchestrator.model == "claude-sonnet-5-5"
-    assert nodes.oap_analyst.model == "claude-sonnet-5-5"
+    assert nodes.doc_analyst.model == "claude-sonnet-5-5"
 
 
 def test_every_node_instantiates_offline(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
-    models = load_config().models
+    models = load_config(NO_SUBAGENTS).models
     for node in models.nodes:
         model = build_model(models, node)
         assert isinstance(model, ChatAnthropic)
         assert model.model == models.nodes[node].model
 
 
-def test_project_paths(tmp_path):
+def test_project_paths():
     assert (PROJECT_ROOT / "conf" / "config.yaml").is_file()
     assert project_path("conf/config.yaml") == PROJECT_ROOT / "conf" / "config.yaml"
     assert "defaults:" in read_prompt("conf/config.yaml")

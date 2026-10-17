@@ -4,8 +4,7 @@ from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 
 from agent.contracts.base import Contract
 from agent.contracts.evidence import CitationCheck
-from agent.contracts.findings.regulation import Verdict
-from agent.contracts.study import VerifiedStudy
+from agent.contracts.study import Verdict, VerifiedStudy
 from agent.llm.usage import ModelUsage
 
 
@@ -41,6 +40,7 @@ class EnvelopeNumbers(Contract):
     min_green_ratio: float | None
     footprint_area_m2: float
     max_footprint_area_m2: float
+    min_green_area_m2: float | None
     max_volume_m3: float | None
 
 
@@ -57,10 +57,16 @@ class CitationStats(Contract):
 class StudyDigest(Contract):
     """Headline results of an accepted study."""
 
+    parcel_ids: tuple[str, ...]
+    """Parcels the surveyor chose as the site."""
     zone: str
+    overlays: tuple[str, ...]
+    """Legend items applying to the site."""
+    oap_applicable: bool
     admissibility: tuple[BuildingVerdict, ...]
     envelope: EnvelopeNumbers
     ambiguities: int
+    evidence_crops: int
     citations: CitationStats
 
 
@@ -103,7 +109,10 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
     """
     study, envelope = verified.study, verified.envelope
     return StudyDigest(
+        parcel_ids=verified.site.choice.parcel_ids,
         zone=study.regime.zone,
+        overlays=tuple(item.item for item in study.regime.overlays),
+        oap_applicable=study.regime.oap_applicable,
         admissibility=tuple(
             BuildingVerdict(building=entry.building, verdict=entry.verdict)
             for entry in study.admissibility
@@ -116,9 +125,11 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
             min_green_ratio=study.envelope.min_green_ratio.value,
             footprint_area_m2=envelope.footprint_area_m2,
             max_footprint_area_m2=envelope.max_footprint_area_m2,
+            min_green_area_m2=envelope.min_green_area_m2,
             max_volume_m3=envelope.max_volume_m3,
         ),
         ambiguities=len(study.ambiguities),
+        evidence_crops=len(verified.evidence),
         citations=citation_stats(verified.citation_checks),
     )
 

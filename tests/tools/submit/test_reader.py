@@ -37,18 +37,18 @@ def test_schema_hides_runtime():
 
 
 def test_returns_artifact_json():
-    data = {"applicable": True, "name": "Joliot Curie", "rationale": "Déjà vu."}
-    message = invoke("oap_findings", {"oap_findings": data, "site": {"area_m2": 1}})
+    data = {"label": "oap", "notes": [{"topic": "perimeter", "text": "Déjà vu."}]}
+    message = invoke("notes.oap", {"notes.oap": data, "site": {"area_m2": 1}})
     assert message.status == "success"
     assert json.loads(message.content) == data
     assert "Déjà" in message.content
 
 
 def test_unknown_name_lists_available():
-    message = invoke("study", {"site": {}, "oap_findings": {}})
+    message = invoke("study", {"site": {}, "notes.oap": {}})
     assert message.status == "error"
     assert "No artifact named 'study'" in message.content
-    assert "Available artifacts: oap_findings, site." in message.content
+    assert "Available artifacts: notes.oap, site." in message.content
 
 
 def test_no_artifact_yet():
