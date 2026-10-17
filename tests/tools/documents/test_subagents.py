@@ -8,6 +8,7 @@ from omegaconf import OmegaConf
 
 from agent.agents.config import load_config
 from agent.agents.subagents import build_subagent
+from agent.tools.submit.factory import DONE
 
 ZONING_TOOLS = {"list_documents", "site_view", "view_image", "zoom", "submit_zone", "revise_zone"}
 DOC_TOOLS = {
@@ -86,7 +87,7 @@ def test_doc_analyst_reads_and_submits_through_graph(corpus_dir, monkeypatch):
     state, (read, rejected, accepted) = run(cfg, "doc_analyst", replies, monkeypatch)
     assert "--- plu_reglement p.3 ---" in read.content
     assert "notes.0.citations.0 (plu_reglement p.3, UMG 10)" in rejected.content
-    assert accepted.content == "notes.rules accepted."
+    assert accepted.content == f"notes.rules accepted.\n\n{DONE}"
     assert state["artifacts"]["notes.rules"]["notes"][0]["topic"] == "height"
 
 
@@ -101,5 +102,5 @@ def test_zoning_analyst_submits_a_region_on_the_plan(monkeypatch):
     replies = [call("submit_zone", zone, "s1"), call("submit_zone", inside, "s2")]
     state, (rejected, accepted) = run(load_config(), "zoning_analyst", replies, monkeypatch)
     assert "region: the overview of plu_reglement_graphique p.1 is" in rejected.content
-    assert accepted.content == "zone accepted."
+    assert accepted.content == f"zone accepted.\n\n{DONE}"
     assert state["artifacts"]["zone"]["region"]["region"] == [100, 100, 300, 200]

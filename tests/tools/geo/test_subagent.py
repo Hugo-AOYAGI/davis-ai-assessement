@@ -13,6 +13,7 @@ from agent.agents.config import load_config
 from agent.agents.subagents import build_subagent, build_tools
 from agent.contracts.findings.site import Site
 from agent.tools.submit.artifacts import read_artifact
+from agent.tools.submit.factory import DONE
 
 TOOLS = [
     "geocode",
@@ -111,8 +112,9 @@ def test_scripted_run_stores_site(cfg, monkeypatch, offline, tmp_path):
     assert [block["type"] for block in view if isinstance(block, dict)] == ["text", "image"]
     assert any((tmp_path / "images").glob("*.png"))
     assert all("base64" not in block for block in view if isinstance(block, dict))
-    accepted, summary = str(replies["s1"].content).split("\n\n", 1)
+    accepted, summary, done = str(replies["s1"].content).split("\n\n")
     assert accepted == "site accepted."
+    assert done == DONE
     assert json.loads(summary)["parcels"] == [{"id": PLOT, "contenance_m2": 5960}]
     assert state["messages"][-1].content == "done"
     assert any(tmp_path.glob("*.png"))

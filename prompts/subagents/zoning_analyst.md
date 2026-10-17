@@ -58,3 +58,5 @@ the plan against the real map. Small labels and hatchings are only legible after
 
 If `submit_zone` is rejected, fix every listed error with `revise_zone`, sending only the changed
 fields.
+Once it replies `zone accepted`, you are done: never submit again. Reply with a short summary
+(the zone, the legend items that apply) and stop.

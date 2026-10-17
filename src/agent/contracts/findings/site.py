@@ -8,6 +8,15 @@ from agent.contracts.evidence import Citation, SourceKind
 from agent.contracts.geometry import Point, Polygon
 
 
+class PublicParcel(Contract):
+    """A neighbouring parcel you judge to be public land despite its cadastral number."""
+
+    id: str = Field(min_length=1)
+    """Cadastral id of a parcel lying along an edge of the site, e.g. `91272000CR0249`."""
+    reason: str = Field(min_length=1)
+    """The evidence: shape, size, position, and what the aerial photo shows."""
+
+
 class ParcelChoice(Contract):
     """The cadastral parcels you chose as the site, and why."""
 
@@ -22,6 +31,9 @@ class ParcelChoice(Contract):
     assumptions: tuple[str, ...] = ()
     """Every choice a reviewer could dispute, one sentence each (e.g. that adjacent parcels form
     one landholding)."""
+    public_parcels: tuple[PublicParcel, ...] = ()
+    """Neighbouring parcels you judge to be public land (e.g. a thin strip of pavement or verge
+    between the site and the road). An edge facing only such parcels faces public land."""
 
 
 class EdgeSide(StrEnum):
@@ -30,7 +42,8 @@ class EdgeSide(StrEnum):
     PARCEL = "parcel"
     """Another cadastral parcel."""
     PUBLIC_LAND = "public_land"
-    """Land without a parcel number: usually a road or a public space."""
+    """Land without a parcel number, or parcels the surveyor declared public: usually a road or a
+    public space."""
 
 
 class Edge(Contract):
@@ -41,7 +54,7 @@ class Edge(Contract):
     length_m: float = Field(ge=0)
     other_side: EdgeSide
     neighbours: tuple[str, ...] = ()
-    """Ids of the parcels across the edge; empty for public land."""
+    """Ids of the parcels across the edge; for public land, only parcels declared public."""
 
 
 class Parcel(Contract):

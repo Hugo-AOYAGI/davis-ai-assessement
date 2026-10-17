@@ -3,10 +3,11 @@ from enum import StrEnum
 from pydantic import Field
 
 from agent.contracts.base import Contract
+from agent.contracts.envelope import EnvelopeStudy
 from agent.contracts.evidence import Ambiguity, Citation, CitationCheck, Rule, StoredCrop
 from agent.contracts.findings.site import Site
 from agent.contracts.findings.zone import LegendItem, ZoneFindings
-from agent.contracts.geometry import Boundary, Envelope, EnvelopeParameters
+from agent.contracts.geometry import Boundary
 
 
 class Verdict(StrEnum):
@@ -71,8 +72,9 @@ class Regime(Contract):
 class Study(Contract):
     """The buildability study.
 
-    The site is not part of it: the gate reads the `site` artifact built from the surveyor's
-    choice, labels its edges and computes the envelope, returned once the study is accepted.
+    The site and the envelope are not part of it: the gate reads the `site` artifact built from
+    the surveyor's choice and labels its edges, reads the architect's `envelope` artifact and
+    recomputes it, and returns both once the study is accepted.
     """
 
     address: str = Field(min_length=1)
@@ -80,7 +82,6 @@ class Study(Contract):
     regime: Regime
     admissibility: tuple[Admissibility, ...] = Field(min_length=1)
     """One entry per building of the program."""
-    envelope: EnvelopeParameters
     parking: tuple[ParkingRule, ...]
     conditions: tuple[Rule, ...]
     """Other feasibility conditions: access, networks, appearance..."""
@@ -97,9 +98,10 @@ class VerifiedStudy(Contract):
     boundaries: tuple[Boundary, ...]
     """The site's edges labelled road / side / rear by the gate."""
     zone: ZoneFindings
-    envelope: Envelope
+    envelope: EnvelopeStudy
+    """The architect's envelope, recomputed by the gate from its rules and layout."""
     citation_checks: tuple[CitationCheck, ...]
-    """One check per distinct regulatory citation found anywhere in ``study``.
+    """One check per distinct regulatory citation of ``study``, then of ``envelope``.
 
     Geometric citations are not checked against the corpus and have no entry. Citations of a
     raster document (no text layer) have an entry with ``text_verifiable`` False unless the

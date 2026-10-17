@@ -22,11 +22,11 @@ iteration.
   every claim has a value, unit, status and citations.
 
 ### Envelope
-- **Stepped 2.5D envelope**: allowed footprint computed per height level, then stacked, so that
-  height-dependent setbacks and prospect rules are handled.
-- **Two-building fit test**: check that two buildings fit with the article 8 minimum distance,
-  using a simple split along the parcel's main axis, and report the max volume per building.
-- **3D visualisation** in the UI from the envelope geometry (GeoJSON + heights → mesh).
+- **Building on the limit per edge**: let the `architect`'s layout choose, edge by edge, whether
+  a building stands on the limit, instead of one choice per edge kind.
+- **Splits driven by the program**: place the buildings from their floor areas rather than a
+  share of the usable area.
+- **A third bound, "no windows"**: the footprint when no facade facing a limit has windows.
 
 ### Program
 - **`ProgramSpec` parse step** (buildings, stated use, known and missing facts) if evals show
@@ -34,8 +34,10 @@ iteration.
 
 ### Sub-agents
 Split out of the orchestrator when evals show failures there (names from REFINE §1):
-- `planning_lawyer` (*juriste en urbanisme*): program → destinations → admissibility verdict.
-- `architect` (Opus): rules → envelope parameters → capacity study.
+- `planning_lawyer` (*juriste en urbanisme*): program → destinations → admissibility verdict,
+  as a typed output. Its reading is the `doc_analyst` `destinations` task and the decision
+  stays with the orchestrator, until evals show it misclassifies buildings or keeps
+  destination, height and parking inconsistent.
 - `permit_officer` (Opus, *instructeur*): would this file be rejected, on which article?
   Contradictions, missing rules, unhandled ambiguities, reviewed before `submit_study`.
 

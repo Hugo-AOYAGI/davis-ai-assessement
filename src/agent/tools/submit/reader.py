@@ -13,8 +13,8 @@ citations that were already verified against the documents: read it before using
 and reuse those citations verbatim in the study rather than retyping them.
 
 Artifact names: `site` (surveyor), `zone` (zoning_analyst), `notes.<label>` (doc_analyst, one
-per task label, e.g. `notes.rules` and `notes.oap`) and `study` (submit_study). An unknown name
-returns the list of artifacts delivered so far."""
+per task label, e.g. `notes.rules` and `notes.oap`), `envelope` (architect) and `study`
+(submit_study). An unknown name returns the list of artifacts delivered so far."""
 
 
 def read_artifact_tool() -> BaseTool:

@@ -10,7 +10,7 @@ from pydantic import JsonValue
 from agent.contracts.evidence import Ambiguity
 from agent.contracts.findings.notes import DocNotes
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsMiddleware, read_artifact
-from agent.tools.submit.factory import SubmissionRejected, submit_tool, submit_tools
+from agent.tools.submit.factory import DONE, SubmissionRejected, submit_tool, submit_tools
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -45,7 +45,7 @@ def test_agent_corrects_rejected_submission(notes_tool, notes_args, bad_notes_ar
     assert replies["bad"].status == "error"
     assert "notes.0.text: Field required" in replies["bad"].content
     assert "notes.0.citations.0: Value error" in replies["bad"].content
-    assert replies["good"].content == "notes.oap accepted."
+    assert replies["good"].content == f"notes.oap accepted.\n\n{DONE}"
 
 
 FIXES: dict[str, JsonValue] = {
@@ -159,5 +159,5 @@ def test_subagent_artifact_reaches_parent(notes_args):
     assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
     assert Ambiguity.model_validate(state["artifacts"]["note"]) == Ambiguity.model_validate(NOTE)
     replies = {m.tool_call_id: m.content for m in state["messages"] if isinstance(m, ToolMessage)}
-    assert replies == {"t1": "child done", "n1": "note accepted."}
+    assert replies == {"t1": "child done", "n1": f"note accepted.\n\n{DONE}"}
     assert state["messages"][-1].content == "parent done"

@@ -8,8 +8,8 @@ from enum import StrEnum
 from typing import NamedTuple
 
 from agent.contracts.base import Contract
+from agent.contracts.envelope import EnvelopeRules
 from agent.contracts.evidence import Limit, Rule
-from agent.contracts.geometry import EnvelopeParameters
 from agent.contracts.study import VerifiedStudy
 from evals.harness.judge import Question
 
@@ -33,7 +33,7 @@ class BreakSettings(Contract):
     """What the breaks change (``eval.judge.validation``)."""
 
     limit: str
-    """Field of ``EnvelopeParameters`` changed, hedged and contradicted; it needs a value."""
+    """Numeric envelope rule changed, hedged and contradicted; it needs a value."""
     shift: float
     """Added to the limit's value (changed, contradicted) or taken off it (hedge's low end)."""
     hedge: str
@@ -68,7 +68,7 @@ def breaks(good: VerifiedStudy, settings: BreakSettings) -> tuple[Break, ...]:
         The broken studies, one per kind that applies.
 
     Raises:
-        ValueError: If ``settings.limit`` is not a limit of ``EnvelopeParameters``.
+        ValueError: If ``settings.limit`` is not a limit of ``EnvelopeRules or BuildingLimits``.
     """
     limit = _limit(good, settings.limit)
     made = [
@@ -181,12 +181,15 @@ def dropped_ambiguity(good: VerifiedStudy) -> VerifiedStudy:
 
 def _limit(good: VerifiedStudy, name: str) -> Limit:
     """Read one limit of the study's envelope parameters."""
-    if name not in EnvelopeParameters.model_fields:
-        msg = f"{name!r} is not a limit of EnvelopeParameters"
+    if name in ("max_height_m", "max_storeys"):
+        limit = getattr(good.envelope.rules.buildings[0], name)
+    elif name in EnvelopeRules.model_fields:
+        limit = getattr(good.envelope.rules, name)
+    else:
+        msg = f"{name!r} is not a limit of EnvelopeRules or BuildingLimits"
         raise ValueError(msg)
-    limit = getattr(good.study.envelope, name)
     if not isinstance(limit, Limit):
-        msg = f"{name!r} is not a limit of EnvelopeParameters"
+        msg = f"{name!r} is not a numeric limit"
         raise TypeError(msg)
     return limit
 
@@ -201,8 +204,16 @@ def _value(limit: Limit) -> float:
 
 def _with_limit(good: VerifiedStudy, name: str, limit: Limit) -> VerifiedStudy:
     """Replace one limit of the study's envelope parameters."""
-    envelope = good.study.envelope.model_copy(update={name: limit})
-    return _with_study(good, envelope=envelope)
+    rules = good.envelope.rules
+    if name in ("max_height_m", "max_storeys"):
+        first, *rest = rules.buildings
+        rules = rules.model_copy(
+            update={"buildings": (first.model_copy(update={name: limit}), *rest)}
+        )
+    else:
+        rules = rules.model_copy(update={name: limit})
+    envelope = good.envelope.model_copy(update={"rules": rules})
+    return good.model_copy(update={"envelope": envelope})
 
 
 def _with_study(good: VerifiedStudy, **changes: object) -> VerifiedStudy:

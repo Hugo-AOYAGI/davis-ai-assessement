@@ -1,9 +1,17 @@
 import pytest
 
+from agent.contracts.envelope import (
+    BuildingLimits,
+    Distance,
+    EnvelopeRules,
+    EnvelopeStudy,
+    Layout,
+    SetbackRule,
+)
 from agent.contracts.evidence import Citation, ImageRegion, Limit, Rule, SourceKind
 from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
 from agent.contracts.findings.zone import LegendItem, ZoneFindings
-from agent.contracts.geometry import EnvelopeParameters, Polygon
+from agent.contracts.geometry import BoundaryKind, BuildingMassing, Level, Polygon, Scenario
 from agent.contracts.study import (
     Admissibility,
     ParkingBasis,
@@ -66,26 +74,82 @@ def zone() -> ZoneFindings:
     )
 
 
-@pytest.fixture
-def parameters(citation: Citation) -> EnvelopeParameters:
-    def limit(value: float | None) -> Limit:
-        return Limit(
-            value=value, rule="see article", citations=() if value is None else (citation,)
-        )
+def _limit(value: float | None, citation: Citation) -> Limit:
+    return Limit(value=value, rule="see article", citations=() if value is None else (citation,))
 
-    return EnvelopeParameters(
-        setback_road_m=limit(5),
-        setback_side_m=limit(4),
-        setback_rear_m=limit(4),
-        max_height_m=limit(20),
-        max_storeys=limit(6),
-        max_footprint_ratio=limit(None),
-        min_green_ratio=limit(0.2),
+
+@pytest.fixture
+def rules(citation: Citation) -> EnvelopeRules:
+    def distance(min_m: float) -> Distance:
+        return Distance(min_m=min_m, rule="see article", citations=(citation,))
+
+    return EnvelopeRules(
+        setbacks=(
+            SetbackRule(kind=BoundaryKind.ROAD, on_limit_allowed=True, without_windows=distance(1)),
+            SetbackRule(kind=BoundaryKind.SIDE, on_limit_allowed=False, with_windows=distance(6)),
+            SetbackRule(kind=BoundaryKind.REAR, on_limit_allowed=False, with_windows=distance(6)),
+        ),
+        buildings=(
+            BuildingLimits(
+                building="A",
+                max_height_m=_limit(20, citation),
+                max_storeys=_limit(6, citation),
+            ),
+            BuildingLimits(
+                building="B",
+                max_height_m=_limit(18, citation),
+                max_storeys=_limit(None, citation),
+            ),
+        ),
+        spacing_with_windows=distance(10),
+        spacing_without_windows=distance(6),
+        max_footprint_ratio=_limit(None, citation),
+        min_green_ratio=_limit(0.2, citation),
     )
 
 
 @pytest.fixture
-def study(citation: Citation, parameters: EnvelopeParameters) -> Study:
+def layout() -> Layout:
+    return Layout(
+        cut="across_long_axis",
+        first_share=0.5,
+        order=("A", "B"),
+        facing_windows=True,
+        heights_m=(15, 18),
+        reasons="Halves.",
+    )
+
+
+@pytest.fixture
+def envelope(rules: EnvelopeRules, layout: Layout, polygon: Polygon) -> EnvelopeStudy:
+    massing = BuildingMassing(
+        building="A",
+        footprint=polygon,
+        footprint_area_m2=1200,
+        max_height_m=20,
+        levels=(Level(from_m=0, to_m=20, area_m2=1200),),
+        volume_m3=24000,
+    )
+    bound = Scenario(
+        name="windows",
+        footprint=polygon,
+        footprint_area_m2=1200,
+        buildings=(massing,),
+        fits=True,
+        total_volume_m3=24000,
+    )
+    return EnvelopeStudy(
+        rules=rules,
+        layout=layout,
+        site_area_m2=1200,
+        min_green_area_m2=240,
+        bounds=(bound,),
+        proposal=bound.model_copy(update={"name": "proposal"}),
+    )
+
+
+@pytest.fixture
+def study(citation: Citation) -> Study:
     return Study(
         address="4 rue Joliot Curie, 91190 Gif-sur-Yvette",
         program="RSE + RJA, two buildings",
@@ -104,7 +168,6 @@ def study(citation: Citation, parameters: EnvelopeParameters) -> Study:
                 citations=(citation,),
             ),
         ),
-        envelope=parameters,
         parking=(
             ParkingRule(
                 use="résidence étudiante",

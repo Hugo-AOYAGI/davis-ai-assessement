@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, FiniteFloat, model_validator
 
 from agent.contracts.base import Contract
 
@@ -64,7 +64,7 @@ class Rule(Contract):
 class Limit(Contract):
     """A numeric limit drawn from a rule. The unit is given by the field holding it."""
 
-    value: float | None
+    value: FiniteFloat | None
     """Resolved value, or ``None`` when the documents set no such limit."""
     rule: str = Field(min_length=1)
     """The rule the value comes from, including any formula or condition (e.g. ``H/2, min 4 m``)."""

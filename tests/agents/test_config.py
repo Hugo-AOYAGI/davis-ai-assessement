@@ -7,7 +7,7 @@ from agent.agents.config import PROJECT_ROOT, load_config, project_path, read_pr
 from agent.contracts.inputs.case import Case
 from agent.llm.factory import build_model
 
-SUBAGENTS = ["surveyor", "zoning_analyst", "doc_analyst"]
+SUBAGENTS = ["surveyor", "zoning_analyst", "doc_analyst", "architect"]
 NODES = {"orchestrator", *SUBAGENTS, "ingest_classifier", "judge"}
 
 
@@ -20,11 +20,11 @@ def test_groups_compose():
     assert cfg.agent.model in cfg.models.nodes
     assert cfg.policies.ask_user.mode == "interactive"
     assert cfg.retrieval.mode == "full_sections"
-    assert list(cfg.policies.study.required_notes) == ["rules", "oap"]
+    assert list(cfg.policies.study.required_notes) == ["rules", "oap", "destinations"]
     assert cfg.policies.evidence.crops_dir == "data/crops"
 
 
-def test_three_subagents_by_default():
+def test_four_subagents_by_default():
     cfg = load_config()
     assert list(cfg.subagents) == SUBAGENTS
     assert {spec.model for spec in cfg.subagents.values()} <= set(cfg.models.nodes)
@@ -54,7 +54,7 @@ def test_overrides_apply():
 
 def test_default_models():
     nodes = load_config().models.nodes
-    for node in ("orchestrator", "surveyor", "zoning_analyst", "doc_analyst", "ingest_classifier"):
+    for node in NODES:
         assert nodes[node].model == "claude-haiku-5-5"
         assert "effort" not in nodes[node]
 

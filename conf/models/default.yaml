@@ -40,6 +40,7 @@ nodes:
   doc_analyst:  # its submit_notes call carries every note and citation in one reply
     <<: *agent
     max_tokens: 32000
+  architect: *agent  # a submit_envelope call (rules, citations, layout) is a few thousand tokens
   ingest_classifier:
     <<: *agent
     max_tokens: 1024

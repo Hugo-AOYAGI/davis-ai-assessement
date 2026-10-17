@@ -1,13 +1,20 @@
 "use client";
 
 import { useId, useMemo } from "react";
-import type { Point, Polygon, VerifiedStudy } from "@/lib/study-types";
+import type {
+  BoundaryKind,
+  EnvelopeStudy,
+  Point,
+  Polygon,
+  VerifiedStudy,
+} from "@/lib/study-types";
 import {
   BOUNDARY_COLORS,
   BOUNDARY_KINDS,
   BOUNDARY_LABELS,
   FOOTPRINT_COLOR,
 } from "./colors";
+import { buildingColors, findBound, massingTag } from "./envelope";
 import { formatArea, formatLength } from "./format";
 import {
   bounds,
@@ -30,30 +37,72 @@ function polygonPath(polygon: Polygon): string {
   return [polygon.exterior, ...polygon.holes].map(ringPath).join("");
 }
 
-function usePlan(study: VerifiedStudy) {
+const samePoint = (a: Point, b: Point) =>
+  Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6;
+
+/** The site edge a labelled boundary lies on, for what is across it. */
+function edgeOf(study: VerifiedStudy, start: Point, end: Point) {
+  return study.site.edges.find(
+    (e) =>
+      (samePoint(e.start, start) && samePoint(e.end, end)) ||
+      (samePoint(e.start, end) && samePoint(e.end, start)),
+  );
+}
+
+function usePlan(study: VerifiedStudy, envelope: EnvelopeStudy | null) {
   return useMemo(() => {
     const origin = centroid(study.site.polygon.exterior);
     const site = polygonToLocal(study.site.polygon, origin);
-    const footprint = study.envelope.footprint
-      ? polygonToLocal(study.envelope.footprint, origin)
+    const outline = envelope
+      ? (envelope.proposal.footprint ??
+        findBound(envelope, "windows")?.footprint ??
+        null)
       : null;
+    const footprint = outline ? polygonToLocal(outline, origin) : null;
+    const known = envelope
+      ? [
+          ...envelope.rules.buildings.map((b) => b.building),
+          ...study.study.admissibility.map((a) => a.building),
+        ]
+      : [];
+    const colors = envelope
+      ? buildingColors(envelope)
+      : new Map<string, string>();
+    const buildings = (envelope?.proposal.buildings ?? []).flatMap((b) => {
+      if (!b.footprint) return [];
+      const polygon = polygonToLocal(b.footprint, origin);
+      return [
+        {
+          name: b.building,
+          tag: massingTag(b, known),
+          height: b.max_height_m,
+          area: b.footprint_area_m2,
+          polygon,
+          center: centroid(polygon.exterior),
+          color: colors.get(b.building) ?? FOOTPRINT_COLOR,
+        },
+      ];
+    });
     const edges = study.boundaries.map((b) => {
       const start = ringToLocal([b.start], origin)[0];
       const end = ringToLocal([b.end], origin)[0];
+      const edge = edgeOf(study, b.start, b.end);
       return {
         kind: b.kind,
         start,
         end,
         length: distance(start, end),
         normal: outwardNormal(start, end, site.exterior),
+        publicLand: edge?.other_side === "public_land",
+        neighbours: edge?.neighbours ?? [],
       };
     });
     const box = bounds(site.exterior);
     const width = box.maxX - box.minX;
     const height = box.maxY - box.minY;
     const extent = Math.max(width, height);
-    return { site, footprint, edges, box, width, height, extent };
-  }, [study]);
+    return { site, footprint, buildings, edges, box, width, height, extent };
+  }, [study, envelope]);
 }
 
 function NorthArrow({ x, y, size }: { x: number; y: number; size: number }) {
@@ -114,8 +163,32 @@ function ScaleBar({
   );
 }
 
-export function SitePlan({ study }: { study: VerifiedStudy }) {
-  const { site, footprint, edges, box, width, height, extent } = usePlan(study);
+/** Parcel id without its commune prefix: `91272000CR0249` → `CR0249`. */
+const parcelLabel = (id: string) => id.replace(/^\d{5,}(?=[A-Z])/, "");
+
+function edgeTitle(e: {
+  kind: BoundaryKind;
+  length: number;
+  publicLand: boolean;
+  neighbours: string[];
+}) {
+  const base = `${BOUNDARY_LABELS[e.kind]} limit · ${formatLength(e.length)}`;
+  if (!e.publicLand) return base;
+  return e.neighbours.length > 0
+    ? `${base} · public land (${e.neighbours.map(parcelLabel).join(", ")}, declared by the surveyor)`
+    : `${base} · public land`;
+}
+
+export function SitePlan({
+  study,
+  envelope,
+}: {
+  study: VerifiedStudy;
+  envelope: EnvelopeStudy | null;
+}) {
+  const { site, footprint, buildings, edges, box, width, height, extent } =
+    usePlan(study, envelope);
+  const declared = study.site.choice.public_parcels ?? [];
   const titleId = useId();
   const pad = extent * 0.14;
   const fontSize = extent * 0.032;
@@ -145,7 +218,15 @@ export function SitePlan({ study }: { study: VerifiedStudy }) {
         className="bg-muted/30 h-auto max-h-[22rem] w-full rounded-lg border"
       >
         <title id={titleId}>
-          {`Site plan: site of ${formatArea(study.envelope.site_area_m2)}, buildable footprint of ${formatArea(study.envelope.footprint_area_m2)} after setbacks, north up.`}
+          {[
+            `Site plan: site of ${formatArea(study.site.area_m2)}`,
+            footprint && "footprint after setbacks with windows dashed",
+            buildings.length > 0 &&
+              `proposed buildings ${buildings.map((b) => `${b.tag} (${formatArea(b.area)}, ${formatLength(b.height, 0)})`).join(", ")}`,
+            "north up.",
+          ]
+            .filter(Boolean)
+            .join(", ")}
         </title>
         <path
           d={polygonPath(site)}
@@ -159,13 +240,27 @@ export function SitePlan({ study }: { study: VerifiedStudy }) {
             d={polygonPath(footprint)}
             fillRule="evenodd"
             fill={FOOTPRINT_COLOR}
-            fillOpacity={0.28}
+            fillOpacity={0.2}
             stroke={FOOTPRINT_COLOR}
             strokeWidth={1.5}
             strokeDasharray="4 3"
             vectorEffect="non-scaling-stroke"
           />
         )}
+        {buildings.map((b) => (
+          <path
+            key={b.name}
+            d={polygonPath(b.polygon)}
+            fillRule="evenodd"
+            fill={b.color}
+            fillOpacity={0.45}
+            stroke={b.color}
+            strokeWidth={1.5}
+            vectorEffect="non-scaling-stroke"
+          >
+            <title>{`${b.name} · ${formatArea(b.area)} · ${formatLength(b.height, 0)}`}</title>
+          </path>
+        ))}
         {edges.map((e, i) => (
           <line
             key={i}
@@ -178,7 +273,7 @@ export function SitePlan({ study }: { study: VerifiedStudy }) {
             strokeLinecap="round"
             vectorEffect="non-scaling-stroke"
           >
-            <title>{`${BOUNDARY_LABELS[e.kind]} limit · ${formatLength(e.length)}`}</title>
+            <title>{edgeTitle(e)}</title>
           </line>
         ))}
         {edges
@@ -203,6 +298,22 @@ export function SitePlan({ study }: { study: VerifiedStudy }) {
               </text>
             );
           })}
+        {buildings.map((b) => (
+          <text
+            key={b.name}
+            x={b.center[0]}
+            y={-b.center[1]}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontSize={fontSize}
+            strokeWidth={fontSize * 0.3}
+            paintOrder="stroke"
+            className="fill-foreground stroke-card font-medium tabular-nums"
+            aria-hidden
+          >
+            {`${b.tag} · ${formatLength(b.height, 0)}`}
+          </text>
+        ))}
         <NorthArrow
           x={box.maxX + pad * 0.5}
           y={-box.maxY - pad * 0.25}
@@ -230,18 +341,46 @@ export function SitePlan({ study }: { study: VerifiedStudy }) {
             {count > 0 ? `· ${count} · ${formatLength(length)}` : "· none"}
           </span>
         ))}
-        <span className="inline-flex items-center gap-1.5">
+        {footprint && (
+          <span className="inline-flex items-center gap-1.5">
+            <span
+              aria-hidden
+              className="size-3 rounded-sm border border-dashed"
+              style={{
+                borderColor: FOOTPRINT_COLOR,
+                backgroundColor: `color-mix(in oklch, ${FOOTPRINT_COLOR} 20%, transparent)`,
+              }}
+            />
+            After setbacks with windows
+          </span>
+        )}
+        {buildings.map((b) => (
           <span
-            aria-hidden
-            className="size-3 rounded-sm border border-dashed"
-            style={{
-              borderColor: FOOTPRINT_COLOR,
-              backgroundColor: `color-mix(in oklch, ${FOOTPRINT_COLOR} 28%, transparent)`,
-            }}
-          />
-          Buildable after setbacks
-        </span>
+            key={b.name}
+            className="inline-flex items-center gap-1.5"
+            title={b.name}
+          >
+            <span
+              aria-hidden
+              className="size-3 rounded-sm"
+              style={{ backgroundColor: b.color }}
+            />
+            {b.tag}
+          </span>
+        ))}
       </figcaption>
+      {declared.length > 0 && (
+        <ul className="text-muted-foreground mt-2 space-y-0.5 text-xs leading-relaxed">
+          {declared.map((p) => (
+            <li key={p.id}>
+              <span className="text-foreground font-medium">
+                {parcelLabel(p.id)}
+              </span>{" "}
+              declared public land by the surveyor: {p.reason}
+            </li>
+          ))}
+        </ul>
+      )}
     </figure>
   );
 }

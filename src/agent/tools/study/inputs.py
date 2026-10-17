@@ -1,11 +1,12 @@
 """What the ``submit_study`` gate reads from the artifacts delivered by the sub-agents."""
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import NamedTuple, Self
 
 from pydantic import Field, model_validator
 
 from agent.contracts.base import Contract
+from agent.contracts.envelope import EnvelopeStudy
 from agent.contracts.evidence import ImageRegion
 from agent.contracts.findings.notes import DocNotes, OpenPoint
 from agent.contracts.findings.site import Site
@@ -26,13 +27,16 @@ class Delivery(Contract):
 
 
 class StudyInputs(Contract):
-    """Where the gate finds the site, the zone and the document notes the study rests on."""
+    """Where the gate finds the site, the zone, the notes and the envelope the study rests on."""
 
     site: Delivery
     zone: Delivery
     notes: Delivery
+    envelope: Delivery
     labels: tuple[str, ...]
-    """Labels of the notes every study needs, e.g. ``rules`` and ``oap``."""
+    """Labels of the notes every study needs, e.g. ``rules``, ``oap`` and ``destinations``."""
+    oap_label: str
+    """Label of the notes every citation of the layout's OAP choices must come from."""
 
     @model_validator(mode="after")
     def _notes_key_has_label(self) -> Self:
@@ -53,6 +57,24 @@ class StudyInputs(Contract):
         """
         return self.notes.artifact.format(label=label)
 
+    def notes_labels(self, keys: Iterable[str]) -> list[str]:
+        """List the labels of the notes artifacts among artifact keys.
+
+        Args:
+            keys: Artifact keys, e.g. ``site``, ``notes.rules``, ``notes.rules_parking``.
+
+        Returns:
+            The labels of the keys the notes template matches, e.g. ``rules``, ``rules_parking``.
+        """
+        prefix, suffix = self.notes.artifact.split("{label}")
+        return [
+            key[len(prefix) : len(key) - len(suffix)]
+            for key in keys
+            if len(key) > len(prefix) + len(suffix)
+            and key.startswith(prefix)
+            and key.endswith(suffix)
+        ]
+
 
 class Findings(NamedTuple):
     """The delivered artifacts a study is checked and completed with."""
@@ -60,11 +82,12 @@ class Findings(NamedTuple):
     site: Site
     zone: ZoneFindings
     notes: tuple[DocNotes, ...]
-    """The required notes, in label order."""
+    """Every notes artifact present: the required labels in order, then the others by label."""
+    envelope: EnvelopeStudy
 
 
 def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) -> Findings:
-    """Read the site, the zone and the required notes from the artifacts.
+    """Read the site, the zone, every notes artifact and the envelope from the artifacts.
 
     Args:
         artifacts: The ``artifacts`` value of the graph state.
@@ -79,11 +102,14 @@ def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) ->
     """
     site = read_artifact(artifacts, inputs.site.artifact, Site)
     zone = read_artifact(artifacts, inputs.zone.artifact, ZoneFindings)
-    keys = {label: inputs.notes_key(label) for label in inputs.labels}
+    envelope = read_artifact(artifacts, inputs.envelope.artifact, EnvelopeStudy)
+    others = sorted(set(inputs.notes_labels(artifacts)) - set(inputs.labels))
+    keys = {label: inputs.notes_key(label) for label in (*inputs.labels, *others)}
     notes = {label: read_artifact(artifacts, key, DocNotes) for label, key in keys.items()}
+    deliveries = ((inputs.site, site), (inputs.zone, zone), (inputs.envelope, envelope))
     errors = [
         describe_missing_artifact(delivery.artifact, delivery.producer)
-        for delivery, found in ((inputs.site, site), (inputs.zone, zone))
+        for delivery, found in deliveries
         if found is None
     ]
     errors += [
@@ -91,9 +117,10 @@ def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) ->
         for label, found in notes.items()
         if found is None
     ]
-    if errors or site is None or zone is None:
+    if errors or site is None or zone is None or envelope is None:
         raise SubmissionRejected(errors)
-    return Findings(site, zone, tuple(found for found in notes.values() if found is not None))
+    found = tuple(doc_notes for doc_notes in notes.values() if doc_notes is not None)
+    return Findings(site, zone, found, envelope)
 
 
 def fold(question: str) -> str:
@@ -108,26 +135,44 @@ def fold(question: str) -> str:
     return " ".join(question.split()).casefold()
 
 
-def unmatched_open_points(study: Study, notes: Sequence[DocNotes]) -> list[tuple[str, OpenPoint]]:
-    """List the open points of the notes that no ambiguity of the study answers.
+def unmatched_open_points(
+    study: Study, sources: Mapping[str, Sequence[OpenPoint]]
+) -> list[tuple[str, OpenPoint]]:
+    """List the open points of the artifacts that no ambiguity of the study answers.
 
     An open point is answered by an ambiguity whose question is the same text, case and
     whitespace aside.
 
     Args:
         study: The submitted study.
-        notes: The required notes.
+        sources: The open points of each artifact, by artifact key (``notes.rules``,
+            ``envelope``...).
 
     Returns:
-        ``(label, open point)`` pairs, in note and open point order.
+        ``(artifact key, open point)`` pairs, in artifact and open point order.
     """
     answered = {fold(ambiguity.question) for ambiguity in study.ambiguities}
     return [
-        (note.label, point)
-        for note in notes
-        for point in note.open_points
+        (key, point)
+        for key, points in sources.items()
+        for point in points
         if fold(point.question) not in answered
     ]
+
+
+def open_points(findings: Findings, inputs: StudyInputs) -> dict[str, tuple[OpenPoint, ...]]:
+    """Gather the open points the study must answer: every notes artifact's and the envelope's.
+
+    Args:
+        findings: The delivered findings.
+        inputs: Where each artifact is stored.
+
+    Returns:
+        The open points by artifact key.
+    """
+    points = {inputs.notes_key(notes.label): notes.open_points for notes in findings.notes}
+    points[inputs.envelope.artifact] = findings.envelope.open_points
+    return points
 
 
 def evidence_regions(findings: Findings, inputs: StudyInputs) -> dict[ImageRegion, Delivery]:

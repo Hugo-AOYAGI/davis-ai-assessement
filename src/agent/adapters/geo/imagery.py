@@ -1,6 +1,7 @@
 from collections.abc import Mapping, Sequence
 
 import pymupdf
+from pydantic import Field
 
 from agent.adapters.http import CachedHttp
 from agent.contracts.base import Contract
@@ -16,10 +17,18 @@ class Outline(Contract):
     """A labelled shape to draw on an image, in pixel coordinates."""
 
     label: str
+    """Text written at ``anchor``; empty for none."""
     rings: tuple[tuple[Pixel, ...], ...]
-    """Closed rings, ``(column, row)`` pixels from the top-left corner."""
+    """Rings, ``(column, row)`` pixels from the top-left corner."""
     anchor: Pixel
     """Where the label is written."""
+    rgb: Rgb | None = None
+    """Line and label colour; the style's when null."""
+    fill_rgb: Rgb | None = None
+    """Fill colour (even-odd, so inner rings are holes); no fill when null."""
+    fill_opacity: float = Field(default=1.0, ge=0, le=1)
+    closed: bool = True
+    """Whether each ring is closed; an open ring is a polyline, e.g. a dimension line."""
 
 
 class OutlineStyle(Contract):
@@ -97,22 +106,37 @@ class ImageryClient:
         return self._http.get_bytes(self._url, params, self._media_type)
 
 
+def blank_image(size_px: tuple[int, int]) -> bytes:
+    """Return a white PNG, the canvas used when no map can be fetched.
+
+    Args:
+        size_px: Image ``(width, height)`` in pixels.
+
+    Returns:
+        PNG bytes.
+    """
+    width, height = size_px
+    pixmap = pymupdf.Pixmap(pymupdf.csRGB, pymupdf.IRect(0, 0, width, height), False)
+    pixmap.clear_with(_CHANNEL_MAX)
+    return bytes(pixmap.tobytes("png"))
+
+
 def draw_outlines(image: bytes, outlines: Sequence[Outline], style: OutlineStyle) -> bytes:
-    """Draw labelled outlines over an image.
+    """Draw labelled outlines over an image, in order, then every label on top.
 
     The image is placed on a temporary PDF page whose size in points equals its size in pixels,
     so MuPDF does the drawing and the PNG encoding; no imaging library is needed.
 
     Args:
         image: Image bytes (PNG or JPEG).
-        outlines: Shapes to draw, in the image's pixel coordinates.
-        style: Colours and sizes.
+        outlines: Shapes to draw, in the image's pixel coordinates; later ones on top.
+        style: Line width, font, label background, and the colour of outlines that set none.
 
     Returns:
         PNG bytes of the same size as ``image``.
     """
     pixmap = pymupdf.Pixmap(image)
-    colour, background = _unit(style.rgb), _unit(style.label_background_rgb)
+    background = _unit(style.label_background_rgb)
     with pymupdf.open() as document:
         page = document.new_page(width=pixmap.width, height=pixmap.height)
         page.insert_image(page.rect, pixmap=pixmap)
@@ -120,12 +144,20 @@ def draw_outlines(image: bytes, outlines: Sequence[Outline], style: OutlineStyle
         for outline in outlines:
             for ring in outline.rings:
                 shape.draw_polyline(ring)
-            shape.finish(color=colour, width=style.width_px, closePath=True)
-        for outline in outlines:
+            shape.finish(
+                color=_unit(outline.rgb or style.rgb),
+                fill=None if outline.fill_rgb is None else _unit(outline.fill_rgb),
+                fill_opacity=outline.fill_opacity,
+                width=style.width_px,
+                closePath=outline.closed,
+                even_odd=True,
+            )
+        for outline in (outline for outline in outlines if outline.label):
             x, y = outline.anchor
             length = pymupdf.get_text_length(outline.label, fontsize=style.font_px)
             shape.draw_rect(pymupdf.Rect(x, y - style.font_px, x + length, y + style.font_px / 4))
             shape.finish(color=None, fill=background)
+            colour = _unit(outline.rgb or style.rgb)
             shape.insert_text((x, y), outline.label, fontsize=style.font_px, color=colour)
         shape.commit()
         return bytes(page.get_pixmap(alpha=False).tobytes("png"))

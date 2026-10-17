@@ -1,11 +1,9 @@
-import math
 from enum import StrEnum
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import Field, FiniteFloat, field_validator, model_validator
+from pydantic import Field, FiniteFloat, model_validator
 
 from agent.contracts.base import Contract
-from agent.contracts.evidence import Limit
 
 type Point = tuple[FiniteFloat, FiniteFloat]
 type Ring = Annotated[tuple[Point, ...], Field(min_length=4)]
@@ -49,83 +47,51 @@ class Boundary(Contract):
     end: Point
 
 
-class EnvelopeParameters(Contract):
-    """Rule values the envelope is computed from. Distances in metres, ratios in [0, 1]."""
+class Level(Contract):
+    """One horizontal slice of a building's massing."""
 
-    setback_road_m: Limit
-    """Minimum distance from road limits."""
-    setback_side_m: Limit
-    """Minimum distance from side limits."""
-    setback_rear_m: Limit
-    """Minimum distance from rear limits."""
-    max_height_m: Limit
-    """Maximum building height, measured as the zone regulation defines it."""
-    max_storeys: Limit
-    """Maximum number of storeys above ground, ground floor included (R+5 = 6)."""
-    max_footprint_ratio: Limit
-    """Maximum built footprint as a share of the site area (emprise au sol)."""
-    min_green_ratio: Limit
-    """Minimum green or open space as a share of the site area."""
-
-    @field_validator("*")
-    @classmethod
-    def _finite_limit(cls, limit: Limit) -> Limit:
-        """Reject non-finite values before geometry calculations."""
-        if limit.value is not None and not math.isfinite(limit.value):
-            msg = "limit values must be finite"
-            raise ValueError(msg)
-        return limit
-
-    @field_validator("setback_road_m", "setback_side_m", "setback_rear_m")
-    @classmethod
-    def _nonnegative_setback(cls, limit: Limit) -> Limit:
-        """Reject negative distances, which would otherwise skip the setback."""
-        if limit.value is not None and limit.value < 0:
-            msg = "setbacks must be nonnegative"
-            raise ValueError(msg)
-        return limit
-
-    @field_validator("max_height_m", "max_storeys")
-    @classmethod
-    def _positive_height(cls, limit: Limit) -> Limit:
-        """Require a positive height or storey count when one is specified."""
-        if limit.value is not None and limit.value <= 0:
-            msg = "height and storey limits must be positive"
-            raise ValueError(msg)
-        return limit
-
-    @field_validator("max_storeys")
-    @classmethod
-    def _whole_storeys(cls, limit: Limit) -> Limit:
-        """Require a whole number of storeys, including the ground floor."""
-        if limit.value is not None and not limit.value.is_integer():
-            msg = "storey limits must be whole numbers"
-            raise ValueError(msg)
-        return limit
+    from_m: float = Field(ge=0)
+    to_m: float = Field(gt=0)
+    area_m2: float = Field(ge=0)
+    """Floor area of the slice: the allowed footprint at its top."""
 
     @model_validator(mode="after")
-    def _ratios_in_range(self) -> Self:
-        """Reject ratios outside [0, 1]."""
-        for limit in (self.max_footprint_ratio, self.min_green_ratio):
-            if limit.value is not None and not 0 <= limit.value <= 1:
-                msg = "ratios must be between 0 and 1"
-                raise ValueError(msg)
+    def _rises(self) -> Self:
+        """Reject a slice whose top is not above its bottom."""
+        if self.to_m <= self.from_m:
+            msg = "a level's to_m must be above its from_m"
+            raise ValueError(msg)
         return self
 
 
-class Envelope(Contract):
-    """Prism envelope computed by deterministic code from the site and the parameters."""
+class BuildingMassing(Contract):
+    """One building's allowed volume, computed by code."""
 
-    site_area_m2: float = Field(gt=0)
+    building: str = Field(min_length=1)
+    """Building label; in a bound, the labels sharing one maximum height, comma-separated."""
     footprint: Polygon | None
-    """Site polygon minus setbacks; ``None`` when nothing remains."""
+    """Its ground footprint; ``None`` when nothing remains for it."""
     footprint_area_m2: float = Field(ge=0)
-    """Area of ``footprint``."""
-    max_footprint_area_m2: float = Field(ge=0)
-    """Smallest of ``footprint_area_m2``, the footprint ratio applied to the site area, and the
-    site area minus ``min_green_area_m2``."""
-    min_green_area_m2: float | None = Field(ge=0)
-    max_height_m: float | None = Field(gt=0)
-    max_volume_m3: float | None = Field(ge=0)
-    """``max_footprint_area_m2`` x ``max_height_m``; ``None`` without a height limit."""
+    """Ground area, after any cap scaling."""
+    max_height_m: float = Field(gt=0)
+    levels: tuple[Level, ...]
+    """One slice for a prism, several when setbacks grow with the height."""
+    volume_m3: float = Field(ge=0)
+
+
+class Scenario(Contract):
+    """The massing of the buildings in one scenario."""
+
+    name: Literal["largest", "windows", "proposal"]
+    footprint: Polygon | None
+    """The plot minus the setbacks at ground level; ``None`` when nothing remains."""
+    footprint_area_m2: float = Field(ge=0)
+    """Area of ``footprint``, before any cap."""
+    buildings: tuple[BuildingMassing, ...]
+    fits: bool
+    """Whether every building has room, with the required spacing."""
+    total_volume_m3: float = Field(ge=0)
+    """Sum of the buildings' volumes; in a bound, the largest alternative."""
     assumptions: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
+    """Why the buildings do not fit, when they do not."""

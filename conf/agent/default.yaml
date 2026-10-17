@@ -40,13 +40,11 @@ tools:
       site: {artifact: site, producer: surveyor}
       zone: {artifact: zone, producer: zoning_analyst}
       notes: {artifact: "notes.{label}", producer: doc_analyst}
+      envelope: {artifact: envelope, producer: architect}
       labels: ${policies.study.required_notes}
-    geometry:
-      _target_: agent.tools.study.gate.GeometrySettings
-      snap_tolerance_m: ${geo.edges.snap_tolerance_m}
-      collinear_angle_deg: ${geo.edges.collinear_angle_deg}
-      quad_segs: ${policies.envelope.quad_segs}
-      min_area_m2: ${policies.envelope.min_area_m2}
+      oap_label: oap                  # the layout's OAP citations must come from notes.oap (the rules' from any notes.*)
+    geometry: ${geo.edge_labels}
+    envelope: ${policies.envelope.settings}
     images: ${images.pages}
     crops_dir:
       _target_: agent.agents.config.project_path

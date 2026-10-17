@@ -12,6 +12,13 @@ edges:                     # agent.runtime.geometry.edges: site_edges and label_
   min_shared_ratio: 0.5    # share of an edge on neighbours' limits for it to face a parcel
   collinear_angle_deg: 20  # direction change that splits a separating limit
 
+# Ready settings node of label_edges, for every caller that labels the site's limits
+# (submit_study, the architect's preview_envelope and submit_envelope).
+edge_labels:
+  _target_: agent.tools.envelope.compute.GeometrySettings
+  snap_tolerance_m: ${geo.edges.snap_tolerance_m}
+  collinear_angle_deg: ${geo.edges.collinear_angle_deg}
+
 http:
   _target_: agent.adapters.http.CachedHttp
   cache_dir:

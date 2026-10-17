@@ -1,5 +1,13 @@
 import pytest
 
+from agent.contracts.envelope import (
+    BuildingLimits,
+    Distance,
+    EnvelopeRules,
+    Layout,
+    OapChoice,
+    SetbackRule,
+)
 from agent.contracts.evidence import (
     Ambiguity,
     Citation,
@@ -13,13 +21,7 @@ from agent.contracts.evidence import (
 )
 from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
 from agent.contracts.findings.zone import LegendItem, ZoneFindings
-from agent.contracts.geometry import (
-    Boundary,
-    BoundaryKind,
-    Envelope,
-    EnvelopeParameters,
-    Polygon,
-)
+from agent.contracts.geometry import Boundary, BoundaryKind, Polygon
 from agent.contracts.study import (
     Admissibility,
     ParkingBasis,
@@ -29,6 +31,7 @@ from agent.contracts.study import (
     Verdict,
     VerifiedStudy,
 )
+from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
 
 SQUARE = ((0.0, 0.0), (40.0, 0.0), (40.0, 30.0), (0.0, 30.0), (0.0, 0.0))
 INNER = ((5.0, 4.0), (36.0, 4.0), (36.0, 25.0), (5.0, 25.0), (5.0, 4.0))
@@ -155,15 +158,6 @@ def study():
                 citations=(USES,),
             ),
         ),
-        envelope=EnvelopeParameters(
-            setback_road_m=limit(5, SETBACK),
-            setback_side_m=limit(4),
-            setback_rear_m=limit(4),
-            max_height_m=limit(20),
-            max_storeys=limit(6),
-            max_footprint_ratio=limit(None),
-            min_green_ratio=limit(0.2),
-        ),
         parking=(
             ParkingRule(
                 use="résidence étudiante",
@@ -189,18 +183,56 @@ def study():
     )
 
 
+def distance(min_m, citation=HEIGHT):
+    return Distance(min_m=min_m, rule="see article", citations=(citation,))
+
+
 @pytest.fixture
-def envelope():
-    return Envelope(
-        site_area_m2=1200,
-        footprint=Polygon(crs="EPSG:2154", exterior=INNER),
-        footprint_area_m2=651,
-        max_footprint_area_m2=651,
-        min_green_area_m2=240,
-        max_height_m=20,
-        max_volume_m3=13020,
-        assumptions=("Setbacks applied as straight offsets.",),
+def rules():
+    return EnvelopeRules(
+        setbacks=(
+            SetbackRule(
+                kind=BoundaryKind.ROAD,
+                on_limit_allowed=False,
+                with_windows=distance(5, SETBACK),
+            ),
+            SetbackRule(kind=BoundaryKind.SIDE, on_limit_allowed=False, with_windows=distance(4)),
+            SetbackRule(kind=BoundaryKind.REAR, on_limit_allowed=True, without_windows=distance(4)),
+        ),
+        buildings=(
+            BuildingLimits(building="A", max_height_m=limit(20), max_storeys=limit(6)),
+            BuildingLimits(building="B", max_height_m=limit(18), max_storeys=limit(None)),
+        ),
+        spacing_with_windows=distance(10),
+        spacing_without_windows=distance(6),
+        max_footprint_ratio=limit(None),
+        min_green_ratio=limit(0.2),
     )
+
+
+@pytest.fixture
+def layout():
+    return Layout(
+        cut="along_long_axis",
+        first_share=0.5,
+        order=("A", "B"),
+        facing_windows=False,
+        oap=(
+            OapChoice(
+                prescription=Rule(
+                    topic="landscape", text="Keep a planted strip.", citations=(OAP,)
+                ),
+                how="B set back behind the strip.",
+            ),
+        ),
+        reasons="A on the street, B at the back.",
+    )
+
+
+@pytest.fixture
+def envelope(rules, layout, site, boundaries):
+    settings = EnvelopeSettings(level_step_m=1, quad_segs=8, min_area_m2=1, cut_tolerance_m=0.01)
+    return compute_envelope_study(site.polygon, boundaries, rules, layout, settings=settings)
 
 
 @pytest.fixture

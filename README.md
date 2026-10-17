@@ -109,18 +109,19 @@ Start with `prompts/playbooks/study.md` for the workflow, then
 1. **Surveyor** chooses cadastral parcels; code builds the site geometry and neutral edges.
 2. **Zoning analyst** reads the raster zoning plan and records zone and legend findings.
 3. **Document analyst** extracts cited notes for the rules and OAP planning orientations.
-4. **Orchestrator** decides uses, limits and ambiguities, then submits a typed `Study`.
-5. **Submission gate** validates inputs, checks quotes against PDF text, requires open points to
+4. **Architect** turns the cited notes into envelope rules and a building layout.
+5. **Orchestrator** decides uses and ambiguities, then submits a typed `Study`.
+6. **Submission gate** validates inputs, checks quotes against PDF text, requires open points to
    be addressed, labels boundaries, computes the envelope and stores evidence crops.
 
-Sub-agents submit typed artifacts (`site`, `zone`, `notes.<label>`) into graph state. The gate
+Sub-agents submit typed artifacts (`site`, `zone`, `notes.<label>`, `envelope`) into graph state. The gate
 produces `VerifiedStudy`, the shared output used by the report and end-to-end scorers.
 Failed submissions return errors for the model to correct; revision tools apply focused edits.
 
-The envelope is currently a **single prism**, capped by setbacks, footprint and green-space
-ratios and maximum height. It does not establish that two buildings fit, calculate parking
-capacity, or model stepped heights. Raster evidence is preserved for inspection but is not
-verified against text. An accepted study is an output that passed these implemented checks.
+The envelope includes bounds and a proposal per building, with setbacks that can vary with
+height. Code recomputes the architect's proposal and checks it against the cited notes.
+Raster evidence is preserved for inspection but is not verified against text. An accepted
+study passed the implemented checks; it does not calculate parking capacity.
 
 ```text
 src/agent/
@@ -185,7 +186,7 @@ the judge when uncached judgement is needed. Outputs include `records/`, `scores
 - [Code review](docs/CODE_REVIEW.md): findings, fixes, field usage and remaining work.
 - [Design](docs/DESIGN.md) and [v1 refinements](docs/REFINE.md): design history; refinements
   supersede the original design where they differ.
-- [Round 2 proposal](docs/REFINE_v2.md): unimplemented envelope and architect design.
+- [Round 2 proposal](docs/REFINE_v2.md): envelope and architect design.
 - [Roadmap](docs/ROADMAP.md): deferred improvements.
 - [CLAUDE.md](CLAUDE.md): contributor map and extension instructions.
 

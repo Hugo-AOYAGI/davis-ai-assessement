@@ -35,7 +35,7 @@ def render_report(verified: VerifiedStudy, *, max_quote_chars: int, crops_link_b
         site_section(verified.site, verified.boundaries, index),
         regime_section(study.regime, verified.zone, index),
         admissibility_section(study.admissibility, index),
-        envelope_section(study.envelope, verified.envelope, index),
+        envelope_section(verified.envelope, index),
         parking_section(study.parking, index),
         conditions_section(study.conditions, index),
         ambiguities_section(study.ambiguities, index),

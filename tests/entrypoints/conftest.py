@@ -1,5 +1,12 @@
 import pytest
 
+from agent.contracts.envelope import (
+    BuildingLimits,
+    Distance,
+    EnvelopeRules,
+    Layout,
+    SetbackRule,
+)
 from agent.contracts.evidence import (
     Ambiguity,
     Citation,
@@ -12,14 +19,9 @@ from agent.contracts.evidence import (
 )
 from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
 from agent.contracts.findings.zone import LegendItem, ZoneFindings
-from agent.contracts.geometry import (
-    Boundary,
-    BoundaryKind,
-    Envelope,
-    EnvelopeParameters,
-    Polygon,
-)
+from agent.contracts.geometry import Boundary, BoundaryKind, Polygon
 from agent.contracts.study import Admissibility, Regime, Study, Verdict, VerifiedStudy
+from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
 
 SQUARE = ((0.0, 0.0), (40.0, 0.0), (40.0, 30.0), (0.0, 30.0), (0.0, 0.0))
 USES = Citation(
@@ -38,6 +40,10 @@ CROP = StoredCrop(
 
 def limit(value):
     return Limit(value=value, rule="see article", citations=() if value is None else (USES,))
+
+
+def distance(min_m):
+    return Distance(min_m=min_m, rule="see article", citations=(USES,))
 
 
 @pytest.fixture
@@ -98,15 +104,6 @@ def verified():
                 citations=(USES,),
             ),
         ),
-        envelope=EnvelopeParameters(
-            setback_road_m=limit(5),
-            setback_side_m=limit(4),
-            setback_rear_m=limit(4),
-            max_height_m=limit(20),
-            max_storeys=limit(6),
-            max_footprint_ratio=limit(None),
-            min_green_ratio=limit(0.2),
-        ),
         parking=(),
         conditions=(),
         ambiguities=(
@@ -119,15 +116,29 @@ def verified():
         ),
         summary="Buildable.",
     )
-    envelope = Envelope(
-        site_area_m2=1200,
-        footprint=None,
-        footprint_area_m2=651,
-        max_footprint_area_m2=651,
-        min_green_area_m2=240,
-        max_height_m=20,
-        max_volume_m3=13020,
+    rules = EnvelopeRules(
+        setbacks=tuple(
+            SetbackRule(kind=kind, on_limit_allowed=False, with_windows=distance(4))
+            for kind in BoundaryKind
+        ),
+        buildings=tuple(
+            BuildingLimits(building=label, max_height_m=limit(20), max_storeys=limit(6))
+            for label in ("RSE", "RJA")
+        ),
+        spacing_with_windows=distance(10),
+        spacing_without_windows=distance(6),
+        max_footprint_ratio=limit(None),
+        min_green_ratio=limit(0.2),
     )
+    layout = Layout(
+        cut="along_long_axis",
+        first_share=0.5,
+        order=("RSE", "RJA"),
+        facing_windows=False,
+        reasons="Halves.",
+    )
+    settings = EnvelopeSettings(level_step_m=1, quad_segs=8, min_area_m2=1, cut_tolerance_m=0.01)
+    envelope = compute_envelope_study(polygon, boundaries, rules, layout, settings=settings)
     checks = (
         CitationCheck(citation=USES, verified=True, score=1.0),
         CitationCheck(citation=HEIGHT, verified=False, score=0.4),

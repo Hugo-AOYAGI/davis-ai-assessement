@@ -103,7 +103,7 @@ def graph_tools(graph) -> dict[str, BaseTool]:
     return cast(ToolNode, graph.nodes["tools"].bound).tools_by_name
 
 
-SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst")
+SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst", "architect")
 OWN_TOOLS = {"read_artifact", "submit_study", "revise_study", "load_playbook", "ask_user"}
 
 
@@ -162,6 +162,15 @@ def test_playbook_tool_reads_configured_files():
     assert text.startswith("# Playbook: buildability study")
     assert "$language" not in text
     assert "French" in text
+
+
+def test_playbook_has_a_task_per_required_notes_label():
+    cfg = load_config()
+    tools = {tool.name: tool for tool in orchestrator_tools(cfg)}
+    text = tools["load_playbook"].invoke({"name": "study"})
+    for label in cfg.policies.study.required_notes:
+        assert f"**Task `{label}`**" in text
+    assert "`uses`" not in text
 
 
 def test_subagent_appears_in_task_tool(cfg):

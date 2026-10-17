@@ -5,8 +5,10 @@ surveyor:
     context to judge which parcels plausibly form the plot). It geocodes the address, inspects
     the nearby cadastral parcels and chooses one parcel or several adjacent ones; code then
     builds the `site` artifact: parcels, union polygon (Lambert-93), area, and every edge with
-    what lies across it (another parcel or public land), with geometric citations. It reports
-    the choice, its rationale and assumptions. Facts only: no zone, no legal labelling of limits.
+    what lies across it (another parcel or public land), with geometric citations. A neighbouring
+    strip it judges to be pavement or verge is declared public land, with its evidence. It
+    reports the choice, its rationale and assumptions. Facts only: no zone, no legal labelling
+    of limits.
   prompt: prompts/subagents/surveyor.md
   model: surveyor
   tools:

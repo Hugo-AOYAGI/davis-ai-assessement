@@ -86,11 +86,17 @@ def test_summary_of_accepted_study(verified):
         ("RJA", Verdict.CONDITIONAL),
     ]
     envelope = summary.study.envelope
-    assert (envelope.site_area_m2, envelope.max_height_m, envelope.max_storeys) == (1200, 20, 6)
+    assert envelope.site_area_m2 == pytest.approx(1200)
     assert envelope.max_footprint_ratio is None
     assert envelope.min_green_ratio == 0.2
-    assert envelope.max_volume_m3 == 13020
-    assert envelope.min_green_area_m2 == 240
+    assert envelope.min_green_area_m2 == pytest.approx(240)
+    assert [bound.name for bound in envelope.bounds] == ["largest", "windows"]
+    assert envelope.bounds[1].footprint_area_m2 == pytest.approx(32 * 22)
+    assert envelope.bounds[1].total_volume_m3 == pytest.approx(32 * 22 * 20)
+    proposal = envelope.proposal
+    assert proposal.fits
+    assert [m.building for m in proposal.buildings] == ["RSE", "RJA"]
+    assert [m.max_height_m for m in proposal.buildings] == [20, 20]
     assert summary.study.ambiguities == 1
     stats = summary.study.citations
     assert (stats.checks, stats.text_verifiable, stats.verified) == (3, 2, 1)
