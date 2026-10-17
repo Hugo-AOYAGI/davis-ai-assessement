@@ -26,29 +26,27 @@ class EnvelopeCitations(Contract):
 def envelope_errors(study: Study, findings: Findings, inputs: StudyInputs) -> list[str]:
     """Check the envelope against the notes and the study.
 
-    Every citation of the envelope rules must be one of the ``rules`` notes, every citation of
-    the layout's OAP choices one of the ``oap`` notes (same document, page and quote, compared
-    after normalisation). The layout must name the buildings of the rules, each no taller than
-    its maximum, and the rules' buildings must be those of the study's admissibility.
+    Every citation of the envelope rules must be one of a notes artifact's (any label: `rules`,
+    `destinations`, or a label re-asked such as `rules_parking`), every citation of the layout's
+    OAP choices one of the ``oap`` notes (same document, page and quote, compared after
+    normalisation). The layout must name the buildings of the rules, each no taller than its
+    maximum, and the rules' buildings must be those of the study's admissibility.
 
     Args:
         study: The submitted study.
         findings: The delivered findings, with the envelope.
-        inputs: Where the notes are stored, the producers and the labels the citations come from.
+        inputs: Where the notes are stored, the producers and the label of the OAP notes.
 
     Returns:
         One ``field.path: message`` line per problem, empty when the envelope is consistent.
     """
     envelope = findings.envelope
     producer = inputs.envelope.producer
-    rules_key = inputs.notes_key(inputs.rules_label)
-    oap_key = inputs.notes_key(inputs.oap_label)
-    errors = _foreign(
-        "envelope.rules", envelope.rules, _notes(findings, inputs.rules_label), rules_key, producer
-    )
-    errors += _foreign(
-        "envelope.layout", envelope.layout, _notes(findings, inputs.oap_label), oap_key, producer
-    )
+    every_key = f"a `{inputs.notes_key('<label>')}` artifact"
+    oap_key = f"`{inputs.notes_key(inputs.oap_label)}`"
+    oap = [notes for notes in findings.notes if notes.label == inputs.oap_label]
+    errors = _foreign("envelope.rules", envelope.rules, findings.notes, every_key, producer)
+    errors += _foreign("envelope.layout", envelope.layout, oap, oap_key, producer)
     errors += [
         f"envelope.{line}. Delegate to {producer} again with the buildings' maximum heights."
         for line in layout_errors(envelope.rules, envelope.layout)
@@ -57,24 +55,24 @@ def envelope_errors(study: Study, findings: Findings, inputs: StudyInputs) -> li
     return errors
 
 
-def _notes(findings: Findings, label: str) -> DocNotes | None:
-    """Return the notes with a label, ``None`` when absent."""
-    return next((notes for notes in findings.notes if notes.label == label), None)
-
-
 def _key(citation: Citation) -> _Key:
     """Return what two citations must share to count as the same: document, page, quote."""
     return citation.doc, citation.page, normalise(citation.quote)
 
 
 def _foreign(
-    prefix: str, part: BaseModel, notes: DocNotes | None, key: str, producer: str
+    prefix: str, part: BaseModel, notes: Iterable[DocNotes], key: str, producer: str
 ) -> list[str]:
-    """List the citations of a part of the envelope that the notes do not hold."""
-    allowed = {_key(citation) for _, citation in collect_citations(notes)} if notes else set()
+    """List the citations of a part of the envelope that the notes do not hold.
+
+    ``key`` names the notes in the message, e.g. ``a `notes.<label>` artifact``.
+    """
+    allowed = {
+        _key(citation) for doc_notes in notes for _, citation in collect_citations(doc_notes)
+    }
     return [
-        f"{prefix}.{path} ({source(citation)}): not a citation of `{key}`. Delegate to "
-        f"{producer} again: every citation must be copied exactly from `{key}`."
+        f"{prefix}.{path} ({source(citation)}): not a citation of {key}. Delegate to "
+        f"{producer} again: every citation must be copied exactly from {key}."
         for path, citation in collect_citations(part)
         if _key(citation) not in allowed
     ]

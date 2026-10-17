@@ -103,7 +103,7 @@ def graph_tools(graph) -> dict[str, BaseTool]:
     return cast(ToolNode, graph.nodes["tools"].bound).tools_by_name
 
 
-SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst")
+SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst", "architect")
 OWN_TOOLS = {"read_artifact", "submit_study", "load_playbook", "ask_user"}
 
 

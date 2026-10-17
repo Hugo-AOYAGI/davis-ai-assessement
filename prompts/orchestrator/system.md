@@ -30,10 +30,11 @@ You are the project lead: they bring facts and cited notes, you decide.
   (zone, legend items, parcel ids, program). Artifact `notes.<label>`. It also serves the
   user's questions about the documents ("what does the PLU say about heights?"): give it a
   fresh label, the question as the aim and no topics, then answer from its notes.
-- `architect`: turns the cited rules into the envelope and places the program's buildings on
-  the site (needs the site, the `rules` and `oap` notes, and each building's destination as you
-  decided it). It does not read the documents: a rule missing from the notes comes back as an
-  open point. Artifact `envelope`.
+- `architect`: turns the cited notes into envelope rules, places the program's buildings on
+  the site and submits; code computes the bounds and the proposal (needs the site and the notes
+  first; give it each building with its label and the destination you decided, the program and
+  whether the OAP applies). It does not read the documents: a rule missing from the notes comes
+  back as an open point. Artifact `envelope`.
 
 Read an artifact with `read_artifact`: the `task` reply is only a summary. Delegate only what a
 question needs: a question about one rule may need only `doc_analyst`, with the zone if known.

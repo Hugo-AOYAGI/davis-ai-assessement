@@ -35,8 +35,6 @@ class StudyInputs(Contract):
     envelope: Delivery
     labels: tuple[str, ...]
     """Labels of the notes every study needs, e.g. ``rules``, ``oap`` and ``destinations``."""
-    rules_label: str
-    """Label of the notes every citation of the envelope rules must come from."""
     oap_label: str
     """Label of the notes every citation of the layout's OAP choices must come from."""
 

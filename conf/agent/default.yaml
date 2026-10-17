@@ -42,12 +42,8 @@ tools:
       notes: {artifact: "notes.{label}", producer: doc_analyst}
       envelope: {artifact: envelope, producer: architect}
       labels: ${policies.study.required_notes}
-      rules_label: rules              # the envelope rules' citations must come from notes.rules
-      oap_label: oap                  # the layout's OAP citations must come from notes.oap
-    geometry:
-      _target_: agent.tools.study.gate.GeometrySettings
-      snap_tolerance_m: ${geo.edges.snap_tolerance_m}
-      collinear_angle_deg: ${geo.edges.collinear_angle_deg}
+      oap_label: oap                  # the layout's OAP citations must come from notes.oap (the rules' from any notes.*)
+    geometry: ${geo.edge_labels}
     envelope: ${policies.envelope.settings}
     images: ${images.pages}
     crops_dir:

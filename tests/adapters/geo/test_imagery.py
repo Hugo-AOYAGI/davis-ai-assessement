@@ -2,7 +2,13 @@ import httpx
 import pymupdf
 import pytest
 
-from agent.adapters.geo.imagery import ImageryClient, Outline, OutlineStyle, draw_outlines
+from agent.adapters.geo.imagery import (
+    ImageryClient,
+    Outline,
+    OutlineStyle,
+    blank_image,
+    draw_outlines,
+)
 from agent.adapters.http import CachedHttp, ServiceError
 
 URL = "https://data.geopf.fr/wms-r/wms"
@@ -75,3 +81,29 @@ def test_draw_outlines_keeps_size_and_paints_the_outline():
     assert green < 60
     assert blue < 60
     assert drawn.pixel(80, 70) == (255, 255, 255)
+
+
+def test_blank_image_is_white():
+    blank = pymupdf.Pixmap(blank_image((30, 20)))
+    assert (blank.width, blank.height) == (30, 20)
+    assert blank.pixel(15, 10) == (255, 255, 255)
+
+
+def test_filled_outline_with_a_hole_and_its_own_colour():
+    outer = ((10.0, 10.0), (90.0, 10.0), (90.0, 70.0), (10.0, 70.0), (10.0, 10.0))
+    hole = ((40.0, 30.0), (60.0, 30.0), (60.0, 50.0), (40.0, 50.0), (40.0, 30.0))
+    outline = Outline(
+        label="", rings=(outer, hole), anchor=(0.0, 0.0), rgb=(0, 0, 255), fill_rgb=(0, 0, 255)
+    )
+    drawn = pymupdf.Pixmap(draw_outlines(blank_image((100, 80)), [outline], STYLE))
+    assert drawn.pixel(20, 40) == (0, 0, 255)
+    assert drawn.pixel(50, 40) == (255, 255, 255)
+    assert drawn.pixel(95, 75) == (255, 255, 255)
+
+
+def test_open_outline_is_not_closed():
+    corner = ((10.0, 10.0), (90.0, 10.0), (90.0, 70.0))
+    outline = Outline(label="", rings=(corner,), anchor=(0.0, 0.0), closed=False)
+    drawn = pymupdf.Pixmap(draw_outlines(blank_image((100, 80)), [outline], STYLE))
+    assert drawn.pixel(50, 10)[0] > 200
+    assert drawn.pixel(50, 40) == (255, 255, 255)
