@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, JsonValue
 
 from agent.contracts.evidence import Citation, Limit, SourceKind
-from agent.runtime.citations.collect import collect_citations
+from agent.runtime.citations.collect import collect_citations, collect_json_citations
 
 
 def cite(quote):
@@ -42,3 +42,20 @@ def test_collects_every_citation_with_its_path_in_field_order():
 
 def test_model_without_citations_yields_nothing():
     assert collect_citations(Limit(value=None, rule="r")) == ()
+
+
+def test_collects_json_citations_with_their_paths():
+    a, b = cite("a"), cite("b")
+    data: JsonValue = {
+        "zone": "UMG",
+        "notes": [{"topic": "height", "citations": [a.model_dump(mode="json")]}],
+        "limit": {"value": 20, "citations": [b.model_dump(mode="json")]},
+    }
+    assert list(collect_json_citations(data, "notes.rules")) == [
+        ("notes.rules.notes.0.citations.0", a),
+        ("notes.rules.limit.citations.0", b),
+    ]
+
+
+def test_json_without_citations_yields_nothing():
+    assert list(collect_json_citations({"a": [1, "x", None]}, "root")) == []

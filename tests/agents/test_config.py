@@ -8,7 +8,7 @@ from agent.contracts.inputs.case import Case
 from agent.llm.factory import build_model
 
 SUBAGENTS = ["surveyor", "zoning_analyst", "doc_analyst"]
-NODES = {"orchestrator", *SUBAGENTS, "ingest_classifier"}
+NODES = {"orchestrator", *SUBAGENTS, "ingest_classifier", "judge"}
 
 
 def test_groups_compose():

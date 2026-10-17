@@ -30,8 +30,8 @@ METRICS = RunMetrics(
 )
 
 
-def submit_call(call_id):
-    return {"name": "submit_study", "args": {}, "id": call_id, "type": "tool_call"}
+def submit_call(call_id, name="submit_study"):
+    return {"name": name, "args": {}, "id": call_id, "type": "tool_call"}
 
 
 MESSAGES = [
@@ -110,6 +110,18 @@ def test_pass_rate_none_without_checkable_citations():
 
 def test_rejected_submissions_counts_gate_errors_only():
     assert rejected_submissions(MESSAGES, "submit_study") == 1
+
+
+def test_rejected_submissions_counts_rejected_revisions():
+    messages = [
+        *MESSAGES[:3],
+        AIMessage("", tool_calls=[submit_call("r1", "revise_study")]),
+        ToolMessage("rejected again", tool_call_id="r1", status="error"),
+        AIMessage("", tool_calls=[submit_call("r2", "revise_study")]),
+        ToolMessage("study accepted.", tool_call_id="r2"),
+    ]
+    assert rejected_submissions(messages, "submit_study") == 2
+    assert rejected_submissions(messages, "submit_notes") == 0
 
 
 def test_final_text():

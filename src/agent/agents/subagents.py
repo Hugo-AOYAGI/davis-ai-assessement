@@ -1,4 +1,4 @@
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 
 from deepagents import CompiledSubAgent
 from hydra.utils import instantiate
@@ -26,27 +26,30 @@ type AgentGraph = CompiledStateGraph[ArtifactsState]  # ty: ignore[invalid-type-
 def build_tools(nodes: Iterable[DictConfig]) -> list[BaseTool]:
     """Instantiate tool factories declared in config as ``_target_`` nodes.
 
-    Each node calls a factory returning a LangChain tool, e.g.
-    ``{_target_: agent.tools.submit.factory.submit_tool, artifact: site, contract: ...}``.
-    Nested ``_target_`` nodes (such as ``hydra.utils.get_class`` for a contract) are
-    instantiated first.
+    Each node calls a factory returning a LangChain tool, or a sequence of tools built together,
+    e.g. ``{_target_: agent.tools.submit.factory.submit_tools, artifact: site, contract: ...}``
+    builds ``submit_parcel`` and ``revise_parcel``. Nested ``_target_`` nodes (such as
+    ``hydra.utils.get_class`` for a contract) are instantiated first.
 
     Args:
         nodes: The ``tools`` list of an agent or sub-agent config.
 
     Returns:
-        The tools, in config order.
+        The tools, in config order, sequences flattened.
 
     Raises:
-        TypeError: If a node does not build a ``BaseTool``.
+        TypeError: If a node builds something other than a ``BaseTool`` or a sequence of them.
     """
     tools: list[BaseTool] = []
     for node in nodes:
-        tool = instantiate(node, _convert_="all")
-        if not isinstance(tool, BaseTool):
-            msg = f"tool node {node.get('_target_')!r} built {type(tool).__name__}, not a BaseTool"
-            raise TypeError(msg)
-        tools.append(tool)
+        built = instantiate(node, _convert_="all")
+        group = built if isinstance(built, Sequence) and not isinstance(built, str) else [built]
+        for tool in group:
+            if not isinstance(tool, BaseTool):
+                target = node.get("_target_")
+                msg = f"tool node {target!r} built {type(tool).__name__}, not a BaseTool"
+                raise TypeError(msg)
+            tools.append(tool)
     return tools
 
 

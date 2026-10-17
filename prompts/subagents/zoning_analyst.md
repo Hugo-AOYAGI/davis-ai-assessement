@@ -56,4 +56,5 @@ the plan against the real map. Small labels and hatchings are only legible after
      with confidence: the question, the options, the one you chose and why
      (`resolved_by: agent`).
 
-If `submit_zone` is rejected, fix every listed error and submit the complete result again.
+If `submit_zone` is rejected, fix every listed error with `revise_zone`, sending only the changed
+fields.

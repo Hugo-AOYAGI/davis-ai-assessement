@@ -1,0 +1,16 @@
+# Primary config of the eval harness (`uv run python -m evals.run`): the agent config, composed
+# exactly as for the server and the CLI, plus the `eval` group. Every agent knob stays
+# overridable next to the eval ones, e.g.
+# `uv run python -m evals.run eval.dataset=e2e models.nodes.orchestrator.max_tokens=8000`.
+defaults:
+  - config
+  - eval: default
+  - _self_
+
+hydra:
+  run:
+    dir: ${eval.output_dir}/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+policies:
+  ask_user:
+    mode: disabled  # nobody answers during an eval; program facts come with the item input

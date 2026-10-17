@@ -1,0 +1,22 @@
+id: z01_zone_boundary
+level: zoning
+tests: site across a zone boundary
+status: draft                           # verified once the placeholders are filled
+built_by: claude
+input:                                  # the task text the orchestrator writes, never upstream output
+  address: <address of a site across the UA / UH boundary>
+  parcel_ids: [<parcel id>]
+  program: housing
+facts:
+  - key: zone
+    any_of: [UA, UH]                    # the plan splits the site: either is accepted
+    critical: true
+    source: gpu_2021                    # 62 % UA, 38 % UH
+  - key: overlays
+    present: [Espaces Boisés Classés]   # labels exactly as printed in the plan's legend
+    absent:
+      - Emplacements réservés pour équipements et aménagements divers, création ou amélioration de voirie
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+    source: gpu_2021
+must_flag:
+  - The site lies across a zone boundary (UA / UH)

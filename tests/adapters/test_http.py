@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import httpx
 import pytest
 
@@ -54,6 +56,37 @@ def test_cache_dir_is_created_lazily(tmp_path, json_transport):
     cache_dir = tmp_path / "nested" / "cache"
     CachedHttp(cache_dir, timeout_s=5, transport=json_transport).get_json(URL, {"q": "x"})
     assert cache_dir.is_dir()
+
+
+def test_cache_body_is_complete_before_publishing(tmp_path, json_transport, monkeypatch):
+    original_replace = Path.replace
+    published = []
+
+    def inspect_publish(source, target):
+        assert source.parent == target.parent == tmp_path
+        assert not target.exists()
+        assert source.read_bytes() == b'{"features":[1,2]}'
+        published.append(target)
+        return original_replace(source, target)
+
+    monkeypatch.setattr(Path, "replace", inspect_publish)
+    result = CachedHttp(tmp_path, 5, json_transport).get_json(URL, {"q": "x"})
+
+    assert result == {"features": [1, 2]}
+    assert len(published) == 1
+    assert list(tmp_path.glob("*.tmp")) == []
+
+
+def test_cache_publish_failure_removes_temporary_file(tmp_path, json_transport, monkeypatch):
+    def refuse_publish(source, target):
+        raise OSError("disk failure")
+
+    monkeypatch.setattr(Path, "replace", refuse_publish)
+
+    with pytest.raises(OSError, match="disk failure"):
+        CachedHttp(tmp_path, 5, json_transport).get_json(URL, {"q": "x"})
+
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_bytes_are_cached_with_their_extension(tmp_path, png_transport, guard_transport):

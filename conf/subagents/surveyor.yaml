@@ -19,7 +19,7 @@ surveyor:
     - _target_: agent.tools.geo.parcels.describe_parcels_tool
       surveyor: ${geo.surveyor}
     - ${geo.site_view}
-    - _target_: agent.tools.submit.factory.submit_tool
+    - _target_: agent.tools.submit.factory.submit_tools  # submit_<x> and revise_<x>
       name: submit_parcel
       artifact: site
       contract:

@@ -1,0 +1,50 @@
+# Eval harness knobs: how one item is run (evals/harness/tasks.py) and judged
+# (evals/harness/judge.py). Included by conf/eval/default.yaml, so they read `eval.eval_tasks.*`
+# and `eval.judge.*`; select it alone with `+eval=harness`.
+
+eval_tasks:
+  subagents:                 # sub-agent under test per component level
+    surveyor: surveyor
+    zoning: zoning_analyst
+    doc: doc_analyst
+  artifacts:                 # artifact holding the component output; {label} from the doc task
+    surveyor: site
+    zoning: zone
+    doc: "notes.{label}"
+  templates:                 # task text per component level, as the orchestrator writes it
+    surveyor: prompts/evals/tasks/surveyor.md
+    zoning: prompts/evals/tasks/zoning.md
+    doc: prompts/evals/tasks/doc.md
+  texts:                     # words filled into a task text when the item leaves a field empty
+    none: none
+    no_program: not given
+    all_documents: every corpus document
+  recursion_limit: 100       # graph steps of a component run; e2e uses agent.recursion_limit
+  max_rejection_chars: 300   # length kept of each rejected submission's error reply
+
+judge:
+  model: judge               # key in models.nodes
+  structured_output: json_schema  # Opus 5.5 rejects the forced tool call of `function_calling`
+  system: prompts/evals/judge/system.md
+  questions:                 # one template per question kind ($output, $subject)
+    must_flag: prompts/evals/judge/assertions/must_flag.md
+    must_not: prompts/evals/judge/assertions/must_not.md
+    covers: prompts/evals/judge/assertions/covers.md
+    hedging: prompts/evals/judge/quality/hedging.md
+    deferral: prompts/evals/judge/quality/deferral.md
+    invented_rule: prompts/evals/judge/reasoning/invented_rule.md
+    restating: prompts/evals/judge/quality/restating.md
+    inconsistency: prompts/evals/judge/reasoning/inconsistency.md
+    unflagged_gap: prompts/evals/judge/reasoning/unflagged_gap.md
+  cache_dir: data/cache/judge  # answers keyed by model settings + prompts + inputs
+  views:                     # what the judge reads of an end-to-end study (its report)
+    max_quote_chars: 400     # quotes are cut beyond this length in the citations table
+    crops_link_base: evidence
+  validation:                # deliberately broken studies (evals/harness/judging/mutations.py)
+    limit: max_height_m      # the limit changed, hedged and contradicted
+    shift: 3                 # added to its value (changed, contradicted) or taken off (hedge)
+    hedge: "Depending on the reading, the maximum is between {low:g} and {high:g} m."
+    contradiction: "\n\nIn short, buildings may rise to {value:g} m."
+    invented_topic: appearance
+    invented_rule: >-
+      Every roof must be covered with red clay tiles and every facade rendered in white lime.

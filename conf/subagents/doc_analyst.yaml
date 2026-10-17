@@ -35,7 +35,7 @@ doc_analyst:
       pages: ${images.pages}
       store: ${images.store}
     - ${geo.site_view}
-    - _target_: agent.tools.submit.factory.submit_tool
+    - _target_: agent.tools.submit.factory.submit_tools  # submit_<x> and revise_<x>
       name: submit_notes
       artifact: "notes.{label}"
       contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.notes.DocNotes}

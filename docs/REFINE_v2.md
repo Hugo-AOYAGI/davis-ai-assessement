@@ -1,8 +1,8 @@
 # Refinements, round 2: envelope, `architect`, destinations
 
-Decisions taken after [REFINE.md](REFINE.md). **Where this file and REFINE.md differ, this file
-wins.** Done before the eval sets are written, because it changes the scored output
-(`VerifiedStudy.envelope`).
+**Status: proposal, not implemented.** The running system follows [REFINE.md](REFINE.md)
+and computes a single prism envelope. This document proposes a later architecture; its
+contracts, sub-agents and output format do not describe the current code.
 
 ---
 

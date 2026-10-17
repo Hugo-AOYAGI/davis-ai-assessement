@@ -104,7 +104,7 @@ def graph_tools(graph) -> dict[str, BaseTool]:
 
 
 SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst")
-OWN_TOOLS = {"read_artifact", "submit_study", "load_playbook", "ask_user"}
+OWN_TOOLS = {"read_artifact", "submit_study", "revise_study", "load_playbook", "ask_user"}
 
 
 def test_default_config_builds():
@@ -182,7 +182,7 @@ def test_gate_corpus_is_loaded_lazily(monkeypatch):
     cfg = with_tester()
     build(cfg)
     assert calls == []
-    [gate] = [node for node in cfg.agent.tools if node._target_.endswith(".submit_study_tool")]
+    [gate] = [node for node in cfg.agent.tools if node._target_.endswith(".submit_study_tools")]
     provider = instantiate(gate.corpus)
     assert calls == []
     assert provider() == "corpus"
@@ -192,6 +192,26 @@ def test_gate_corpus_is_loaded_lazily(monkeypatch):
 def test_build_tools_instantiates_submit_tool():
     tools = build_tools(OmegaConf.create([SUBMIT_NOTES]))
     assert [tool.name for tool in tools] == ["submit_notes"]
+
+
+def test_build_tools_flattens_tool_lists():
+    pair = {**SUBMIT_NOTES, "_target_": "agent.tools.submit.factory.submit_tools"}
+    tools = build_tools(OmegaConf.create([pair, SUBMIT_NOTES]))
+    assert [tool.name for tool in tools] == ["submit_notes", "revise_notes", "submit_notes"]
+
+
+def test_build_tools_rejects_lists_of_non_tools():
+    with pytest.raises(TypeError, match="built int, not a BaseTool"):
+        build_tools(OmegaConf.create([{"_target_": "builtins.list", "_args_": [[1]]}]))
+
+
+@pytest.mark.parametrize(
+    ("name", "artifact"),
+    [("surveyor", "parcel"), ("zoning_analyst", "zone"), ("doc_analyst", "notes")],
+)
+def test_default_subagents_have_revise_tools(name, artifact):
+    tools = {tool.name for tool in build_tools(load_config().subagents[name].tools)}
+    assert {f"submit_{artifact}", f"revise_{artifact}"} <= tools
 
 
 def test_build_tools_rejects_non_tools():

@@ -1,7 +1,7 @@
 """Smoke-check the Agent Server: start ``langgraph dev``, wait for health, run one message.
 
 Usage: ``uv run python scripts/smoke_server.py [--port 2025]``. Costs one short orchestrator
-call. The server output is kept in a log file whose path is logged.
+call unless ``--startup-only`` is set. The server output is kept in a log file whose path is logged.
 """
 
 import argparse
@@ -37,6 +37,7 @@ class Options(BaseModel):
     poll_interval: float
     log_tail: int
     log_level: str
+    startup_only: bool
 
 
 def parse_options(argv: Sequence[str] | None = None) -> Options:
@@ -57,6 +58,9 @@ def parse_options(argv: Sequence[str] | None = None) -> Options:
     parser.add_argument("--poll-interval", type=float, default=2.0, help="seconds")
     parser.add_argument("--log-tail", type=int, default=40, help="server lines shown on error")
     parser.add_argument("--log-level", default="INFO")
+    parser.add_argument(
+        "--startup-only", action="store_true", help="check graph schema without an LLM call"
+    )
     return Options.model_validate(vars(parser.parse_args(argv)))
 
 
@@ -214,7 +218,18 @@ def main(argv: Sequence[str] | None = None) -> int:
             with httpx.Client(base_url=f"http://127.0.0.1:{options.port}") as client:
                 wait_ready(client, process, options)
                 logger.info("server ready on port %d", options.port)
-                reply = run_message(client, options)
+                if options.startup_only:
+                    assistant = (
+                        client.post("/assistants", json={"graph_id": options.assistant})
+                        .raise_for_status()
+                        .json()
+                    )
+                    client.get(
+                        f"/assistants/{assistant['assistant_id']}/schemas"
+                    ).raise_for_status()
+                    reply = "startup and graph schema verified (no model call)"
+                else:
+                    reply = run_message(client, options)
         except (RuntimeError, httpx.HTTPError) as error:
             logger.error("smoke check failed: %s", error)
             log_tail(log_path, options.log_tail)

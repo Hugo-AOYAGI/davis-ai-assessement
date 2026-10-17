@@ -14,13 +14,15 @@ _HYDRA_VERSION_BASE = "1.3"
 _COMPOSE_LOCK = threading.Lock()
 
 
-def load_config(overrides: Sequence[str] = ()) -> DictConfig:
+def load_config(overrides: Sequence[str] = (), *, config_name: str = _CONFIG_NAME) -> DictConfig:
     """Compose the Hydra config from ``conf/``; the single loader for server, CLI and evals.
 
     Hydra's compose API sets process-global state, so calls are serialised.
 
     Args:
         overrides: Hydra override strings, e.g. ``["models.nodes.orchestrator.max_tokens=8000"]``.
+        config_name: Primary config: ``config`` for the agent, ``eval`` for the eval harness
+            (the agent config plus the ``eval`` group).
 
     Returns:
         The composed config (without the ``hydra`` node).
@@ -29,7 +31,7 @@ def load_config(overrides: Sequence[str] = ()) -> DictConfig:
         _COMPOSE_LOCK,
         initialize_config_dir(config_dir=str(_CONFIG_DIR), version_base=_HYDRA_VERSION_BASE),
     ):
-        return compose(config_name=_CONFIG_NAME, overrides=list(overrides))
+        return compose(config_name=config_name, overrides=list(overrides))
 
 
 def project_path(relative: str) -> Path:

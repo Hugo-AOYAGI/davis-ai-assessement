@@ -1,12 +1,14 @@
+import math
 from enum import StrEnum
-from typing import Self
+from typing import Annotated, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, FiniteFloat, field_validator, model_validator
 
 from agent.contracts.base import Contract
 from agent.contracts.evidence import Limit
 
-type Point = tuple[float, float]
+type Point = tuple[FiniteFloat, FiniteFloat]
+type Ring = Annotated[tuple[Point, ...], Field(min_length=4)]
 
 
 class Polygon(Contract):
@@ -14,9 +16,9 @@ class Polygon(Contract):
 
     crs: str = Field(min_length=1)
     """CRS identifier, e.g. ``EPSG:2154``."""
-    exterior: tuple[Point, ...] = Field(min_length=4)
+    exterior: Ring
     """Closed ring: the first and last points are equal."""
-    holes: tuple[tuple[Point, ...], ...] = ()
+    holes: tuple[Ring, ...] = ()
 
     @model_validator(mode="after")
     def _rings_closed(self) -> Self:
@@ -64,6 +66,42 @@ class EnvelopeParameters(Contract):
     """Maximum built footprint as a share of the site area (emprise au sol)."""
     min_green_ratio: Limit
     """Minimum green or open space as a share of the site area."""
+
+    @field_validator("*")
+    @classmethod
+    def _finite_limit(cls, limit: Limit) -> Limit:
+        """Reject non-finite values before geometry calculations."""
+        if limit.value is not None and not math.isfinite(limit.value):
+            msg = "limit values must be finite"
+            raise ValueError(msg)
+        return limit
+
+    @field_validator("setback_road_m", "setback_side_m", "setback_rear_m")
+    @classmethod
+    def _nonnegative_setback(cls, limit: Limit) -> Limit:
+        """Reject negative distances, which would otherwise skip the setback."""
+        if limit.value is not None and limit.value < 0:
+            msg = "setbacks must be nonnegative"
+            raise ValueError(msg)
+        return limit
+
+    @field_validator("max_height_m", "max_storeys")
+    @classmethod
+    def _positive_height(cls, limit: Limit) -> Limit:
+        """Require a positive height or storey count when one is specified."""
+        if limit.value is not None and limit.value <= 0:
+            msg = "height and storey limits must be positive"
+            raise ValueError(msg)
+        return limit
+
+    @field_validator("max_storeys")
+    @classmethod
+    def _whole_storeys(cls, limit: Limit) -> Limit:
+        """Require a whole number of storeys, including the ground floor."""
+        if limit.value is not None and not limit.value.is_integer():
+            msg = "storey limits must be whole numbers"
+            raise ValueError(msg)
+        return limit
 
     @model_validator(mode="after")
     def _ratios_in_range(self) -> Self:

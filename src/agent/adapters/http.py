@@ -1,6 +1,8 @@
 import hashlib
 import json
 import mimetypes
+import os
+import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
@@ -99,10 +101,17 @@ class CachedHttp:
         return self._cache_dir / f"{_cache_key(url, params)}{suffix}"
 
     def _store(self, path: Path, body: bytes) -> None:
-        """Write a response body to the cache."""
+        """Publish a complete response atomically so concurrent readers see no partial body."""
         _LOGGER.debug("cache store %s", path.name)
         self._cache_dir.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(body)
+        handle, name = tempfile.mkstemp(dir=self._cache_dir, suffix=".tmp")
+        temporary = Path(name)
+        try:
+            with os.fdopen(handle, "wb") as file:
+                file.write(body)
+            temporary.replace(path)
+        finally:
+            temporary.unlink(missing_ok=True)
 
     def _fetch(self, url: str, params: Mapping[str, str]) -> httpx.Response:
         """Perform the request.

@@ -1,5 +1,7 @@
 """The ``submit_study`` gate: the orchestrator's final submission, checked and completed.
 
+It comes with ``revise_study``, which fixes a rejected study by edits instead of resubmitting it.
+
 Declared in the orchestrator's ``tools`` list (``conf/agent/default.yaml``). ``corpus`` is a
 provider (``_partial_: true``) called on the first submission only.
 """
@@ -30,7 +32,7 @@ from agent.tools.study.inputs import (
 )
 from agent.tools.study.messages import describe_accepted, describe_open_point, describe_unsaved_crop
 from agent.tools.submit.artifacts import ArtifactData
-from agent.tools.submit.factory import SubmissionRejected, submit_tool
+from agent.tools.submit.factory import SubmissionRejected, submit_tools
 
 
 class CropStore(Protocol):
@@ -58,7 +60,7 @@ class GeometrySettings(Contract):
     """Footprint parts smaller than this are discarded as slivers."""
 
 
-def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
+def submit_study_tools(  # noqa: PLR0913 - one argument per configured bundle
     *,
     name: str,
     artifact: str,
@@ -68,8 +70,8 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
     geometry: GeometrySettings,
     images: CropStore,
     crops_dir: Path,
-) -> BaseTool:
-    """Build the tool that turns a ``Study`` into a ``VerifiedStudy``.
+) -> list[BaseTool]:
+    """Build the tool that turns a ``Study`` into a ``VerifiedStudy``, and its revise tool.
 
     On each submission the gate reads the site, the zone and the required document notes
     delivered by the sub-agents (a missing one refuses the study, naming the sub-agent to
@@ -78,7 +80,8 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
     against the corpus, as ``check_submission`` describes; labels the site edges road / side /
     rear; computes the envelope; and saves the zoning plan region and every note view as
     evidence crops. All open point and citation errors are reported together. On acceptance the
-    reply gives the envelope figures for the orchestrator's answer.
+    reply gives the envelope figures for the orchestrator's answer. ``revise_study`` applies
+    edits to the last rejected study and runs the same checks.
 
     Args:
         name: Tool name (``submit_study``).
@@ -91,7 +94,7 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
         crops_dir: Directory the crops are written to.
 
     Returns:
-        The submit tool, whose argument schema is ``Study``.
+        ``[submit_study, revise_study]``; the submit tool's argument schema is ``Study``.
     """
 
     @cache
@@ -125,7 +128,7 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
             evidence=_save_crops(evidence_regions(findings, inputs), images, crops_dir),
         )
 
-    return submit_tool(
+    return submit_tools(
         name=name,
         artifact=artifact,
         contract=Study,

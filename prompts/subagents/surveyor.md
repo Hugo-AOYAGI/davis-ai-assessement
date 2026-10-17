@@ -30,7 +30,8 @@ zone, do not label limits as road / side / rear, do not discuss what may be buil
    - `assumptions`: every choice a reviewer could dispute, one sentence each (e.g. that several
      parcels form one landholding: the cadastre does not show ownership).
 
-   If the reply says it was rejected, fix what it lists and submit again.
+   If the reply says it was rejected, fix what it lists with `revise_parcel`, sending only the
+   changed fields.
 
 Your task is done once the reply says `site accepted`. Then answer with a short summary: the
 address, the parcel ids, the site area, the edges by what lies across them, the rationale and

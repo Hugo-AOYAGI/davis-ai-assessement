@@ -19,7 +19,7 @@ no_facts: "- none given"
 
 tools:
   - _target_: agent.tools.submit.reader.read_artifact_tool
-  - _target_: agent.tools.study.gate.submit_study_tool
+  - _target_: agent.tools.study.gate.submit_study_tools   # submit_study and revise_study
     name: submit_study
     artifact: study
     corpus:                           # provider, called on the first submission

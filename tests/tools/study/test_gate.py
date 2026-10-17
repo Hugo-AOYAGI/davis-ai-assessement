@@ -29,7 +29,7 @@ from agent.contracts.geometry import BoundaryKind, EnvelopeParameters, Polygon
 from agent.contracts.inputs.corpus import Corpus, Document, DocumentKind, Page
 from agent.contracts.study import Admissibility, Regime, Study, Verdict, VerifiedStudy
 from agent.tools.study.checks import citation_rules
-from agent.tools.study.gate import GeometrySettings, submit_study_tool
+from agent.tools.study.gate import GeometrySettings, submit_study_tools
 from agent.tools.study.inputs import Delivery, StudyInputs
 
 PAGES = (
@@ -249,9 +249,9 @@ def images(tmp_path):
 
 
 @pytest.fixture
-def make_gate(tmp_path, images):
+def make_pair(tmp_path, images):
     def make(policy="reject", corpus=fixture_corpus, store=None):
-        return submit_study_tool(
+        return submit_study_tools(
             name="submit_study",
             artifact="study",
             corpus=corpus,
@@ -272,6 +272,15 @@ def make_gate(tmp_path, images):
 
 
 @pytest.fixture
+def make_gate(make_pair):
+    def make(**kwargs):
+        submit, _ = make_pair(**kwargs)
+        return submit
+
+    return make
+
+
+@pytest.fixture
 def findings(site, zone, rules, oap):
     return {
         "site": site.model_dump(mode="json"),
@@ -284,19 +293,28 @@ def findings(site, zone, rules, oap):
 FABRICATED = regulatory(326, "UMG 10", "La hauteur des constructions est limitée à 35 mètres")
 
 
-def invoke(tool, study, artifacts):
+def call(tool, args, artifacts, messages=()):
     runtime = ToolRuntime(
-        state={"messages": [], "artifacts": artifacts},
+        state={"messages": list(messages), "artifacts": artifacts},
         context=None,
         config={},
         stream_writer=lambda _: None,
         tool_call_id="1",
         store=None,
     )
-    args = {**study.model_dump(mode="json"), "runtime": runtime}
-    result = tool.invoke({"type": "tool_call", "id": "1", "name": tool.name, "args": args})
+    payload = {
+        "type": "tool_call",
+        "id": "1",
+        "name": tool.name,
+        "args": {**args, "runtime": runtime},
+    }
+    result = tool.invoke(payload)
     assert isinstance(result, Command)
     return cast("Command[str]", result)
+
+
+def invoke(tool, study, artifacts):
+    return call(tool, study.model_dump(mode="json"), artifacts)
 
 
 def message(command):
@@ -376,6 +394,25 @@ def test_evidence_crops_are_saved_once(make_gate, study, findings, images, tmp_p
     for crop in verified.evidence:
         assert (tmp_path / crop.path).is_file()
         assert crop.path.startswith("crops/")
+
+
+def test_revise_study_fixes_a_rejected_citation(make_pair, study, findings):
+    submit, revise = make_pair()
+    assert revise.name == "revise_study"
+    rejected = message(invoke(submit, citing(study, FABRICATED), findings))
+    assert "Fix these errors with revise_study" in rejected.content
+    edit = {"path": "regime.citations.0", "value": ZONE.model_dump(mode="json")}
+    verified = stored(call(revise, {"edits": [edit]}, findings, [rejected]))
+    assert verified.study == citing(study, ZONE)
+
+
+def test_revise_study_without_edits_checks_again(make_pair, study, findings):
+    submit, revise = make_pair()
+    partial = {key: value for key, value in findings.items() if key != "site"}
+    rejected = message(invoke(submit, study, partial))
+    assert "no `site` artifact in state" in rejected.content
+    verified = stored(call(revise, {"edits": []}, findings, [rejected]))
+    assert verified.study == study
 
 
 def test_rejected_study_saves_no_crop(make_gate, study, findings, images):
@@ -497,7 +534,7 @@ def test_notes_key_needs_a_label_placeholder():
         )
 
 
-def test_config_node_builds_the_tool(study, findings, tmp_path):
+def test_config_node_builds_the_tools(study, findings, tmp_path):
     cfg = load_config()
     node = cfg.agent.tools[1]
     assert node.inputs.labels == ["rules", "oap"]
@@ -505,8 +542,8 @@ def test_config_node_builds_the_tool(study, findings, tmp_path):
         node.corpus = {"_target_": f"{__name__}.fixture_corpus", "_partial_": True}
         node.images = {"_target_": f"{FakeImages.__module__}.FakeImages", "root": str(tmp_path)}
         node.crops_dir = {"_target_": "pathlib.Path", "_args_": [str(tmp_path / "crops")]}
-    tool = instantiate(node, _convert_="all")
-    assert tool.name == "submit_study"
+    tool, revise = instantiate(node, _convert_="all")
+    assert (tool.name, revise.name) == ("submit_study", "revise_study")
     stored(invoke(tool, study, findings))
 
 

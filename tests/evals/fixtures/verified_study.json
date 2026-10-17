@@ -1,0 +1,2074 @@
+{
+  "study": {
+    "address": "4 rue Joliot Curie, 91190 Gif-sur-Yvette",
+    "program": "One Résidence Sociale Étudiante (RSE) and one Résidence Jeunes Actifs, in two separate buildings.",
+    "regime": {
+      "zone": "UMG",
+      "overlays": [
+        {
+          "item": "Limites de zones",
+          "applies": true,
+          "note": "The site lies inside a continuous UMG pink area; its boundary with the UM5/UM4 zones lies north-west of the site, not across it."
+        },
+        {
+          "item": "Secteur à Orientation d'Aménagement et de Programmation",
+          "applies": true,
+          "note": "Magenta dotted OAP outline runs along the north of the UMG area and encloses the site (the site lies south-east of its north-west edge, inside the boundary). The OAP applies to the site."
+        }
+      ],
+      "oap_applicable": true,
+      "oap_prescriptions": [
+        {
+          "topic": "building form - height",
+          "text": "For principally residential buildings, height stepping (épannelage) must reach an average objective of R+4. No maximum height in metres is given. The règlement cap (20 m / R+5) remains the hard limit.",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 33,
+              "article": "OAP 8 - morphologie",
+              "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+              "source_kind": "regulatory"
+            }
+          ]
+        },
+        {
+          "topic": "building form - siting",
+          "text": "Principle of building on the alignment along the road, without creating a uniform continuous built front (porosity, views into block interiors).",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 34,
+              "article": "OAP 8 - implantation",
+              "quote": "Le principe d’une implantation des constructions à l’alignement le long de la voie doit être retenu. Ce principe ne doit toutefois pas aboutir à la création d’un front bâti uniforme et continu.",
+              "source_kind": "regulatory"
+            }
+          ]
+        },
+        {
+          "topic": "ground floors",
+          "text": "Ground floors holding common spaces, shops or facilities must extend and open onto the public space, with an adapted height.",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 34,
+              "article": "OAP 8",
+              "quote": "Les rez-de-chaussée des constructions qui accueillent des espaces communs, des commerces et des équipements doivent être conçus en prolongement de l’espace public et ouverts sur celui-ci, avec notamment une hauteur adaptée.",
+              "source_kind": "regulatory"
+            }
+          ]
+        },
+        {
+          "topic": "mobility and parking",
+          "text": "Limit car use: underground parking or parking within the building envelope, pooled spaces, few spaces along streets.",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 35,
+              "article": "OAP 8 - circulations douces",
+              "quote": "la limitation de l’utilisation de la voiture, avec la réalisation de parkings souterrains ou dans le gabarit des constructions, avec une recherche de mutualisation des places de stationnement et l’accueil d’un nombre réduit de places de stationnement le long des voies,",
+              "source_kind": "regulatory"
+            }
+          ]
+        },
+        {
+          "topic": "landscape and water",
+          "text": "Landscape framework supporting alternative rainwater management; retention pooled between neighbouring plots.",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 33,
+              "article": "OAP 8 - orientations générales",
+              "quote": "Installer une trame paysagère sur le site, qui s’appuie sur les qualités de son environnement, et notamment sur le coteau boisé, et qui soit le support d’une gestion alternative de l’eau pluviale.",
+              "source_kind": "regulatory"
+            }
+          ]
+        },
+        {
+          "topic": "programming",
+          "text": "Student and family housing is to be sited mainly in the west of the district; young-worker housing is not mentioned. Treated as an orientation.",
+          "citations": [
+            {
+              "doc": "oap",
+              "page": 36,
+              "article": "OAP 8 - liens fonctionnels",
+              "quote": "les programmes de logements familiaux et étudiants sont implantés principalement à l’Ouest du quartier pour favoriser la mixité en privilégiant la proximité des services et des équipements publics.",
+              "source_kind": "regulatory"
+            }
+          ]
+        }
+      ],
+      "citations": [
+        {
+          "doc": "plu_reglement",
+          "page": 320,
+          "article": "UMG - chapeau",
+          "quote": "Cette zone est destinée à accueillir principalement des établissements d'enseignement supérieur et de recherche, des constructions à destination d'habitation, au bénéfice des étudiants, des chercheurs, et des familles.",
+          "source_kind": "regulatory"
+        },
+        {
+          "doc": "plu_reglement",
+          "page": 320,
+          "article": "UMG - chapeau",
+          "quote": "Cette zone fait l’objet d’orientations d’aménagement, document n°3 du PLU (orientations 8 et 9) avec lesquelles tout projet d’aménagement et de construction doit être compatible.",
+          "source_kind": "regulatory"
+        }
+      ]
+    },
+    "admissibility": [
+      {
+        "building": "Résidence Sociale Étudiante (RSE)",
+        "stated_use": "Résidence Sociale Étudiante",
+        "destination": "Habitation (housing for students; student residence)",
+        "verdict": "permitted",
+        "conditions": [
+          "Must be compatible with the OAP (chapters 7 and 8).",
+          "OAP siting orientation: student housing mainly in the west of the district."
+        ],
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 320,
+            "article": "UMG - chapeau",
+            "quote": "Cette zone est destinée à accueillir principalement des établissements d'enseignement supérieur et de recherche, des constructions à destination d'habitation, au bénéfice des étudiants, des chercheurs, et des familles.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 320,
+            "article": "UMG 1",
+            "quote": "Les constructions, ouvrages ou travaux à destination d’exploitation agricole ou forestière et d’entrepôt.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "building": "Résidence Jeunes Actifs",
+        "stated_use": "Résidence Jeunes Actifs",
+        "destination": "Habitation (collective housing / hébergement) - not defined in the règlement; retained as housing",
+        "verdict": "permitted",
+        "conditions": [
+          "Not banned by art. 1; classification as housing is an agent interpretation (see ambiguities).",
+          "OAP does not mention young-worker housing."
+        ],
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 320,
+            "article": "UMG 1",
+            "quote": "Les constructions, ouvrages ou travaux à destination d’exploitation agricole ou forestière et d’entrepôt.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "oap",
+            "page": 23,
+            "article": "OAP 7 - mixité fonctionnelle",
+            "quote": "Cette dominante d’habitat n’exclut pas la réalisation de programmes d’une autre nature, l’habitat restant une dominante.",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
+    ],
+    "envelope": {
+      "setback_road_m": {
+        "value": 1.0,
+        "rule": "Alignment or set back at least 1 m (UMG 6.3). OAP principle: building on the alignment.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 324,
+            "article": "UMG 6.3",
+            "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 379,
+            "article": "Lexique - Voie",
+            "quote": "Emprise publique ou privée composée de la chaussée et des trottoirs ou bas-côtés.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 374,
+            "article": "Lexique - Alignement",
+            "quote": "Il s’agit de la limite entre le domaine public et la propriété privée.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "setback_side_m": {
+        "value": 6.0,
+        "rule": "On boundary or set back: 6 m for facades with views, 3 m without (UMG 7.2.1). 6 m retained as conservative value (residential facades with views).",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 7.2.1",
+            "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 7.2.1",
+            "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 378,
+            "article": "Lexique - Limite séparative",
+            "quote": "Limite séparative : Ligne commune, séparant deux propriétés privées et/ou publiques.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "setback_rear_m": {
+        "value": 6.0,
+        "rule": "Same rule as side limits (UMG 7 covers lateral and rear boundaries): 6 m with views, 3 m without; 6 m retained.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 7.1.1",
+            "quote": "c'est-à-dire les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction du terrain ou des terrains voisins et qui ne sont pas concernées par l’application de l’article 6.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 7.2.1",
+            "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "max_height_m": {
+        "value": 20.0,
+        "rule": "Principally housing: 20 m max, R+5 (UMG 10.2); measured from natural ground to ridge/acrotère. OAP average R+4 objective is an orientation, not a cap.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 10.2",
+            "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 10.1",
+            "quote": "à partir du sol naturel existant avant travaux;",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "max_storeys": {
+        "value": 6.0,
+        "rule": "R+5 = 6 storeys (UMG 10.2); OAP targets an average R+4 across the stepping.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 10.2",
+            "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "oap",
+            "page": 33,
+            "article": "OAP 8 - morphologie",
+            "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "max_footprint_ratio": {
+        "value": null,
+        "rule": "Footprint not regulated by UMG 9; project must be compatible with the OAP, which gives no figure.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 9",
+            "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "min_green_ratio": {
+        "value": 0.2,
+        "rule": "At least 20% of plot as green space (planted, 60 cm topsoil), of which at least 10% pleine terre (UMG 13.3). Surface car parks and green roofs do not count.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace vert 20% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 330,
+            "article": "UMG 13.1",
+            "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
+    },
+    "parking": [
+      {
+        "use": "Résidence Sociale Étudiante (résidence étudiante)",
+        "spaces": 1.0,
+        "per": 150.0,
+        "basis": "floor_area_m2",
+        "rule": "1 space per started 150 m² of floor area for student residences; majority-underground requirement not applicable. Bicycle: 0.75 m² per dwelling up to two main rooms (min 3 m²).",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 327,
+            "article": "UMG 12.1",
+            "quote": "1 place de stationnement par tranche de 150 m² de surface de plancher, pour les résidences étudiantes.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 329,
+            "article": "UMG 12.5",
+            "quote": "Pour le cas des résidences étudiantes, la réalisation de la majorité des places de stationnement en sous-sol n’est pas requise.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 328,
+            "article": "UMG 12.3",
+            "quote": "- 0,75 m² par logement pour les logements jusqu’à deux pièces principales",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "use": "Résidence Jeunes Actifs (retained as housing)",
+        "spaces": 1.0,
+        "per": 35.0,
+        "basis": "floor_area_m2",
+        "rule": "General housing ratio: 1 space per started 35 m² of floor area, max 2 per dwelling; 1 per dwelling if State-aided loan financed (financing unknown). At least 85% of spaces integrated in the building, majority underground. Alternative reading: hotel-type 0.5 per room.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 327,
+            "article": "UMG 12.1",
+            "quote": "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement,",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 327,
+            "article": "UMG 12.1",
+            "quote": "1 place de stationnement par logement, pour les logements financés avec un prêt aidé par l’Etat,",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 328,
+            "article": "UMG 12.1",
+            "quote": "0,5 place par chambre",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "topic": "distance between buildings",
+        "text": "Between the two buildings: at least 10 m if at least one facing facade has views, 6 m if neither does.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 325,
+            "article": "UMG 8.1",
+            "quote": "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comporte des vues.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 8.1",
+            "quote": "6 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vue.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "topic": "access",
+        "text": "Roads serving the plot must be at least 5 m wide for two-way traffic (3.50 m one-way); access on a road causing risk may be refused.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 322,
+            "article": "UMG 3.2",
+            "quote": "Aucune voie d'intérêt public ou privé ne doit avoir  une largeur  inférieure à 5 mètres pour une circulation à double sens et à 3,50 mètres pour une circulation à sens unique.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "topic": "networks",
+        "text": "Underground connection to the sewer; rainwater discharge limited to 0.7 L/s/ha with on-plot retention; all networks underground; enclosed waste-container space for housing above three dwellings.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 323,
+            "article": "UMG 4.2.2",
+            "quote": "quantitatives et par dérogation de manière à réguler les rejets dans le réseau collecteur à 0,7 L/s/ha pour la pluie de référence défini dans l’étude globale de gestion des eaux du plateau de Saclay",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 323,
+            "article": "UMG 4.3",
+            "quote": "Tous les réseaux sont implantés en souterrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 323,
+            "article": "UMG 4.4",
+            "quote": "Toute construction dont la destination engendre la production de déchets et pour les constructions à destination d’habitation comportant plus de trois logements, un espace clos d’une superficie suffisante pour recevoir les divers conteneurs liés à la collecte sélective des ordures ménagères doit être aménagé.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "topic": "appearance",
+        "text": "The buildings must form one architectural composition (volumes, facade variation, rhythm of openings, recesses); raw hollow bricks/breeze blocks banned.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 327,
+            "article": "UMG 11.1",
+            "quote": "Les différents bâtiments et leurs annexes doivent participer d'une même composition architecturale par leurs volumes et leurs traitements, avec des variations de façades dans leur hauteur, le rythme de leurs percements, ainsi que par des décrochés en élévation ou en emprise.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "topic": "derogations",
+        "text": "Derogations from the règlement are prohibited (only minor adaptations).",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 8,
+            "article": "Titre I - Article 4",
+            "quote": "Les dérogations aux dispositions du présent règlement sont interdites.",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
+    ],
+    "ambiguities": [
+      {
+        "question": "How are a Résidence Sociale Étudiante and a Résidence Jeunes Actifs classified for UMG parking and height (habitation, 'résidence étudiante', hébergement hôtelier/résidence services, or other)?",
+        "options": [
+          "Habitation: 1 space per 35 m² (max 2 per dwelling) or 1 per dwelling if State-aided loan; height 20 m / R+5",
+          "Résidence étudiante for the RSE: 1 space per 150 m² of floor area",
+          "Hébergement hôtelier / résidence services: 0.5 space per room",
+          "Other destination: height 18 m"
+        ],
+        "chosen": "Both are housing for height (20 m, R+5). RSE: student-residence parking 1/150 m². Jeunes Actifs: general housing ratio 1/35 m².",
+        "rationale": "The règlement names only 'résidences étudiantes'; the Jeunes Actifs residence is undefined, and housing is the closest category. Financing unknown; if State-aided, 1 per dwelling may apply. Confirm with the planning authority.",
+        "resolved_by": "agent",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 327,
+            "article": "UMG 12.1",
+            "quote": "1 place de stationnement par tranche de 150 m² de surface de plancher, pour les résidences étudiantes.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "question": "What is the meaning of 'emprise publique' in the règlement?",
+        "options": [
+          "Public land open to the public (squares, paths) in addition to roads",
+          "Same as the limit between public domain and private property (alignement)"
+        ],
+        "chosen": "Public land beyond roads, with the alignment as the limit between public domain and private property.",
+        "rationale": "No lexique entry; the surveyor found no site edge facing public land anyway, so the effect is limited.",
+        "resolved_by": "agent",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 324,
+            "article": "UMG 6.1.1",
+            "quote": "Les dispositions du présent article s'appliquent aux constructions implantées le long des emprises publiques et des voies ouvertes à la circulation générale",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "question": "Is parcel 91272000CR0247 at the alignment-principle frontage of rue Joliot-Curie or on a secondary north-south road, and is it inside a specific OAP diagram area?",
+        "options": [
+          "Frontage on rue Joliot-Curie: alignment principle",
+          "Secondary road: varied siting"
+        ],
+        "chosen": "Frontage on rue Joliot-Curie (alignment principle, without a uniform continuous front), per the zoning analyst's location of the parcel north of that street.",
+        "rationale": "Diagrams are schematic. The règlement only requires 1 m minimum setback, so the envelope is unaffected.",
+        "resolved_by": "agent",
+        "citations": []
+      },
+      {
+        "question": "Is parcel 91272000CR0247 (north of rue Joliot-Curie, east of rue Sébastienne Guyot) affected by the north-south structuring public axis or the 'espace public d'articulation' shown on the OAP district diagram, or is it only inside the general perimeter?",
+        "options": [
+          "Inside the perimeter, not on a public-space symbol",
+          "Inside the perimeter, adjacent to or overlapping the articulation square or N-S axis"
+        ],
+        "chosen": "Inside the perimeter, not on a public-space symbol.",
+        "rationale": "No evidence of overlap; to be verified on a larger-scale OAP document.",
+        "resolved_by": "agent",
+        "citations": []
+      },
+      {
+        "question": "Does the OAP's 'principalement à l'Ouest du quartier' siting of student and family housing apply to a parcel in the central part of the district, and how does it treat a young-worker residence?",
+        "options": [
+          "Orientation only, compatible with a residence located elsewhere in the district",
+          "Counts against a central location"
+        ],
+        "chosen": "Orientation only, compatible with a residence located elsewhere in the district.",
+        "rationale": "'Principalement' is not exclusive and the OAP sets no quota or location; compatibility, not conformity, is required. Residual risk for the RSE if the site is not in the west.",
+        "resolved_by": "agent",
+        "citations": [
+          {
+            "doc": "oap",
+            "page": 36,
+            "article": "OAP 8 - liens fonctionnels",
+            "quote": "les programmes de logements familiaux et étudiants sont implantés principalement à l’Ouest du quartier pour favoriser la mixité en privilégiant la proximité des services et des équipements publics.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      {
+        "question": "Does the magenta dotted OAP line enclose the site or pass along it?",
+        "options": [
+          "Site inside the OAP perimeter",
+          "Site outside the OAP perimeter"
+        ],
+        "chosen": "Site inside the OAP perimeter",
+        "rationale": "The line runs north and north-west of the parcel and does not cross it; the OAP notes agree.",
+        "resolved_by": "agent",
+        "citations": []
+      },
+      {
+        "question": "Is the parcel fully inside a single zone (UMG) or does a zone limit cross it?",
+        "options": [
+          "Entirely UMG",
+          "Split with UM4/UM5"
+        ],
+        "chosen": "Entirely UMG",
+        "rationale": "Nearest zone limits are well away from the parcel.",
+        "resolved_by": "agent",
+        "citations": []
+      },
+      {
+        "question": "Do the site edges labelled by the gate (all against neighbouring parcels, none against public land) match the real road frontage?",
+        "options": [
+          "Accept gate labelling: no road edge, all limits side/rear",
+          "Treat the southern edge as road frontage on rue Joliot-Curie"
+        ],
+        "chosen": "Accept the gate labelling but note that the southern edge likely fronts rue Joliot-Curie (road setback 1 m, smaller than the 6 m side/rear).",
+        "rationale": "The surveyor recorded no edge facing public land, though the aerial view shows open ground to the south. The computed envelope may therefore be too conservative on that side.",
+        "resolved_by": "agent",
+        "citations": []
+      }
+    ],
+    "summary": "**Site.** Parcel 91272000CR0247, 4 rue Joliot-Curie, about 5,952 m². Zone UMG (Joliot-Curie mixed quarter). The OAP perimeter applies (chapter 8, compatibility only).\n\n**Admissibility.** Both buildings are permitted. UMG art. 1 bans only agricultural/forestry and warehouse uses and a few leisure uses. I classed both residences as housing. The règlement does not define either one, and the Jeunes Actifs classification is the weaker of the two.\n\n**Envelope.**\n- Road setback: alignment or at least 1 m.\n- Side and rear setbacks: 6 m facing views, 3 m without. I used 6 m.\n- Height: 20 m, R+5 (6 storeys). The OAP aims at an average of R+4.\n- Footprint: not regulated.\n- Green space: at least 20% of the plot as green space, including at least 10% pleine terre.\n\n**Between the buildings.** At least 10 m if either facing facade has views, otherwise 6 m.\n\n**Parking.**\n- RSE: 1 space per 150 m² of floor area.\n- Jeunes Actifs: 1 space per 35 m² of floor area (maximum 2 per dwelling). If the dwellings are State-aided, 1 per dwelling.\n- Alternative reading for Jeunes Actifs: hotel-type, 0.5 per room.\n\n**Caveats.**\n- The gate found no site edge facing public land. The southern edge probably fronts rue Joliot-Curie, so the 6 m setback may overstate the constraint there.\n- The OAP wants student housing mainly in the west of the district. This is an orientation, not a quota.\n- Derogations are prohibited, and the project must be compatible with the OAP.\n- Financing and floor areas were not given, so parking figures are ratios only."
+  },
+  "site": {
+    "address": "4 Rue Joliot-curie 91190 Gif-sur-Yvette",
+    "longitude": 2.165254,
+    "latitude": 48.709836,
+    "choice": {
+      "address": "4 Rue Joliot-curie 91190 Gif-sur-Yvette",
+      "parcel_ids": [
+        "91272000CR0247"
+      ],
+      "rationale": "The geocoder returned a housenumber match (score 0.96) at 2.165254, 48.709836. The nearest parcel, CR0249 (116 m², mean width 0.7 m), is a thin strip along the western boundary and was dropped as a misfit. CR0247 (5,960 m², mean width 38.7 m) lies 2.5 m from the address point and carries the main built mass visible on the aerial photo; it is the only plausible plot large enough to hold two separate buildings. CR0227 (2,240 m², mean width 11.3 m) lies to the north, is mostly open lawn and path, and is set aside as a separate parcel that does not share the built block. Other nearby parcels (CR0251, CR0258, CR0239, CR0240, CR0259, CR0215) are at 23 m or more and were not needed for the program.",
+      "assumptions": [
+        "The site is taken as the single parcel CR0247; the thin strip CR0249 and the adjacent parcel CR0227 are assumed not to belong to the same landholding.",
+        "The cadastre does not show ownership, so the assumption that CR0247 is one landholding is unverified.",
+        "The address point is assumed to relate to CR0247 because it lies 2.5 m from it and CR0247 carries the main built mass."
+      ]
+    },
+    "parcels": [
+      {
+        "id": "91272000CR0247",
+        "area_m2": 5960.0,
+        "polygon": {
+          "crs": "EPSG:2154",
+          "exterior": [
+            [
+              638556.2,
+              6845932.1
+            ],
+            [
+              638553.9,
+              6845849.85
+            ],
+            [
+              638606.65,
+              6845848.35
+            ],
+            [
+              638609.25,
+              6845848.75
+            ],
+            [
+              638611.85,
+              6845849.5
+            ],
+            [
+              638614.3,
+              6845850.6
+            ],
+            [
+              638622.7,
+              6845855.45
+            ],
+            [
+              638624.15,
+              6845857.0
+            ],
+            [
+              638625.1,
+              6845858.85
+            ],
+            [
+              638641.7,
+              6845858.4
+            ],
+            [
+              638641.8,
+              6845866.0
+            ],
+            [
+              638626.45,
+              6845895.1
+            ],
+            [
+              638626.4,
+              6845904.85
+            ],
+            [
+              638623.95,
+              6845913.75
+            ],
+            [
+              638611.75,
+              6845927.95
+            ],
+            [
+              638605.05,
+              6845930.75
+            ],
+            [
+              638556.2,
+              6845932.1
+            ]
+          ],
+          "holes": []
+        }
+      }
+    ],
+    "polygon": {
+      "crs": "EPSG:2154",
+      "exterior": [
+        [
+          638556.2,
+          6845932.1
+        ],
+        [
+          638553.9,
+          6845849.85
+        ],
+        [
+          638606.65,
+          6845848.35
+        ],
+        [
+          638609.25,
+          6845848.75
+        ],
+        [
+          638611.85,
+          6845849.5
+        ],
+        [
+          638614.3,
+          6845850.6
+        ],
+        [
+          638622.7,
+          6845855.45
+        ],
+        [
+          638624.15,
+          6845857.0
+        ],
+        [
+          638625.1,
+          6845858.85
+        ],
+        [
+          638641.7,
+          6845858.4
+        ],
+        [
+          638641.8,
+          6845866.0
+        ],
+        [
+          638626.45,
+          6845895.1
+        ],
+        [
+          638626.4,
+          6845904.85
+        ],
+        [
+          638623.95,
+          6845913.75
+        ],
+        [
+          638611.75,
+          6845927.95
+        ],
+        [
+          638605.05,
+          6845930.75
+        ],
+        [
+          638556.2,
+          6845932.1
+        ]
+      ],
+      "holes": []
+    },
+    "area_m2": 5951.632500010313,
+    "edges": [
+      {
+        "start": [
+          638556.2,
+          6845932.1
+        ],
+        "end": [
+          638553.9,
+          6845849.85
+        ],
+        "length_m": 82.28215177059772,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0227",
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638553.9,
+          6845849.85
+        ],
+        "end": [
+          638606.65,
+          6845848.35
+        ],
+        "length_m": 52.77132270466603,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638606.65,
+          6845848.35
+        ],
+        "end": [
+          638609.25,
+          6845848.75
+        ],
+        "length_m": 2.6305892876268144,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638609.25,
+          6845848.75
+        ],
+        "end": [
+          638611.85,
+          6845849.5
+        ],
+        "length_m": 2.7060118255245906,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638611.85,
+          6845849.5
+        ],
+        "end": [
+          638614.3,
+          6845850.6
+        ],
+        "length_m": 2.685609800310294,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638614.3,
+          6845850.6
+        ],
+        "end": [
+          638622.7,
+          6845855.45
+        ],
+        "length_m": 9.699613394556284,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638622.7,
+          6845855.45
+        ],
+        "end": [
+          638624.15,
+          6845857.0
+        ],
+        "length_m": 2.122498527590807,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638624.15,
+          6845857.0
+        ],
+        "end": [
+          638625.1,
+          6845858.85
+        ],
+        "length_m": 2.079663433955881,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638625.1,
+          6845858.85
+        ],
+        "end": [
+          638641.7,
+          6845858.4
+        ],
+        "length_m": 16.606098277396665,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249"
+        ]
+      },
+      {
+        "start": [
+          638641.7,
+          6845858.4
+        ],
+        "end": [
+          638641.8,
+          6845866.0
+        ],
+        "length_m": 7.600657865892675,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638641.8,
+          6845866.0
+        ],
+        "end": [
+          638626.45,
+          6845895.1
+        ],
+        "length_m": 32.900341943225726,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638626.45,
+          6845895.1
+        ],
+        "end": [
+          638626.4,
+          6845904.85
+        ],
+        "length_m": 9.750128204284959,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638626.4,
+          6845904.85
+        ],
+        "end": [
+          638623.95,
+          6845913.75
+        ],
+        "length_m": 9.231061694462522,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638623.95,
+          6845913.75
+        ],
+        "end": [
+          638611.75,
+          6845927.95
+        ],
+        "length_m": 18.721111078249432,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638611.75,
+          6845927.95
+        ],
+        "end": [
+          638605.05,
+          6845930.75
+        ],
+        "length_m": 7.261542535738046,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0256"
+        ]
+      },
+      {
+        "start": [
+          638605.05,
+          6845930.75
+        ],
+        "end": [
+          638556.2,
+          6845932.1
+        ],
+        "length_m": 48.868650482779785,
+        "other_side": "parcel",
+        "neighbours": [
+          "91272000CR0249",
+          "91272000CR0256"
+        ]
+      }
+    ],
+    "citations": [
+      {
+        "doc": "geoplateforme-geocodage",
+        "page": null,
+        "article": null,
+        "quote": "label=4 Rue Joliot-curie 91190 Gif-sur-Yvette; id=91272_1599_00004; lon=2.165254; lat=48.709836",
+        "source_kind": "geometric"
+      },
+      {
+        "doc": "apicarto-cadastre",
+        "page": null,
+        "article": null,
+        "quote": "idu=91272000CR0247; contenance=5960",
+        "source_kind": "geometric"
+      }
+    ]
+  },
+  "boundaries": [
+    {
+      "kind": "rear",
+      "start": [
+        638556.2,
+        6845932.1
+      ],
+      "end": [
+        638553.9,
+        6845849.85
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638553.9,
+        6845849.85
+      ],
+      "end": [
+        638606.65,
+        6845848.35
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638606.65,
+        6845848.35
+      ],
+      "end": [
+        638609.25,
+        6845848.75
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638609.25,
+        6845848.75
+      ],
+      "end": [
+        638611.85,
+        6845849.5
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638611.85,
+        6845849.5
+      ],
+      "end": [
+        638614.3,
+        6845850.6
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638614.3,
+        6845850.6
+      ],
+      "end": [
+        638622.7,
+        6845855.45
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638622.7,
+        6845855.45
+      ],
+      "end": [
+        638624.15,
+        6845857.0
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638624.15,
+        6845857.0
+      ],
+      "end": [
+        638625.1,
+        6845858.85
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638625.1,
+        6845858.85
+      ],
+      "end": [
+        638641.7,
+        6845858.4
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638641.7,
+        6845858.4
+      ],
+      "end": [
+        638641.8,
+        6845866.0
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638641.8,
+        6845866.0
+      ],
+      "end": [
+        638626.45,
+        6845895.1
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638626.45,
+        6845895.1
+      ],
+      "end": [
+        638626.4,
+        6845904.85
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638626.4,
+        6845904.85
+      ],
+      "end": [
+        638623.95,
+        6845913.75
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638623.95,
+        6845913.75
+      ],
+      "end": [
+        638611.75,
+        6845927.95
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638611.75,
+        6845927.95
+      ],
+      "end": [
+        638605.05,
+        6845930.75
+      ]
+    },
+    {
+      "kind": "rear",
+      "start": [
+        638605.05,
+        6845930.75
+      ],
+      "end": [
+        638556.2,
+        6845932.1
+      ]
+    }
+  ],
+  "zone": {
+    "zone": "UMG",
+    "overlays": [
+      {
+        "item": "Limites de zones",
+        "applies": true,
+        "note": "The site lies inside a continuous UMG pink area; its boundary with the UM5/UM4 zones lies north-west of the site, not across it."
+      },
+      {
+        "item": "Espaces Boisés Classés",
+        "applies": false,
+        "note": "Green hatched EBC areas are on the NF woodland south-east of the site, about 30 map units away; none on the site."
+      },
+      {
+        "item": "Lisières des massifs boisés de plus de 100 ha du SDRIF",
+        "applies": false,
+        "note": "No forest-edge hatching appears on or near the site in the Moulon quarter."
+      },
+      {
+        "item": "Zones non aedificandi",
+        "applies": false,
+        "note": "Diagonal hatching is only on the NE strip south-west of the site near the Yvette slope; not on the site."
+      },
+      {
+        "item": "Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)",
+        "applies": false,
+        "note": "Blue dotted flood-risk perimeter is in the Yvette valley well south of the site; not on the site."
+      },
+      {
+        "item": "Zone correspondant au périmètre de prescriptions sanitaires",
+        "applies": false,
+        "note": "Purple hatched sanitary-prescription perimeter not seen on or around the site in the zoomed plan."
+      },
+      {
+        "item": "Zone correspondant au périmètre de recommandations sanitaires",
+        "applies": false,
+        "note": "Dashed sanitary-recommendation perimeter not seen on or around the site in the zoomed plan."
+      },
+      {
+        "item": "Secteur à Orientation d'Aménagement et de Programmation",
+        "applies": true,
+        "note": "Magenta dotted OAP outline runs along the north of the UMG area and encloses the site (the site lies south-east of its north-west edge, inside the boundary). The OAP applies to the site."
+      },
+      {
+        "item": "Protection paysagère inconstructible",
+        "applies": false,
+        "note": "No such hatching on the site; not visible in the Moulon quarter."
+      },
+      {
+        "item": "Emplacements réservés pour équipements et aménagements divers, création ou amélioration de voirie",
+        "applies": false,
+        "note": "No numbered reserved-site symbol on the site in the zoomed plan; the reserved-site tables list other parcels."
+      },
+      {
+        "item": "Emplacement réservé pour élargissement de voirie nord-sud",
+        "applies": false,
+        "note": "Red cross-hatched road-widening symbol is not on the site; it lies elsewhere in the commune."
+      },
+      {
+        "item": "Linéaire identifié pour la sauvegarde du commerce",
+        "applies": false,
+        "note": "Tan commercial-frontage line not present on or near the site."
+      },
+      {
+        "item": "Zone humide",
+        "applies": false,
+        "note": "Zone humide hatching is not on the site; it is not seen in the Moulon quarter."
+      }
+    ],
+    "rationale": "The site (parcel 91272000CR0247) sits on the Moulon campus, bounded by rue Joliot-Curie to the south, rue Sébastienne Guyot to the west and rue Noetzlin to the east, with the Parc du Moulon and Avenue des Sciences to the north. On the plan I located the matching irregular building footprint with the curved east side and the Joliot-Curie road just south of it, in the area labelled UMG (legend: \"Zone mixte du quartier Joliot-Curie\"). The parcel is entirely inside the pink UMG area. The only legend item touching it is the magenta dotted OAP perimeter, which encloses the UMG quarter. The other legend items were checked and are absent from the site.",
+    "region": {
+      "doc": "plu_reglement_graphique",
+      "page": 1,
+      "region": [
+        1270,
+        300,
+        1360,
+        390
+      ]
+    },
+    "ambiguities": [
+      {
+        "question": "Does the magenta dotted OAP line enclose the site or pass along it?",
+        "options": [
+          "Site inside the OAP perimeter",
+          "Site outside the OAP perimeter"
+        ],
+        "chosen": "Site inside the OAP perimeter",
+        "rationale": "The magenta dotted line runs along the north edge of the UMG area near y≈305 and along the north-west near x≈1270-1290, then turns south-east; the site (around x≈1298-1325, y≈333-360) is south-east of these lines, inside the enclosed UMG quarter. The line does not cross the parcel outline.",
+        "resolved_by": "agent",
+        "citations": []
+      },
+      {
+        "question": "Is the parcel fully inside a single zone (UMG) or does a zone limit cross it?",
+        "options": [
+          "Entirely UMG",
+          "Split with UM4/UM5"
+        ],
+        "chosen": "Entirely UMG",
+        "rationale": "The nearest zone limits (UM4, UM5 boundaries and the NE/NF limits) lie more than about 20 map units north-west and south-east of the parcel, and the parcel sits in a continuous pink UMG area.",
+        "resolved_by": "agent",
+        "citations": []
+      }
+    ]
+  },
+  "envelope": {
+    "site_area_m2": 5951.632500010313,
+    "footprint": {
+      "crs": "EPSG:2154",
+      "exterior": [
+        [
+          638618.5222539209,
+          6845910.86043671
+        ],
+        [
+          638620.4041562934,
+          6845904.024138295
+        ],
+        [
+          638620.4500788939,
+          6845895.069231173
+        ],
+        [
+          638620.4772010767,
+          6845894.807615788
+        ],
+        [
+          638620.4757608618,
+          6845894.544602196
+        ],
+        [
+          638620.5377011696,
+          6845894.224043468
+        ],
+        [
+          638620.5713683957,
+          6845893.899295847
+        ],
+        [
+          638620.6490080637,
+          6845893.647998601
+        ],
+        [
+          638620.6989069281,
+          6845893.389757772
+        ],
+        [
+          638620.8221949751,
+          6845893.0874424465
+        ],
+        [
+          638620.9185704134,
+          6845892.775502908
+        ],
+        [
+          638621.0437439174,
+          6845892.544181016
+        ],
+        [
+          638621.1430642757,
+          6845892.300636997
+        ],
+        [
+          638635.7745166542,
+          6845864.5628347695
+        ],
+        [
+          638625.2625908718,
+          6845864.847796612
+        ],
+        [
+          638624.8386099209,
+          6845864.817612184
+        ],
+        [
+          638624.4136135529,
+          6845864.810610173
+        ],
+        [
+          638624.2531290295,
+          6845864.775930108
+        ],
+        [
+          638624.0893546612,
+          6845864.7642705375
+        ],
+        [
+          638623.6794090753,
+          6845864.651951514
+        ],
+        [
+          638623.2639449178,
+          6845864.562171367
+        ],
+        [
+          638623.1133098066,
+          6845864.496848693
+        ],
+        [
+          638622.9549569841,
+          6845864.453462363
+        ],
+        [
+          638622.5748007419,
+          6845864.263325102
+        ],
+        [
+          638622.1848348499,
+          6845864.094217019
+        ],
+        [
+          638622.0498379702,
+          6845864.000762048
+        ],
+        [
+          638621.9029921073,
+          6845863.927316273
+        ],
+        [
+          638621.5672344033,
+          6845863.666667644
+        ],
+        [
+          638621.2177529437,
+          6845863.424730352
+        ],
+        [
+          638621.1035821509,
+          6845863.306734507
+        ],
+        [
+          638620.9738864509,
+          6845863.206051765
+        ],
+        [
+          638620.6954302602,
+          6845862.884908346
+        ],
+        [
+          638620.3998636148,
+          6845862.5794393625
+        ],
+        [
+          638620.3109064304,
+          6845862.44143716
+        ],
+        [
+          638620.2033450241,
+          6845862.317386631
+        ],
+        [
+          638619.9928912628,
+          6845861.948089782
+        ],
+        [
+          638619.7625978913,
+          6845861.5908281095
+        ],
+        [
+          638619.1955948187,
+          6845860.486664232
+        ],
+        [
+          638618.9275926058,
+          6845860.2001791075
+        ],
+        [
+          638611.5641124119,
+          6845855.9486459
+        ],
+        [
+          638609.7794483624,
+          6845855.147368164
+        ],
+        [
+          638607.9570422028,
+          6845854.621674079
+        ],
+        [
+          638606.2760449909,
+          6845854.363059123
+        ],
+        [
+          638560.0652919302,
+          6845855.677108973
+        ],
+        [
+          638562.0299948476,
+          6845925.9365937365
+        ],
+        [
+          638603.7673572791,
+          6845924.783155881
+        ],
+        [
+          638608.1251434626,
+          6845922.961991506
+        ],
+        [
+          638618.5222539209,
+          6845910.86043671
+        ]
+      ],
+      "holes": []
+    },
+    "footprint_area_m2": 4241.440786859832,
+    "max_footprint_area_m2": 4241.440786859832,
+    "min_green_area_m2": 1190.3265000020626,
+    "max_height_m": 20.0,
+    "max_volume_m3": 84828.81573719664,
+    "assumptions": [
+      "No footprint ratio set: footprint not capped by a ratio."
+    ]
+  },
+  "citation_checks": [
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 33,
+        "article": "OAP 8 - morphologie",
+        "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 34,
+        "article": "OAP 8 - implantation",
+        "quote": "Le principe d’une implantation des constructions à l’alignement le long de la voie doit être retenu. Ce principe ne doit toutefois pas aboutir à la création d’un front bâti uniforme et continu.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 34,
+        "article": "OAP 8",
+        "quote": "Les rez-de-chaussée des constructions qui accueillent des espaces communs, des commerces et des équipements doivent être conçus en prolongement de l’espace public et ouverts sur celui-ci, avec notamment une hauteur adaptée.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 35,
+        "article": "OAP 8 - circulations douces",
+        "quote": "la limitation de l’utilisation de la voiture, avec la réalisation de parkings souterrains ou dans le gabarit des constructions, avec une recherche de mutualisation des places de stationnement et l’accueil d’un nombre réduit de places de stationnement le long des voies,",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 33,
+        "article": "OAP 8 - orientations générales",
+        "quote": "Installer une trame paysagère sur le site, qui s’appuie sur les qualités de son environnement, et notamment sur le coteau boisé, et qui soit le support d’une gestion alternative de l’eau pluviale.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 36,
+        "article": "OAP 8 - liens fonctionnels",
+        "quote": "les programmes de logements familiaux et étudiants sont implantés principalement à l’Ouest du quartier pour favoriser la mixité en privilégiant la proximité des services et des équipements publics.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 320,
+        "article": "UMG - chapeau",
+        "quote": "Cette zone est destinée à accueillir principalement des établissements d'enseignement supérieur et de recherche, des constructions à destination d'habitation, au bénéfice des étudiants, des chercheurs, et des familles.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 320,
+        "article": "UMG - chapeau",
+        "quote": "Cette zone fait l’objet d’orientations d’aménagement, document n°3 du PLU (orientations 8 et 9) avec lesquelles tout projet d’aménagement et de construction doit être compatible.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 320,
+        "article": "UMG 1",
+        "quote": "Les constructions, ouvrages ou travaux à destination d’exploitation agricole ou forestière et d’entrepôt.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "oap",
+        "page": 23,
+        "article": "OAP 7 - mixité fonctionnelle",
+        "quote": "Cette dominante d’habitat n’exclut pas la réalisation de programmes d’une autre nature, l’habitat restant une dominante.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 324,
+        "article": "UMG 6.3",
+        "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 379,
+        "article": "Lexique - Voie",
+        "quote": "Emprise publique ou privée composée de la chaussée et des trottoirs ou bas-côtés.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 374,
+        "article": "Lexique - Alignement",
+        "quote": "Il s’agit de la limite entre le domaine public et la propriété privée.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 325,
+        "article": "UMG 7.2.1",
+        "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 325,
+        "article": "UMG 7.2.1",
+        "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 378,
+        "article": "Lexique - Limite séparative",
+        "quote": "Limite séparative : Ligne commune, séparant deux propriétés privées et/ou publiques.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 325,
+        "article": "UMG 7.1.1",
+        "quote": "c'est-à-dire les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction du terrain ou des terrains voisins et qui ne sont pas concernées par l’application de l’article 6.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 326,
+        "article": "UMG 10.2",
+        "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 326,
+        "article": "UMG 10.1",
+        "quote": "à partir du sol naturel existant avant travaux;",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 326,
+        "article": "UMG 9",
+        "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 331,
+        "article": "UMG 13.3",
+        "quote": "En espace vert 20% au moins de la superficie du terrain.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 331,
+        "article": "UMG 13.3",
+        "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 330,
+        "article": "UMG 13.1",
+        "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 327,
+        "article": "UMG 12.1",
+        "quote": "1 place de stationnement par tranche de 150 m² de surface de plancher, pour les résidences étudiantes.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 329,
+        "article": "UMG 12.5",
+        "quote": "Pour le cas des résidences étudiantes, la réalisation de la majorité des places de stationnement en sous-sol n’est pas requise.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 328,
+        "article": "UMG 12.3",
+        "quote": "- 0,75 m² par logement pour les logements jusqu’à deux pièces principales",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 327,
+        "article": "UMG 12.1",
+        "quote": "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement,",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 327,
+        "article": "UMG 12.1",
+        "quote": "1 place de stationnement par logement, pour les logements financés avec un prêt aidé par l’Etat,",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 328,
+        "article": "UMG 12.1",
+        "quote": "0,5 place par chambre",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 325,
+        "article": "UMG 8.1",
+        "quote": "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comporte des vues.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 326,
+        "article": "UMG 8.1",
+        "quote": "6 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vue.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 0.9886363636363636,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 322,
+        "article": "UMG 3.2",
+        "quote": "Aucune voie d'intérêt public ou privé ne doit avoir  une largeur  inférieure à 5 mètres pour une circulation à double sens et à 3,50 mètres pour une circulation à sens unique.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 323,
+        "article": "UMG 4.2.2",
+        "quote": "quantitatives et par dérogation de manière à réguler les rejets dans le réseau collecteur à 0,7 L/s/ha pour la pluie de référence défini dans l’étude globale de gestion des eaux du plateau de Saclay",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 323,
+        "article": "UMG 4.3",
+        "quote": "Tous les réseaux sont implantés en souterrain.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 323,
+        "article": "UMG 4.4",
+        "quote": "Toute construction dont la destination engendre la production de déchets et pour les constructions à destination d’habitation comportant plus de trois logements, un espace clos d’une superficie suffisante pour recevoir les divers conteneurs liés à la collecte sélective des ordures ménagères doit être aménagé.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 327,
+        "article": "UMG 11.1",
+        "quote": "Les différents bâtiments et leurs annexes doivent participer d'une même composition architecturale par leurs volumes et leurs traitements, avec des variations de façades dans leur hauteur, le rythme de leurs percements, ainsi que par des décrochés en élévation ou en emprise.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 8,
+        "article": "Titre I - Article 4",
+        "quote": "Les dérogations aux dispositions du présent règlement sont interdites.",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    },
+    {
+      "citation": {
+        "doc": "plu_reglement",
+        "page": 324,
+        "article": "UMG 6.1.1",
+        "quote": "Les dispositions du présent article s'appliquent aux constructions implantées le long des emprises publiques et des voies ouvertes à la circulation générale",
+        "source_kind": "regulatory"
+      },
+      "verified": true,
+      "score": 1.0,
+      "matched_page": null,
+      "text_verifiable": true
+    }
+  ],
+  "evidence": [
+    {
+      "region": {
+        "doc": "plu_reglement_graphique",
+        "page": 1,
+        "region": [
+          1270,
+          300,
+          1360,
+          390
+        ]
+      },
+      "pixels": [
+        4549,
+        1074,
+        4872,
+        1398
+      ],
+      "path": "data/crops/plu_reglement_graphique_p1_1270-300-1360-390.png"
+    },
+    {
+      "region": {
+        "doc": "oap",
+        "page": 34,
+        "region": [
+          189,
+          940,
+          1373,
+          1765
+        ]
+      },
+      "pixels": [
+        225,
+        1121,
+        1639,
+        2107
+      ],
+      "path": "data/crops/oap_p34_189-940-1373-1765.png"
+    },
+    {
+      "region": {
+        "doc": "oap",
+        "page": 35,
+        "region": [
+          530,
+          1300,
+          1370,
+          1890
+        ]
+      },
+      "pixels": [
+        632,
+        1551,
+        1636,
+        2256
+      ],
+      "path": "data/crops/oap_p35_530-1300-1370-1890.png"
+    }
+  ]
+}

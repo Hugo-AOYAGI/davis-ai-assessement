@@ -11,6 +11,8 @@ from pydantic import JsonValue, ValidationError
 
 from agent.contracts.base import Contract
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsState
+from agent.tools.submit.replies import format_validation, rejection, reply_artifact, revise_name
+from agent.tools.submit.revise import Deliver, revise_tool
 
 type Finalizer[C: Contract, S: Contract] = Callable[[C, Mapping[str, ArtifactData]], S]
 """Turns a validated submission into the object to store, given the current artifacts.
@@ -48,8 +50,9 @@ def submit_tool[C: Contract, S: Contract](
     The tool's argument schema is the contract's JSON schema, so the model passes the contract
     fields as top-level arguments and reads their docstrings as descriptions. Validation happens
     inside the tool: a rejected submission returns an error ``ToolMessage`` listing every
-    ``field.path: message`` and stores nothing; an accepted one is stored as JSON in the
-    ``artifacts`` state under its key, and the reply says ``<key> accepted.``.
+    ``field.path: message`` and stores nothing, its ``artifact`` keeping the rejected arguments
+    as the draft the revise tool edits (see ``submit_tools``); an accepted one is stored as JSON
+    in the ``artifacts`` state under its key, and the reply says ``<key> accepted.``.
 
     Args:
         name: Tool name, e.g. ``submit_notes``.
@@ -68,31 +71,78 @@ def submit_tool[C: Contract, S: Contract](
         ValueError: If ``artifact`` names a placeholder that is not a field of ``contract``.
     """
     _check_placeholders(artifact, contract)
+    deliver = _pipeline(name, artifact, contract, finalize, summarize)
+    return _submit(name, contract, deliver)
 
-    def submit(runtime: ToolRuntime[None, ArtifactsState], **arguments: JsonValue) -> Command[str]:
-        """Validate, optionally finalize, and store the submission."""
+
+def submit_tools[C: Contract, S: Contract](
+    *,
+    name: str,
+    artifact: str,
+    contract: type[C],
+    finalize: Finalizer[C, S] | None = None,
+    summarize: Summarizer[S] | None = None,
+) -> list[BaseTool]:
+    """Build the submit tool and its revise tool (``submit_notes`` and ``revise_notes``).
+
+    After a rejection the model sends only edits to the rejected draft to the revise tool,
+    which runs them through the same pipeline (validation, ``finalize``, storage, ``summarize``)
+    instead of making the model re-emit the complete result. Arguments as in ``submit_tool``.
+
+    Returns:
+        ``[submit, revise]``, to add to the agent that produces the artifact.
+
+    Raises:
+        ValueError: If ``artifact`` names a placeholder that is not a field of ``contract``.
+    """
+    _check_placeholders(artifact, contract)
+    deliver = _pipeline(name, artifact, contract, finalize, summarize)
+    return [_submit(name, contract, deliver), revise_tool(name, deliver)]
+
+
+def _pipeline[C: Contract, S: Contract](
+    name: str,
+    artifact: str,
+    contract: type[C],
+    finalize: Finalizer[C, S] | None,
+    summarize: Summarizer[S] | None,
+) -> Deliver:
+    """Build the pipeline shared by the submit and revise tools: check, store, reply."""
+
+    def deliver(
+        arguments: dict[str, JsonValue], runtime: ToolRuntime[None, ArtifactsState]
+    ) -> Command[str]:
+        """Validate, optionally finalize, and store the submission, or reject it as a draft."""
         tool_call_id = runtime.tool_call_id or ""
         try:
             submission = contract.model_validate(arguments)
         except ValidationError as error:
-            return _reject(name, _format_validation(error), tool_call_id)
+            return rejection(name, format_validation(error), tool_call_id, arguments)
         if finalize is None:
             stored = cast("S", submission)
         else:
             try:
                 stored = finalize(submission, runtime.state.get("artifacts", {}))
-            except SubmissionRejected as rejection:
-                return _reject(name, rejection.errors, tool_call_id)
+            except SubmissionRejected as rejected:
+                return rejection(name, rejected.errors, tool_call_id, arguments)
         key = artifact.format_map(dict(submission))
         reply = f"{key} accepted."
         if summarize is not None:
             reply = f"{reply}\n\n{summarize(stored)}"
+        message = ToolMessage(reply, tool_call_id=tool_call_id, artifact=reply_artifact(name))
         return Command[str](
-            update={
-                "artifacts": {key: stored.model_dump(mode="json")},
-                "messages": [ToolMessage(reply, tool_call_id=tool_call_id)],
-            }
+            update={"artifacts": {key: stored.model_dump(mode="json")}, "messages": [message]}
         )
+
+    return deliver
+
+
+def _submit(name: str, contract: type[Contract], deliver: Deliver) -> BaseTool:
+    """Wrap the pipeline in the submit tool, whose arguments are the contract's fields."""
+
+    def submit(runtime: ToolRuntime[None, ArtifactsState], **arguments: JsonValue) -> Command[str]:
+        """Validate, optionally finalize, and store the submission."""
+        return deliver(arguments, runtime)
 
     return StructuredTool(
         name=name,
@@ -117,23 +167,9 @@ def _describe(name: str, contract: type[Contract]) -> str:
     return (
         f"Deliver your final result: {summary}\n\n"
         "This is the only way to hand your result back. Pass every field of the result as a "
-        "top-level argument. The submission is validated: if it is rejected, the reply lists "
-        f"each problem as `field.path: message`; fix them and call {name} again with the "
-        "complete result. Your task is done only once the reply says the result was accepted."
+        "top-level argument. The submission is validated: if it is rejected, nothing is stored "
+        "and the reply lists each problem as `field.path: message`; fix them with "
+        f"{revise_name(name)}, sending only the changed fields (calling {name} again with the "
+        "complete result also works, but is much slower). Your task is done only once the reply "
+        "says the result was accepted."
     )
-
-
-def _format_validation(error: ValidationError) -> list[str]:
-    """Render pydantic errors as ``field.path: message`` lines."""
-    return [
-        f"{'.'.join(str(part) for part in detail['loc']) or '(whole result)'}: {detail['msg']}"
-        for detail in error.errors(include_url=False)
-    ]
-
-
-def _reject(name: str, errors: Sequence[str], tool_call_id: str) -> Command[str]:
-    """Reply with the errors as an error ``ToolMessage``, storing nothing."""
-    lines = "\n".join(f"- {line}" for line in errors)
-    content = f"{name} rejected, nothing was stored. Fix these errors and resubmit:\n{lines}"
-    message = ToolMessage(content, tool_call_id=tool_call_id, status="error")
-    return Command[str](update={"messages": [message]})

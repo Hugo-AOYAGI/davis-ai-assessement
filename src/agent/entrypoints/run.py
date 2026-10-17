@@ -9,12 +9,13 @@ log lines in ``agent.log``.
 
 import shutil
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
 import hydra
 from dotenv import load_dotenv
 from hydra.core.hydra_config import HydraConfig
-from langchain_core.callbacks import UsageMetadataCallbackHandler
+from langchain_core.callbacks import BaseCallbackHandler, UsageMetadataCallbackHandler
 from langchain_core.messages import BaseMessage, HumanMessage
 from omegaconf import DictConfig, OmegaConf, open_dict
 
@@ -64,7 +65,10 @@ def make_unattended(cfg: DictConfig) -> None:
 
 
 def run_study(
-    cfg: DictConfig, case: Case, overrides: list[str]
+    cfg: DictConfig,
+    case: Case,
+    overrides: list[str],
+    callbacks: Sequence[BaseCallbackHandler] = (),
 ) -> tuple[RunMetrics, list[BaseMessage], VerifiedStudy | None]:
     """Run the orchestrator on one case.
 
@@ -72,6 +76,8 @@ def run_study(
         cfg: The composed config.
         case: What to study.
         overrides: Hydra overrides of the run, recorded as trace metadata.
+        callbacks: Extra callback handlers of the run; they also reach every sub-agent run
+            (evals capture the sub-agents' messages this way).
 
     Returns:
         The run's metrics, the orchestrator's messages and the accepted study, if any.
@@ -85,7 +91,7 @@ def run_study(
         {"messages": [HumanMessage(message)]},
         config={
             "recursion_limit": cfg.agent.recursion_limit,
-            "callbacks": [usage_handler],
+            "callbacks": [usage_handler, *callbacks],
             "run_name": "study",
             "metadata": {
                 "address": case.address,

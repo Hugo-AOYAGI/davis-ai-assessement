@@ -1,4 +1,4 @@
-# Root config. The defaults list is final: later work packages only add files inside groups.
+# Root configuration and default groups.
 #
 # `subagents` is a multi-select group: one file per sub-agent in conf/subagents/, whose content
 # is nested under a top-level key equal to the file name (conf/subagents/surveyor.yaml starts

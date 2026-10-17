@@ -1,0 +1,38 @@
+id: e01_reference
+level: e2e
+tests: the brief's case; CR0249 strip; "jeunes actifs" undefined in the corpus; Titre I parking cap
+status: draft                            # verified once compose_e2e.py has filled the volume
+built_by: claude
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs, two separate buildings
+  facts: []                              # program facts standing in for ask_user answers
+from_items: [s01, z05, d01, d11]         # component items the pre-filled facts come from
+facts:
+  - {key: site.choice.parcel_ids, expect: [91272000CR0247], critical: true}
+  - {key: study.regime.zone, expect: UMG, critical: true}
+  - {key: study.regime.oap_applicable, expect: true}
+  - key: study.envelope.max_height_m
+    expect: 20
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326, quote: "20 mètres"}]
+  - key: study.envelope.max_footprint_ratio
+    expect: null                         # "not regulated" is the expected answer
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326}]
+  - key: study.admissibility[building~"Sociale Étudiante"].verdict
+    expect: permitted
+    critical: true
+  - key: study.admissibility[building~"Jeunes Actifs"].verdict
+    any_of: [permitted, conditional]     # left open by the documents
+    critical: true
+  - key: envelope.max_volume_m3
+    expect: <computed by compose_e2e.py>
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - The destination of a Résidence Jeunes Actifs is not defined by the corpus (housing or hotel-type accommodation)
+  - Parking for the student residence is capped by Titre I (p.6), not only by UMG 12 (p.327)
+must_not:
+  - States a maximum footprint ratio for zone UMG
+  - Uses parcel CR0249 as the site

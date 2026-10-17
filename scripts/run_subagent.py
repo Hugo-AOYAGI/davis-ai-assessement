@@ -9,7 +9,7 @@ JSON object of initial artifacts (e.g. ``{"site": ...}`` from a ``surveyor`` run
 
 import argparse
 import json
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
 
@@ -23,10 +23,11 @@ from pydantic import BaseModel, JsonValue, TypeAdapter
 from agent.adapters.corpus.store import load_corpus
 from agent.agents.config import PROJECT_ROOT, load_config, project_path
 from agent.agents.subagents import build_subagent
-from agent.contracts.evidence import Citation, CitationCheck, SourceKind
+from agent.contracts.evidence import CitationCheck, SourceKind
 from agent.llm.factory import load_pricing
 from agent.llm.pricing import TokenCounts, find_price
 from agent.observability.logs import get_logger, setup_logging
+from agent.runtime.citations.collect import collect_json_citations
 from agent.tools.study.checks import check_regulatory, corpus_facts
 from agent.tools.study.messages import Verification
 
@@ -96,21 +97,6 @@ def parse_options(argv: Sequence[str] | None = None) -> Options:
     return Options.model_validate(vars(parser.parse_args(argv)))
 
 
-def find_citations(value: JsonValue, path: str) -> Iterator[tuple[str, Citation]]:
-    """Yield ``(dotted path, citation)`` for every dict with ``quote`` and ``source_kind``."""
-    if isinstance(value, dict):
-        if "quote" in value and "source_kind" in value:
-            yield path, Citation.model_validate(value)
-            return
-        items = list(value.items())
-    elif isinstance(value, list):
-        items = [(str(index), item) for index, item in enumerate(value)]
-    else:
-        return
-    for key, item in items:
-        yield from find_citations(item, f"{path}.{key}")
-
-
 def check_citations(cfg: DictConfig, artifacts: Mapping[str, JsonValue]) -> list[LocatedCheck]:
     """Check every regulatory citation of the artifacts against the ingested corpus.
 
@@ -124,7 +110,7 @@ def check_citations(cfg: DictConfig, artifacts: Mapping[str, JsonValue]) -> list
     cited = [
         (path, citation)
         for name, data in artifacts.items()
-        for path, citation in find_citations(data, name)
+        for path, citation in collect_json_citations(data, name)
         if citation.source_kind is SourceKind.REGULATORY
     ]
     if not cited:

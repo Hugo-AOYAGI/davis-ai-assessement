@@ -10,7 +10,7 @@ from pydantic import JsonValue
 from agent.contracts.evidence import Ambiguity
 from agent.contracts.findings.notes import DocNotes
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsMiddleware, read_artifact
-from agent.tools.submit.factory import SubmissionRejected, submit_tool
+from agent.tools.submit.factory import SubmissionRejected, submit_tool, submit_tools
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -46,6 +46,67 @@ def test_agent_corrects_rejected_submission(notes_tool, notes_args, bad_notes_ar
     assert "notes.0.text: Field required" in replies["bad"].content
     assert "notes.0.citations.0: Value error" in replies["bad"].content
     assert replies["good"].content == "notes.oap accepted."
+
+
+FIXES: dict[str, JsonValue] = {
+    "edits": [
+        {"path": "notes.0.text", "value": "The site lies inside the Joliot Curie OAP perimeter."},
+        {"path": "notes.0.citations.0.page", "value": 33},
+    ]
+}
+
+
+def test_agent_revises_rejected_submission(notes_args, bad_notes_args):
+    model = scripted(
+        call("submit_notes", bad_notes_args, "bad"),
+        call("revise_notes", FIXES, "fix"),
+        AIMessage(content="done"),
+    )
+    tools = submit_tools(name="submit_notes", artifact="notes.{label}", contract=DocNotes)
+    agent = create_agent(model=model, tools=tools, middleware=[ArtifactsMiddleware()])
+    state = agent.invoke({"messages": [HumanMessage("analyse the OAP")]})
+
+    stored = state["artifacts"]["notes.oap"]
+    assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
+    replies = {m.tool_call_id: m for m in state["messages"] if isinstance(m, ToolMessage)}
+    assert replies["bad"].status == "error"
+    assert replies["bad"].artifact["draft"] == bad_notes_args
+    assert replies["fix"].content == "notes.oap accepted."
+
+
+def test_revised_subagent_artifact_reaches_parent(notes_args, bad_notes_args):
+    parent = scripted(
+        call("task", {"description": "analyse the OAP", "subagent_type": "worker"}, "t1"),
+        AIMessage(content="parent done"),
+    )
+    child = scripted(
+        call("submit_notes", bad_notes_args, "s1"),
+        call("revise_notes", FIXES, "r1"),
+        AIMessage(content="child done"),
+    )
+    agent = create_deep_agent(
+        model=parent,
+        system_prompt="x",
+        middleware=[ArtifactsMiddleware()],
+        subagents=[
+            SubAgent(
+                name="worker",
+                description="d",
+                system_prompt="y",
+                model=child,
+                tools=submit_tools(
+                    name="submit_notes", artifact="notes.{label}", contract=DocNotes
+                ),
+                middleware=[ArtifactsMiddleware()],
+            )
+        ],
+    )
+    state = agent.invoke({"messages": [HumanMessage("go")]})
+
+    stored = state["artifacts"]["notes.oap"]
+    assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
+    replies = {m.tool_call_id: m.content for m in state["messages"] if isinstance(m, ToolMessage)}
+    assert replies == {"t1": "child done"}
 
 
 NOTE: dict[str, JsonValue] = {

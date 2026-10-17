@@ -1,124 +1,193 @@
 # Regulatory buildability agent
 
-An AI agent that navigates French planning documents (PLU regulatory text, zoning plan, OAP) and
-produces an auditable buildability study for a parcel: applicable zone and overlays, program
-admissibility, envelope rules, the resulting buildable envelope, ambiguities, and a verified
-citation for every conclusion.
+An AI agent that reads French planning documents and produces a cited buildability study:
+which zone applies, whether the proposed uses are permitted, the applicable limits, and a
+computed building envelope. The reference case is **4 rue Joliot Curie, Gif-sur-Yvette**:
+a student residence and a residence for young workers in two separate buildings.
 
-Reference case: **4 rue Joliot Curie, 91190 Gif-sur-Yvette**, with one Résidence Sociale
-Étudiante and one Résidence Jeunes Actifs in two separate buildings. The agent itself is
-generic: address, program and document corpus are inputs.
+The backend uses LangGraph, deepagents, Anthropic models and Hydra configuration. It separates
+model judgement from deterministic geometry, quote verification and submission validation.
+The included Next.js chat client connects to the LangGraph Agent Server.
 
-## Stack
+## Start here
 
-- **Agent**: LangGraph + deepagents (orchestrator, sub-agents, playbooks), Claude models
-- **Configuration**: Hydra — every model, prompt, threshold and policy is configurable
-- **Observability and evals**: Arize Phoenix + deterministic scorers
-- **UI**: LangGraph Agent Server + agent-chat-ui
-- **Tooling**: uv, ruff, ty, pytest
+Run commands from the repository root unless a step says otherwise. Install **uv** first;
+`uv sync --locked` provisions the Python version required by `pyproject.toml` (3.13 or newer)
+and the locked dependencies. Model calls require an Anthropic API key and incur API charges.
 
-## Quick start
-
-```bash
-uv sync
-cp .env.example .env                          # set ANTHROPIC_API_KEY
-uv run python -m agent.entrypoints.ingest     # once: builds the corpus cache under data/
+```sh
+uv sync --locked
 ```
 
-### Run a study from the command line
+Copy the environment template, then edit `.env` to set `ANTHROPIC_API_KEY`:
 
-```bash
-uv run python -m agent.entrypoints.run                       # reference case (conf/case/reference.yaml)
-uv run python -m agent.entrypoints.run models.nodes.orchestrator.max_tokens=8000   # any Hydra override
+```powershell
+# PowerShell
+Copy-Item .env.example .env
 ```
 
-The CLI runs unattended (`ask_user` disabled; program facts come from `case.facts`). Each run
-writes to its Hydra run dir `outputs/<date>/<time>/`:
-
-- `run_summary.json`: cost per model and per model node (orchestrator, each sub-agent),
-  tokens, wall time, rejected submissions, headline results, citation pass rate;
-- `final_message.md`: the orchestrator's last reply;
-- `agent.log`: the run's log lines;
-- when the gate accepted a study: `verified_study.json` (the study, site, labelled limits, zone,
-  envelope, citation checks), `report.md`, and `evidence/` with the evidence crops the report
-  links to (zoning-plan region and diagram views, saved by the gate under `data/crops/`).
-
-The command exits with code 1 when no study was accepted.
-
-### Chat with the agent (Agent Server + chat UI)
-
-```bash
-uv run langgraph dev                                         # Agent Server on http://localhost:2024
-cd ui && pnpm install && pnpm dev                            # UI on http://localhost:3000 (graph id: agent)
+```sh
+# macOS / Linux
+cp .env.example .env
 ```
 
-Ask for a study in the chat, e.g. *"Buildability study for 4 rue Joliot Curie, 91190
-Gif-sur-Yvette: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs in two separate
-buildings."* The orchestrator loads the `study` playbook and delegates to its three sub-agents. In
-the chat, `ask_user` is enabled: its questions appear as an interrupt card with one field per
-question, pre-filled with the agent's recommendation (approve, edit, or reject with a free-text
-reply). Per-run Hydra overrides go in the run config:
-`{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}`.
+The template disables tracing, so Phoenix is optional. Existing environment variables take
+precedence over `.env`; copying the template overwrites an existing file, so do this only on
+first setup.
 
-### Tracing (Phoenix)
+Build the corpus from the three bundled PDFs (calls the document classifier):
 
-```bash
-uv run phoenix serve                                          # UI and collector on http://localhost:6006
+```sh
+uv run python -m agent.entrypoints.ingest
 ```
 
-Tracing is on by default, for CLI runs and the Agent Server alike: start Phoenix first. Spans go to
-project `policies.tracing.project`. Turn it off with `AGENT_TRACING=false` (the test suite does),
-or with `policies.tracing.enabled=false` on a CLI run. The Agent Server reads it once at startup.
+This writes `data/gif-sur-yvette@2021-07-06/corpus.json`. Re-run ingestion after changing the
+PDFs or splitter configuration. The cache is local and is not included in a fresh clone.
 
-## How it works
+Check that the real Agent Server starts and exposes the graph schema, without a model call:
 
-The orchestrator plays the project lead: it loads a playbook (`load_playbook`), delegates with
-`task`, reads the sub-agents' typed outputs (`read_artifact`), decides (destinations, verdicts,
-limits, ambiguities), asks the user when allowed (`ask_user`) and submits the study to the
-`submit_study` gate. Each sub-agent ends with a submit tool that validates its output and stores it
-as an artifact in the graph state:
-
-| Sub-agent | Job | Tools | Artifact |
-|---|---|---|---|
-| `surveyor` | address → parcels chosen → site (polygon, area, neutral edges) | `geocode`, `find_parcels`, `describe_parcels`, `site_view`, `submit_parcel` | `site` |
-| `zoning_analyst` | finds the site on the raster zoning plan by eye; zone and legend items | `list_documents`, `site_view`, `view_image`, `zoom`, `submit_zone` | `zone` |
-| `doc_analyst` | reads documents for an aim (rules, OAP, a chat question) and returns cited notes and open points; extracts, does not decide | `list_documents`, `list_sections`, `read_section`, `search`, `read_pages`, `view_image`, `zoom`, `site_view`, `submit_notes` | `notes.<label>` |
-
-The study playbook runs `surveyor`, then `zoning_analyst`, then `doc_analyst` twice in parallel
-(`rules` and `oap`). `submit_study` is plain code: it validates the `Study`, checks every quote on
-its page, requires an ambiguity for every open point, labels the site limits (road / side / rear),
-computes the envelope, saves the evidence crops, and returns the envelope figures on acceptance
-(artifact `study`).
-
-## Repository layout
-
-```
-conf/        Hydra configuration groups
-prompts/     system prompts, sub-agent prompts, playbooks (Markdown)
-src/agent/   contracts · runtime · adapters · ingest · llm · tools · agents · observability · entrypoints
-tests/       unit tests mirroring src/agent/
-evals/       eval sets and scorers
-ressources/  input planning documents (PDF)
-docs/        design, v1 refinements, coding standards, plans, roadmap
-ui/          chat UI (Next.js, adapted from agent-chat-ui)
+```sh
+uv run python scripts/smoke_server.py --startup-only
 ```
 
-## Documentation
+The check uses port **2025**, logs its server output to a temporary file, and stops its server
+when finished. To also test credentials and one short model response, omit `--startup-only`.
+That check calls the real API.
 
-- [Design](docs/DESIGN.md): architecture, inputs and outputs, sub-agents, evolution path
-- [Refinements](docs/REFINE.md): v1 decisions, brick by brick (wins where it differs from Design)
-- [Coding standards](docs/CODING_STANDARDS.md)
-- [v0 plan](docs/V0_PLAN.md): work packages and acceptance criteria
-- [v1 plan](docs/V1_PLAN.md): v1 seams, work packages, as-built deviations
-- [Roadmap](docs/ROADMAP.md): deferred decisions, post-v0 improvements, rejected options
-- [CLAUDE.md](CLAUDE.md): where things go, and the dev workflow
+## Run a study
 
-## Status
+```sh
+uv run python -m agent.entrypoints.run
+```
 
-v1 (the [REFINE](docs/REFINE.md) refactor of the working v0): orchestrator (deepagents) with three
-sub-agents (`surveyor`, `zoning_analyst`, `doc_analyst`), on-demand `study` playbook, hard
-`submit_study` gate (schema, verbatim citation check, open points ↔ ambiguities, edge labelling,
-envelope with green cap, evidence crops), `ask_user` interrupt, Hydra CLI and Phoenix tracing.
-v0 baseline reference run: accepted at the first submission, 46/46 text-verifiable citations
-verified, 5 ambiguities, $0.71. Next: rerun the reference case against that baseline, then the
-eval set and iteration driven by eval failures.
+The CLI runs unattended: clarification tools are disabled, and known program facts come from
+`case.facts` in `conf/case/reference.yaml`. Address, program, corpus, models and policies can be
+changed through Hydra overrides:
+
+```sh
+uv run python -m agent.entrypoints.run models.nodes.orchestrator.max_tokens=8000
+uv run python -m agent.entrypoints.run --cfg job
+```
+
+`--cfg job` prints configuration without running a study. A study run writes to
+`outputs/<date>/<time>/`:
+
+- `run_summary.json`: acceptance, headline findings, tokens, configured cost estimates and timing.
+- `final_message.md` and `agent.log`: the final response and application logs.
+- On acceptance: `verified_study.json`, `report.md`, and `evidence/` with linked image crops.
+
+Exit code **1** means no study was accepted. Inspect the log and rejected submission messages.
+API access and geographic services require an internet connection; a successful startup check
+does not verify those external dependencies.
+
+## Run the server
+
+```sh
+uv run langgraph dev
+```
+
+The Agent Server listens on **http://localhost:2024**, with graph ID **agent**. It supports
+interactive clarification and accepts Hydra overrides in each run's configuration:
+
+```json
+{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}
+```
+
+The optional chat client is in `ui/`; see its own setup instructions. The backend can be run
+and evaluated independently of the client.
+
+For Phoenix tracing, run `uv run phoenix serve` in another terminal, set
+`AGENT_TRACING=true` in `.env`, and restart the agent server. Phoenix listens on
+**http://localhost:6006**. CLI tracing can also be disabled with
+`policies.tracing.enabled=false`.
+
+## Follow the code
+
+Start with `prompts/playbooks/study.md` for the workflow, then
+`src/agent/agents/orchestrator.py` for assembly and `src/agent/tools/study/gate.py` for acceptance.
+
+1. **Surveyor** chooses cadastral parcels; code builds the site geometry and neutral edges.
+2. **Zoning analyst** reads the raster zoning plan and records zone and legend findings.
+3. **Document analyst** extracts cited notes for the rules and OAP planning orientations.
+4. **Orchestrator** decides uses, limits and ambiguities, then submits a typed `Study`.
+5. **Submission gate** validates inputs, checks quotes against PDF text, requires open points to
+   be addressed, labels boundaries, computes the envelope and stores evidence crops.
+
+Sub-agents submit typed artifacts (`site`, `zone`, `notes.<label>`) into graph state. The gate
+produces `VerifiedStudy`, the shared output used by the report and end-to-end scorers.
+Failed submissions return errors for the model to correct; revision tools apply focused edits.
+
+The envelope is currently a **single prism**, capped by setbacks, footprint and green-space
+ratios and maximum height. It does not establish that two buildings fit, calculate parking
+capacity, or model stepped heights. Raster evidence is preserved for inspection but is not
+verified against text. An accepted study is an output that passed these implemented checks.
+
+```text
+src/agent/
+  contracts/       Shared Pydantic inputs, findings and study outputs
+  runtime/         Pure geometry, citation matching, report rendering and revisions
+  adapters/        HTTP services, corpus files and page/image storage
+  tools/           Tools and submission gates exposed to the models
+  agents/          Configuration loading and graph assembly
+  ingest/          PDF extraction, classification and section splitting
+  llm/             Model creation, usage accounting and output limits
+  observability/   Logging and Phoenix tracing
+  entrypoints/     CLI ingestion/studies, server graph and image routes
+conf/              Hydra settings and tool factory wiring
+prompts/           Model instructions and playbooks
+evals/             Evaluation harness and shipped dataset
+tests/             Offline tests, largely mirroring the backend
+ressources/        Bundled source PDFs
+docs/              Design decisions, review and evaluation documentation
+```
+
+Configuration supplies factories with `_target_` entries; tool wrappers call adapters and pure
+runtime logic. Start with `conf/config.yaml`, then the relevant configuration group.
+
+## Checks and evaluations
+
+```sh
+uv run ruff check src evals scripts tests
+uv run ruff format --check src evals scripts tests
+uv run ty check
+uv run pytest
+```
+
+Tests use fixtures and fakes. Real-corpus acceptance tests are skipped until ingestion has run.
+Coding conventions and file/folder limits are in [CODING_STANDARDS.md](docs/CODING_STANDARDS.md).
+
+The eval harness supports surveyor, zoning, document and end-to-end tasks, but the repository
+currently ships **one verified surveyor item**. The broader 70-item suite is a plan, not a
+completed benchmark. Run the included item without Phoenix:
+
+```sh
+uv run python -m evals.run eval.dataset=surveyor eval.phoenix.enabled=false
+```
+
+This still calls the real agent and geographic services. Disabling Phoenix does not make model
+execution offline. To rescore saved records, add
+`eval.rescore=outputs/evals/<date>/<time>` with a matching dataset selection; scoring may call
+the judge when uncached judgement is needed. Outputs include `records/`, `scores.json` and
+`summary.md`. See [EVALS.md](docs/EVALS.md) for scoring and dataset status.
+
+## Troubleshooting
+
+- **No ingested corpus:** run the ingest command before studies or evals.
+- **Authentication or model errors:** check `.env`, API credit and model access. Model IDs and
+  local pricing estimates are configured in `conf/models/default.yaml`.
+- **Connection refused on port 6006:** disable tracing, or start Phoenix. Evals have a separate
+  `eval.phoenix.enabled` switch.
+- **Port in use:** pass `--port 2026` to the smoke check, or `--port 2027` to `langgraph dev`.
+- **Windows terminal encoding errors:** set `$env:PYTHONUTF8='1'` before launching the command.
+
+## Further reading
+
+- [Code review](docs/CODE_REVIEW.md): findings, fixes, field usage and remaining work.
+- [Design](docs/DESIGN.md) and [v1 refinements](docs/REFINE.md): design history; refinements
+  supersede the original design where they differ.
+- [Round 2 proposal](docs/REFINE_v2.md): unimplemented envelope and architect design.
+- [Roadmap](docs/ROADMAP.md): deferred improvements.
+- [CLAUDE.md](CLAUDE.md): contributor map and extension instructions.
+
+The historical plans in `docs/V0_PLAN.md` and `docs/V1_PLAN.md` explain implementation stages;
+they are not the startup guide or a statement of current benchmark results.

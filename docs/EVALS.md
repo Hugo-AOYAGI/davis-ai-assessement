@@ -1,8 +1,15 @@
 # Evals
 
-How we prove the agent is correct (Part 2 of the brief). Sections 1–5 answer the brief's
-questions: what we evaluate, how the eval sets are built, how they are scored, why they are hard
-to game. Results and failure modes (sections 9–10) are filled in from the scored pass.
+Evaluation harness and proposed evaluation plan (Part 2 of the brief).
+
+**Current scope:** the repository ships one verified surveyor item,
+`evals/datasets/surveyor/s01_joliot_curie.yaml`. The harness supports all four levels, but the
+70-item suite below is a plan, not a completed dataset. Zoning, document and end-to-end examples
+live in `tests/evals/fixtures/items/` as harness fixtures; they are not runnable benchmark items.
+No benchmark results or judge calibration measurements are published yet.
+
+Sections 1 to 6 describe intended coverage and implemented scoring rules. Section 7 gives
+commands for the shipped item. Missing datasets and selections with no matching items are errors.
 
 ---
 
@@ -11,16 +18,17 @@ to game. Results and failure modes (sections 9–10) are filled in from the scor
 Three levels. Most items sit at the component level, where runs are cheap and failures are easy to
 attribute; the end-to-end level catches what only appears when the pieces are combined.
 
-| Level | Unit under test | Input | Output scored | Items |
+| Level | Unit under test | Input | Output scored | Planned items |
 |---|---|---|---|---|
 | Deterministic core | envelope geometry, citation matcher, gate | fixtures | exact values | pytest suite (not counted here) |
 | Component | `surveyor` | address | `Site` | 20 |
-| Component | `zoning_analyst` | seeded `Site` | `ZoneFindings` | 20 |
-| Component | `doc_analyst` | task + seeded `Site` and `ZoneFindings` | `DocNotes` | 20 |
+| Component | `zoning_analyst` | address, program, parcel ids | `ZoneFindings` | 20 |
+| Component | `doc_analyst` | task: label, aim, documents, topics, context (zone, legend items, parcel ids, program) | `DocNotes` | 20 |
 | End to end | orchestrator + sub-agents + `submit_study` gate | address + program | `VerifiedStudy` + run trace | 10 |
 
-Component inputs are fixtures, never the output of the previous sub-agent, so an upstream error
-does not leak into a downstream score. Sub-agents run standalone through `build_subagent(cfg, name)`;
+Component inputs are the task text the orchestrator would write (a sub-agent knows nothing
+else), filled from ground truth, never from the output of the previous sub-agent, so an upstream
+error does not leak into a downstream score. Sub-agents run standalone through `build_subagent(cfg, name)`;
 the end-to-end level runs the same graph as the CLI and the server.
 
 What only the end-to-end level sees: reconciling sources (zone from the plan vs the text, OAP
@@ -33,7 +41,9 @@ supplied, the agent must choose and record an `Ambiguity`.
 
 ## 2. Eval sets
 
-70 items, one YAML file each, under `evals/datasets/<level>/`.
+The target is 70 items, one YAML file each, under `evals/datasets/<level>/`. Only the
+surveyor reference item is currently shipped. The remaining cases and ground-truth collection
+workflow in this section are planned work.
 
 ### End to end (10)
 
@@ -79,52 +89,191 @@ Cases vary the site (sector, zone, sub-sector) and the program.
 
 ### Item format
 
-Two parts: **facts**, scored in code, and **notes**, scored by a yes/no judge.
+Every item has the same frame; only the input and the kind of expected answer change with the
+level.
+
+```yaml
+id:          # s01, z03, d07, e01…
+level:       # surveyor | zoning | doc | e2e
+tests:       # one line: what the item catches
+status:      # draft | verified | dropped; only verified items are scored
+built_by:    # who wrote the expected answers
+input:       # what the unit under test receives
+facts:       # expected answers, each with where it comes from (source or evidence)
+must_flag:   # points the documents leave open that the output must raise
+must_not:    # wrong claims the output must not make
+```
+
+**Facts** are scored in code, except `doc_analyst` statements, which the judge matches to notes.
+**`must_flag` and `must_not`** are scored by the yes/no judge (section 4).
+
+Fact keys are paths into the output contract of the level (`Site`, `ZoneFindings`, `DocNotes`,
+`VerifiedStudy`), resolved by `evals/harness/extract.py`; a key on a `Limit` reads its `value` and
+`citations`. Pages are 1-based PDF page indices (the printed page number is one lower in the
+regulation).
+
+| Field | Meaning |
+|---|---|
+| `expect` | exact value after unit normalisation; `null` means "not regulated" |
+| `any_of` | the documents leave the point open: any listed value is accepted |
+| `expect_none_of` | none of these values may appear |
+| `at_least` | minimum number of matching elements |
+| `present` / `absent` | legend items that must / must not be reported as applying (`overlays`) |
+| `tolerance` | relative tolerance for measured or computed quantities (0.02 = ±2 %) |
+| `critical` | the item fails if this fact is not grounded-correct |
+| `source` | oracle the value comes from: `ban`, `cadastre`, `gpu_2021`, `geometry`, `hand` |
+| `evidence` | pages (and quotes) where the answer lives; quotes are checked by the citation matcher |
+| `[field=value]`, `[field~"text"]` | select list elements by exact value / by substring (case and accents ignored) |
+
+Exactly one expectation per fact (`present` and `absent` together count as one). A `verified`
+item may not hold an unfilled `<...>` placeholder; drafts may.
+
+#### `surveyor`: scored in code only
+
+```yaml
+id: s01_joliot_curie
+level: surveyor
+tests: address point on unregistered ground beside the CR0249 strip; the real site is CR0247
+status: verified
+built_by: claude
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+facts:
+  - key: choice.parcel_ids
+    expect: [91272000CR0247]
+    critical: true
+    source: hand            # trap: chosen by hand, the parcel is checked to exist in the cadastre
+  - key: choice.parcel_ids
+    expect_none_of: [91272000CR0249]
+    critical: true
+  - key: area_m2
+    expect: 5952
+    tolerance: 0.02
+    source: cadastre
+  - key: edges[neighbours~"CR0249"]
+    at_least: 1             # the site meets the road only across the CR0249 strip
+    source: cadastre
+```
+
+Random items have the same shape with `source: ban` and no trap fields.
+
+#### `zoning_analyst`: code, plus the judge for `must_flag`
+
+```yaml
+id: z01_zone_boundary
+level: zoning
+tests: site across a zone boundary
+status: draft                           # verified once the placeholders are filled
+built_by: claude
+input:                                  # the task text the orchestrator writes, never upstream output
+  address: <address of a site across the UA / UH boundary>
+  parcel_ids: [<parcel id>]
+  program: housing
+facts:
+  - key: zone
+    any_of: [UA, UH]                    # the plan splits the site: either is accepted
+    critical: true
+    source: gpu_2021                    # 62 % UA, 38 % UH
+  - key: overlays
+    present: [Espaces Boisés Classés]   # labels exactly as printed in the plan's legend
+    absent:
+      - Emplacements réservés pour équipements et aménagements divers, création ou amélioration de voirie
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+    source: gpu_2021
+must_flag:
+  - The site lies across a zone boundary (UA / UH)
+```
+
+#### `doc_analyst`: statements matched to notes by the judge, quotes checked in code
+
+The output is free-text `DocNotes`, so a fact is a statement. It counts as covered when a note
+states it (judge), and as grounded when that note also has a valid citation on one of its evidence
+pages (matcher).
+
+```yaml
+id: d02_uga_height
+level: doc
+tests: struck-through "7 10 mètres" (p.91); the height in force is 10 m
+status: verified
+built_by: claude
+input:                                  # the task as the orchestrator writes it (playbook §3)
+  label: rules
+  aim: the height, footprint, setback and parking limits for housing in sector UGa (Vallée)
+  documents: [plu_reglement]
+  topics: [height, footprint, setback_road, setback_side, setback_rear, parking]
+  context:
+    zone: UGa
+    legend_items: []
+    program: housing
+facts:
+  - statement: Maximum height in UGa is 10 m at the acroterion
+    critical: true
+    evidence: [{doc: plu_reglement, page: 91, quote: "10 mètres à l’acrotère"}]
+  - statement: Maximum footprint in UGa is 15 % of the site area
+    critical: true
+    evidence: [{doc: plu_reglement, page: 90, quote: "Dans les secteurs UGa et UGd L’emprise au sol des constructions ne doit pas excéder 15%"}]
+  - statement: Housing requires 2 parking spaces per dwelling
+    evidence: [{doc: plu_reglement, page: 94, quote: "2 places par logement"}]
+must_not:
+  - States a maximum height of 7 m in UGa
+```
+
+#### End to end: values in code, notes and anti-patterns by the judge
+
+A planned composition helper would pre-fill facts from component items for the same site and
+compute the expected envelope with our geometry code. No `evals/gt/compose_e2e.py` helper is
+implemented; the example below illustrates the intended format.
 
 ```yaml
 id: e01_reference
 level: e2e
-status: verified                  # draft | verified; only verified items are scored
-reviewed_by: hugo
+tests: the brief's case; CR0249 strip; "jeunes actifs" undefined in the corpus; Titre I parking cap
+status: draft                            # verified once compose_e2e.py has filled the volume
+built_by: claude
 input:
   address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
   program: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs, two separate buildings
-  facts: []                       # program facts standing in for ask_user answers
-
+  facts: []                              # program facts standing in for ask_user answers
+from_items: [s01, z05, d01, d11]         # component items the pre-filled facts come from
 facts:
-  - key: site.parcel_ids
-    expect: [91272000CR0247]
-    critical: true
-  - key: site.area_m2
-    expect: 5952                  # measured value: ±2 %
-  - key: regime.zone
-    expect: UMG
-    critical: true
-  - key: envelope.max_height_m
+  - {key: site.choice.parcel_ids, expect: [91272000CR0247], critical: true}
+  - {key: study.regime.zone, expect: UMG, critical: true}
+  - {key: study.regime.oap_applicable, expect: true}
+  - key: study.envelope.max_height_m
     expect: 20
     critical: true
-    evidence:                     # where the answer lives; every quote is checked by the matcher
-      - {doc: plu_reglement, page: 326, quote: "20 mètres"}
-  - key: admissibility.residence_jeunes_actifs.verdict
-    any_of: [permitted, conditional]   # left open by the documents: either is accepted
-  - key: envelope.max_footprint_ratio
-    expect: null                  # "not regulated" is the expected answer
+    evidence: [{doc: plu_reglement, page: 326, quote: "20 mètres"}]
+  - key: study.envelope.max_footprint_ratio
+    expect: null                         # "not regulated" is the expected answer
+    critical: true
     evidence: [{doc: plu_reglement, page: 326}]
-
-notes:
-  must_flag:
-    - The destination of a Résidence Jeunes Actifs is not defined by the corpus (housing or hotel-type accommodation)
-    - Parking for the student residence is capped by Titre I (p.6), not only by UMG 12 (p.327)
-  must_not:
-    - States a maximum footprint ratio for zone UMG
-    - Uses parcel CR0249 as the site
+  - key: study.admissibility[building~"Sociale Étudiante"].verdict
+    expect: permitted
+    critical: true
+  - key: study.admissibility[building~"Jeunes Actifs"].verdict
+    any_of: [permitted, conditional]     # left open by the documents
+    critical: true
+  - key: envelope.max_volume_m3
+    expect: <computed by compose_e2e.py>
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - The destination of a Résidence Jeunes Actifs is not defined by the corpus (housing or hotel-type accommodation)
+  - Parking for the student residence is capped by Titre I (p.6), not only by UMG 12 (p.327)
+must_not:
+  - States a maximum footprint ratio for zone UMG
+  - Uses parcel CR0249 as the site
 ```
 
-Fact keys are paths into the scored output, resolved by `evals/harness/extract.py`. Pages are
-1-based PDF page indices (the printed page number is one lower in the regulation).
+The anti-patterns of section 4 are not listed in items: the judge checks them on every end-to-end
+study.
 
-For `doc_analyst`, whose output is free-text `DocNotes`, a fact is a statement (e.g. "housing
-height in UMG is 20 m") plus its evidence pages; it is scored as covered by a note (section 4).
+| Level | Scored in code | Scored by the judge |
+|---|---|---|
+| `surveyor` | parcels, area, road frontage | none |
+| `zoning_analyst` | zone, overlays present / absent | `must_flag` |
+| `doc_analyst` | quotes valid and on an evidence page | statement coverage, `must_not` |
+| End to end | values, verdicts, envelope (twice), citations | `must_flag`, `must_not`, anti-patterns |
 
 ## 3. Building ground truth
 
@@ -203,8 +352,9 @@ reason. No 1–10 scores.
   5. **Inconsistency**: the summary or report contradicts the typed fields.
   6. **Unflagged gap**: a rule pointing outside the corpus treated as known.
 
-The judge is validated once on about 20 notes labelled by hand: we report its agreement rate and its
-yes-rate on deliberately wrong outputs.
+Judge calibration is planned on about 20 notes labelled by hand. The harness has mutation and
+validation helpers in `evals/harness/judging/`, tested with fake judge answers, but no calibration
+CLI or measured agreement/catch rates are shipped.
 
 ### Trajectory
 
@@ -243,43 +393,73 @@ works as a test of one capability; neither is meant as a precise rate.
 ## 7. Harness
 
 ```
-conf/eval/default.yaml        # dataset, judge, Phoenix endpoint, tolerances
-prompts/evals/                # judge prompts, ground-truth drafting brief
+conf/eval.yaml                # primary config of an eval pass: conf/config.yaml + the eval group
+conf/eval/default.yaml        # dataset, item filter, tolerances, intervals, Phoenix, budget, rescore
+conf/eval/harness.yaml        # how one item is run (eval.eval_tasks) and judged (eval.judge)
+prompts/evals/                # judge system + assertions/reasoning/quality, component task texts
 evals/
-  datasets/{e2e,surveyor,zoning,doc}/*.yaml
-  drafts/                     # the two independent drafts per item, kept for audit
-  fixtures/sites/             # seeded Site and ZoneFindings inputs
+  datasets/surveyor/s01_joliot_curie.yaml  # the one shipped benchmark item
   harness/
     items.py                  # eval item schema + YAML loader
-    tasks.py                  # run e2e, or one sub-agent on seeded inputs
+    tasks.py                  # run e2e, or one sub-agent on its item input -> RunRecord
     extract.py                # fact key -> (value, citations)
-    scorers/                  # facts, citations, envelope, trajectory, notes
     judge.py                  # yes/no Opus judge
-    report.py                 # scores.json + summary.md
-  gt/                         # sample_addresses, oracle_site, oracle_zoning, diff, compose_e2e
+    runs/                     # run record, sub-agent message capture, task texts
+    judging/                  # judge cache, output views, judge validation
+    matching/                 # expectations, values, citation grounding
+    scorers/                  # facts, citations, envelope, trajectory, notes
+    passes/                   # one pass: scoring of a record, driver + budget, Phoenix, files
+    report/                   # Wilson and bootstrap intervals, per-level aggregates, summary.md
   run.py                      # Hydra entrypoint
-tests/evals/                  # scorer unit tests on canned outputs, offline
+tests/evals/                  # harness unit tests on canned outputs and fake runs, offline
 ```
 
 - `evals/` is a top-level package: it imports `agent.*`, nothing in `agent` imports it. The judge
   model is a `models.nodes.judge` entry built by `agent.llm`, like every other model.
-- Config is composed by the same `load_config(overrides)` as the server and CLI, so any agent knob
-  can be overridden for an eval run.
-- Each run uploads the dataset to Phoenix (named by content hash, so ground-truth edits create a new
-  version) and runs a Phoenix experiment: one task per level, scorers as evaluators. Phoenix is the
-  UI for browsing traces and per-item results.
-- The record is `outputs/evals/<date>/<time>/scores.json` and `summary.md`; the final ones are
-  copied to `docs/evals/` so this document does not depend on a local Phoenix database.
+- Config is composed by the same loader as the server and CLI (`load_config(overrides,
+  config_name="eval")`; `evals.run` is a Hydra main on the same `conf/eval.yaml`): the agent
+  config plus the `eval` group, with `ask_user` disabled. Any agent knob can be overridden next
+  to the eval ones.
+- For each item, the pass runs the unit under test (`run_item`), saves its record to
+  `records/<item_id>.json` at once, then scores it: facts, citations, envelope (e2e), trajectory,
+  judge questions, item pass. The same code scores offline and under Phoenix.
+- With `eval.phoenix.enabled` (default), each level's items are uploaded as a dataset named
+  `<level>-<content hash>` (editing ground truth creates a new dataset; an existing one is reused)
+  and run as one Phoenix experiment whose task runs and scores an item, so its traces sit next to
+  its scores. Evaluators: `item_pass`, `grounded_accuracy`, `answer_accuracy`,
+  `citation_validity`, `must_flag_rate`, `must_not_hits`, `anti_patterns`, `cost_usd`.
+  `eval.phoenix.enabled=false` runs the same pass without Phoenix (`eval.concurrency` items at a
+  time).
+- Budget guard: no item is launched once agent runs plus judging reach `eval.max_cost_usd`;
+  those items are listed as not launched.
+- If Phoenix finishes without an item's scores for a reason other than the budget, the pass
+  raises an error instead of publishing a report with that item omitted.
+- `eval.rescore=<run dir>` scores that pass's saved records again against the current items and
+  scorers, without running any agent (judge answers are cached).
+- The record is `outputs/evals/<date>/<time>/`: `scores.json` (per level: pass rate with a Wilson
+  interval, grounded and answer accuracy with bootstrap intervals over items, luck rate, citation
+  validity, `must_flag` coverage, `must_not` and anti-pattern hits, trajectory figures, cost; per
+  item: every score), `summary.md` (one table per level, the failed items with their failing
+  critical facts) and `records/`. Publishing selected results under `docs/evals/` is planned;
+  no such result archive is currently shipped.
 
 ```bash
-uv run phoenix serve                                    # http://localhost:6006
+uv run phoenix serve                                         # http://localhost:6006
 uv run python -m evals.run eval.dataset=surveyor
-uv run python -m evals.run eval.dataset=e2e models.nodes.orchestrator.effort=low
+uv run python -m evals.run eval.dataset=surveyor eval.items=[s01_joliot_curie] eval.phoenix.enabled=false
+uv run python -m evals.run eval.rescore=outputs/evals/<date>/<time>   # re-score, no agent run
 ```
 
-## 8. Budget
+The eval commands require the project environment, API credentials and ingested corpus described
+in the README. Start Phoenix for the default mode, or use `eval.phoenix.enabled=false` to run
+without its server. This still runs the agent and may use paid API calls. Judge answers are
+reused only when the resolved model settings, structured-output method, prompts and inputs match
+the cache.
 
-$50 of API credit for evals, of which at most $10 while building the harness. Ground-truth drafting
+## 8. Planned budget
+
+The proposed full-suite budget is $50 of API credit, with at most $10 while building the harness.
+The estimates below are projections for the planned 70-item suite, not measured spending. Ground-truth drafting
 uses a Claude subscription, not API credit. Each item runs once per pass.
 
 | Level | Items | Cost per item | Per pass |

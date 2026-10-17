@@ -1,0 +1,30 @@
+# Eval pass settings (docs/EVALS.md §4, §6, §7). Composed under `eval` by conf/eval.yaml.
+defaults:
+  - harness  # how one item is run and judged: eval.eval_tasks, eval.judge
+  - _self_
+
+dataset: all                  # surveyor | zoning | doc | e2e | all
+datasets_dir: evals/datasets  # one sub-directory per level, relative to the project root
+statuses: [verified]          # only verified items are scored
+items: []                     # item ids to run; empty runs every item of the selected levels
+rescore: null                 # a previous run dir: re-score its records/ without running agents
+
+tolerances:
+  envelope: 0.02                               # reported vs recomputed envelope figures (relative)
+  quad_segs: ${policies.envelope.quad_segs}    # as used by the submit_study gate
+  min_area_m2: ${policies.envelope.min_area_m2}
+
+confidence: 0.95  # level of the Wilson and bootstrap intervals
+bootstrap:        # grounded and answer accuracy, resampled over items
+  resamples: 2000
+  seed: 0
+
+phoenix:
+  enabled: true
+  base_url: http://localhost:6006  # `uv run phoenix serve`
+  timeout_s: 3600                  # per item; an end-to-end run takes minutes
+  retries: 0                       # a failed run is not relaunched: each launch costs credit
+
+max_cost_usd: 20.0  # budget guard: no item is launched once the pass has spent this much
+concurrency: 1      # items run in parallel (offline driver; the Phoenix driver runs one at a time)
+output_dir: outputs/evals  # runs land in <output_dir>/<date>/<time>/

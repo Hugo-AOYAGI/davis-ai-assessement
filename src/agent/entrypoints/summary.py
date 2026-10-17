@@ -7,6 +7,7 @@ from agent.contracts.evidence import CitationCheck
 from agent.contracts.study import Verdict, VerifiedStudy
 from agent.llm.costs import NodeUsage
 from agent.llm.usage import ModelUsage
+from agent.tools.submit.replies import revise_name
 
 
 class RunMetrics(Contract):
@@ -23,7 +24,7 @@ class RunMetrics(Contract):
     total_tokens: int
     cost_usd: float
     rejected_submissions: int
-    """``submit_study`` calls refused by the gate."""
+    """``submit_study`` and ``revise_study`` calls refused by the gate."""
 
 
 class BuildingVerdict(Contract):
@@ -155,15 +156,19 @@ def run_summary(metrics: RunMetrics, verified: VerifiedStudy | None) -> RunSumma
 
 
 def rejected_submissions(messages: Sequence[BaseMessage], tool: str) -> int:
-    """Count the calls of one tool answered with an error, e.g. rejected ``submit_study`` calls.
+    """Count the calls of a submit tool, or of its revise tool, answered with an error.
+
+    A rejected revision (e.g. ``revise_study``) is a rejected submission of the same result, so
+    ``rejected_submissions(messages, "submit_study")`` counts both tools' refusals.
 
     Args:
         messages: The orchestrator's messages.
-        tool: Tool name.
+        tool: Submit tool name.
 
     Returns:
         The number of rejected submissions.
     """
+    tools = {tool, revise_name(tool)}
     names = {
         call["id"]: call["name"]
         for message in messages
@@ -173,7 +178,7 @@ def rejected_submissions(messages: Sequence[BaseMessage], tool: str) -> int:
     return sum(
         isinstance(message, ToolMessage)
         and message.status == "error"
-        and names.get(message.tool_call_id) == tool
+        and names.get(message.tool_call_id) in tools
         for message in messages
     )
 

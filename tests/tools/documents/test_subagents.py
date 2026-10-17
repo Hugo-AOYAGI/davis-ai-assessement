@@ -9,7 +9,7 @@ from omegaconf import OmegaConf
 from agent.agents.config import load_config
 from agent.agents.subagents import build_subagent
 
-ZONING_TOOLS = {"list_documents", "site_view", "view_image", "zoom", "submit_zone"}
+ZONING_TOOLS = {"list_documents", "site_view", "view_image", "zoom", "submit_zone", "revise_zone"}
 DOC_TOOLS = {
     "list_documents",
     "list_sections",
@@ -20,6 +20,7 @@ DOC_TOOLS = {
     "zoom",
     "site_view",
     "submit_notes",
+    "revise_notes",
 }
 HEIGHT = {
     "doc": "plu_reglement",

@@ -39,7 +39,7 @@ dev = [
 [tool.ruff]
 line-length = 100
 target-version = "py313"
-src = ["src", "tests"]
+src = ["src", "tests", "."]
 extend-exclude = ["tools/agent-chat-ui", "ressources"]
 
 [tool.ruff.lint]
@@ -63,10 +63,10 @@ quote-style = "double"
 
 [tool.ty.environment]
 python-version = "3.13"
-root = ["./src", "./tests"]
+root = ["./src", "./tests", "."]
 
 [tool.ty.src]
-include = ["src", "tests", "scripts"]
+include = ["src", "tests", "scripts", "evals"]
 exclude = ["tools", "ressources"]
 
 [tool.ty.rules]
@@ -78,4 +78,4 @@ error-on-warning = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--import-mode=importlib"
-pythonpath = ["src"]
+pythonpath = ["src", "."]

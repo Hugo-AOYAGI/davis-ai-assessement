@@ -70,11 +70,22 @@ Running the agent:
 ```bash
 uv run langgraph dev                         # Agent Server on http://localhost:2024 (graph: src/agent/entrypoints/graph.py)
 cd ui && pnpm install && pnpm dev                     # chat UI on http://localhost:3000
+cd ui && pnpm build && pnpm start                     # same UI, production build: use it to watch full studies (dev mode renders several times slower)
 ```
 
-Smoke checks: `uv run pytest tests/entrypoints` (offline graph build) and
-`uv run python scripts/smoke_server.py` (starts `langgraph dev` on port 2025, sends one cheap
-message, ~$0.01).
+Evals (`docs/EVALS.md` §7; outputs in `outputs/evals/<date>/<time>/`):
+
+```bash
+uv run phoenix serve                                         # Phoenix UI on http://localhost:6006
+uv run python -m evals.run eval.dataset=surveyor             # the one shipped verified benchmark item
+uv run python -m evals.run eval.items=[s01_joliot_curie] eval.phoenix.enabled=false   # without Phoenix; still calls APIs
+uv run python -m evals.run eval.rescore=outputs/evals/<date>/<time>   # re-score saved records
+```
+
+Smoke checks: `uv run pytest tests/entrypoints` (offline graph build),
+`uv run python scripts/smoke_server.py --startup-only` (real server and graph schema, no model
+call), and `uv run python scripts/smoke_server.py` (real server plus one paid model response).
+Both server checks use port 2025 and stop their server when finished.
 
 ## How to extend
 
@@ -113,7 +124,7 @@ surveyor:
       geocoder: ${geo.geocoder}
       max_results: ${geo.max_results}
     - ${geo.site_view}           # shared ready-made tool node
-    - _target_: agent.tools.submit.factory.submit_tool
+    - _target_: agent.tools.submit.factory.submit_tools   # submit_parcel + revise_parcel
       name: submit_parcel        # tool name
       artifact: site             # state key
       contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.site.ParcelChoice}
@@ -137,7 +148,11 @@ top-level fields (`notes.{label}` gives `notes.rules`, `notes.oap`); `summarize(
 appended to the `<key> accepted.` reply. Artifacts written by a sub-agent reach the
 orchestrator's state. Read one back with `read_artifact(state["artifacts"], key, Contract)`. A
 gate such as `submit_study` passes `finalize(submission, artifacts) -> stored` and raises
-`SubmissionRejected(errors)` to refuse.
+`SubmissionRejected(errors)` to refuse. `submit_tools(...)` (same arguments, used in config)
+returns `[submit, revise]`: a rejection keeps the rejected arguments as a draft in the error
+`ToolMessage.artifact` (not sent to the model, not in state), and `revise_<x>` applies path edits
+to that draft (`runtime/submissions/edits.py`) and runs the same pipeline, so the model sends
+only its fixes. A config tool node may build one tool or a list (`build_tools` flattens).
 
 Dependencies: `uv add <pkg>` / `uv add --dev <pkg>`; never edit `uv.lock` by hand.
 Secrets live in `.env` (`ANTHROPIC_API_KEY`), never committed.

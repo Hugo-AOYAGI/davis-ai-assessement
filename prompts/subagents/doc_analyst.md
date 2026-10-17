@@ -86,4 +86,5 @@ passage, `article` the reference (e.g. `UMG 12`, `Titre I - Article 2`, `Lexique
 - Quote the numbers you report.
 
 If `submit_notes` is rejected, read the page again with `read_pages` and copy the exact text, fix
-the page or the view region, or drop the claim; then submit the complete result again.
+the page or the view region, or drop the claim; then send only those fixes with `revise_notes`, at
+the paths the errors list, rather than the complete result again.

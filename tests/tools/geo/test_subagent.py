@@ -14,7 +14,14 @@ from agent.agents.subagents import build_subagent, build_tools
 from agent.contracts.findings.site import Site
 from agent.tools.submit.artifacts import read_artifact
 
-TOOLS = ["geocode", "find_parcels", "describe_parcels", "site_view", "submit_parcel"]
+TOOLS = [
+    "geocode",
+    "find_parcels",
+    "describe_parcels",
+    "site_view",
+    "submit_parcel",
+    "revise_parcel",
+]
 LON, LAT = 2.165254, 48.709836
 LABEL = "4 Rue Joliot-curie 91190 Gif-sur-Yvette"
 PLOT, STRIP = "91272000CR0247", "91272000CR0249"

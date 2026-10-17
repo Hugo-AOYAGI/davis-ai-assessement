@@ -18,7 +18,7 @@ zoning_analyst:
     - _target_: agent.tools.images.view.zoom_tool
       pages: ${images.pages}
       store: ${images.store}
-    - _target_: agent.tools.submit.factory.submit_tool
+    - _target_: agent.tools.submit.factory.submit_tools  # submit_<x> and revise_<x>
       name: submit_zone
       artifact: zone
       contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.zone.ZoneFindings}

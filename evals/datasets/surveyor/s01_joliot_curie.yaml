@@ -1,0 +1,22 @@
+id: s01_joliot_curie
+level: surveyor
+tests: address point on unregistered ground beside the CR0249 strip; the real site is CR0247
+status: verified
+built_by: claude
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+facts:
+  - key: choice.parcel_ids
+    expect: [91272000CR0247]
+    critical: true
+    source: hand            # trap: chosen by hand, the parcel is checked to exist in the cadastre
+  - key: choice.parcel_ids
+    expect_none_of: [91272000CR0249]
+    critical: true
+  - key: area_m2
+    expect: 5952
+    tolerance: 0.02
+    source: cadastre
+  - key: edges[neighbours~"CR0249"]
+    at_least: 1             # the site meets the road only across the CR0249 strip
+    source: cadastre

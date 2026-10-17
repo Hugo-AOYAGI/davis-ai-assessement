@@ -104,12 +104,14 @@ Work through this checklist, in order:
 ## 5. Submit and reply
 
 Call `submit_study` with the complete study (see below). If it rejects the study, fix every
-error listed and submit the complete study again, until it is accepted:
+error listed with `revise_study`, sending only the changed fields at the paths the errors give,
+until it is accepted:
 
 - a quote not found: take the citation exactly as it is in the notes, or call `doc_analyst`
   again to find the passage; never invent or retype a quote;
 - a missing artifact, an open point without its ambiguity, or an evidence region that cannot be
-  saved: do what the error says.
+  saved: do what the error says, then call `revise_study` (with no edits if the study itself
+  needs no change).
 
 On acceptance, `submit_study` replies with the envelope it computed (site area, buildable
 footprint after setbacks, maximum footprint, minimum green area, maximum height, maximum volume,
