@@ -38,8 +38,9 @@ from agent.contracts.geometry import Boundary, BoundaryKind, Polygon
 from agent.contracts.inputs.corpus import Corpus, Document, DocumentKind, Page
 from agent.contracts.study import Admissibility, Regime, Study, Verdict, VerifiedStudy
 from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
+from agent.tools.envelope.compute import GeometrySettings
 from agent.tools.study.checks import citation_rules
-from agent.tools.study.gate import GeometrySettings, submit_study_tool
+from agent.tools.study.gate import submit_study_tool
 from agent.tools.study.inputs import Delivery, StudyInputs
 
 PAGES = (
@@ -313,7 +314,6 @@ INPUTS = StudyInputs(
     notes=Delivery(artifact="notes.{label}", producer="doc_analyst"),
     envelope=Delivery(artifact="envelope", producer="architect"),
     labels=("rules", "oap", "destinations"),
-    rules_label="rules",
     oap_label="oap",
 )
 GEOMETRY = GeometrySettings(snap_tolerance_m=0.5, collinear_angle_deg=20)
@@ -630,8 +630,26 @@ def test_envelope_citation_outside_the_rules_notes_is_rejected(
     content = rejection(invoke(make_gate(), study, findings))
     assert (
         "envelope.rules.setbacks.1.with_windows.citations.0 (plu_reglement p.322, UMG 3.2): "
-        "not a citation of `notes.rules`. Delegate to architect again" in content
+        "not a citation of a `notes.<label>` artifact. Delegate to architect again" in content
     )
+
+
+def test_envelope_rules_may_cite_any_notes_artifact(
+    make_gate, study, findings, envelope_rules, layout
+):
+    parking = DocNotes(
+        label="rules_parking",
+        notes=(Note(topic="access", text="5 m wide road.", citations=(ACCESS,)),),
+    )
+    findings["notes.rules_parking"] = parking.model_dump(mode="json")
+    cited = Distance(min_m=4, rule="see article", citations=(ACCESS,))
+    side = envelope_rules.setbacks[1].model_copy(update={"with_windows": cited})
+    rules = envelope_rules.model_copy(
+        update={"setbacks": (envelope_rules.setbacks[0], side, envelope_rules.setbacks[2])}
+    )
+    store_envelope(findings, compute(rules, layout))
+    verified = stored(invoke(make_gate(), study, findings))
+    assert verified.envelope.rules == rules
 
 
 def test_layout_oap_citation_must_come_from_the_oap_notes(

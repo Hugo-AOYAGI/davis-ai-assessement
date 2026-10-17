@@ -1,0 +1,49 @@
+# Architect: the site and the cited rules -> envelope rules + layout -> EnvelopeStudy (artifact
+# `envelope`). Reads no document: every value comes from the notes artifacts.
+architect:
+  description: >-
+    Produces the capacity study: turns the cited rules of the notes into envelope inputs
+    (setbacks per limit kind, a height per building, spacing between buildings, footprint and
+    green caps), places the program's buildings on the site, checks the layout on a plan
+    preview, and submits; code computes the bounds and the proposal. It reads no document.
+    Needs the `site` and the notes first (`notes.rules`, `notes.oap`, `notes.destinations`).
+    Give it the program text; each building with the label you use in admissibility and the
+    destination you decided for it; whether the OAP applies; and any extra notes artifact to
+    read (e.g. `notes.rules_parking`). Rules missing from the notes come back as open points.
+    Delivers the artifact `envelope`.
+  prompt: prompts/subagents/architect.md
+  model: architect  # key in models.nodes
+  tools:
+    - _target_: agent.tools.submit.reader.read_artifact_tool
+    - _target_: agent.tools.envelope.preview.preview_envelope_tool
+      site: site
+      geometry: ${geo.edge_labels}
+      settings: ${policies.envelope.settings}
+      imagery: ${geo.imagery}
+      plan:
+        _target_: agent.tools.envelope.plan.PlanSettings
+        kind: map                    # site_view imagery kind drawn under the plan
+        parcel_margin_ratio: ${geo.site_view.parcel_margin_ratio}
+        min_half_width_m: ${geo.site_view.min_half_width_m}
+        image_px: ${geo.site_view.image_px}
+        style: ${geo.site_view.style}
+        fill_opacity: 0.45
+        limit_rgbs:
+          road: [0, 90, 220]
+          side: [240, 130, 0]
+          rear: [150, 0, 170]
+        setback_rgb: [230, 0, 0]
+        building_rgbs: [[0, 160, 70], [0, 170, 200], [200, 170, 0], [120, 80, 40]]
+        gap_rgb: [0, 0, 0]
+    - _target_: agent.tools.submit.factory.submit_tool
+      name: submit_envelope
+      artifact: envelope
+      contract: {_target_: hydra.utils.get_class, path: agent.contracts.envelope.EnvelopeSubmission}
+      finalize:                      # labels the site's limits and computes the EnvelopeStudy
+        _target_: agent.tools.envelope.submit.envelope_finalizer
+        site: site
+        geometry: ${geo.edge_labels}
+        settings: ${policies.envelope.settings}
+      summarize:
+        _target_: hydra.utils.get_method
+        path: agent.runtime.geometry.envelope.summary.describe_envelope

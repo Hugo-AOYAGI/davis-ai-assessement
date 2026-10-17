@@ -3,8 +3,9 @@
 Usage: ``uv run python scripts/run_subagent.py <name> "<task text>" [--override key=value ...]
 [--artifacts path.json]``. ``--override`` is a repeatable Hydra override; ``--artifacts`` is a
 JSON object of initial artifacts (e.g. ``{"site": ...}`` from a ``surveyor`` run, for
-``zoning_analyst``). Calls the real model. A JSON report is written to
-``outputs/runs/<name>-<timestamp>.json``. Example: ``... run_subagent.py surveyor "<address>"``.
+``zoning_analyst``; ``site`` and the ``notes.*`` artifacts for ``architect``). Calls the real
+model. A JSON report is written to ``outputs/runs/<name>-<timestamp>.json``. Example:
+``... run_subagent.py surveyor "<address>"``.
 """
 
 import argparse

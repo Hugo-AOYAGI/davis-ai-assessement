@@ -262,7 +262,8 @@ program's floor areas; a third bound "no windows".
 - Reads the `envelope` artifact (producer `architect`) instead of `Study.envelope`, and
   recomputes bounds and proposal from the stored rules and layout: a stored figure cannot drift
   from the code's.
-- Every citation in `EnvelopeRules` must appear in `notes.rules`, and every citation in
+- Every citation in `EnvelopeRules` must appear in a `notes.*` artifact (`notes.rules`,
+  `notes.destinations`, or a re-asked label such as `notes.rules_parking`), and every citation in
   `Layout.oap` in `notes.oap` (same doc, page and quote), otherwise rejected: the architect
   cannot bring in unchecked sources. A layout height above the building's maximum is rejected.
 - `BuildingLimits.building` labels must match `Study.admissibility` building labels one to one.

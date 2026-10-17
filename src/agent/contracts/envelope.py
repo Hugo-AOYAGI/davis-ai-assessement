@@ -194,13 +194,11 @@ def layout_errors(rules: EnvelopeRules, layout: Layout) -> tuple[str, ...]:
     return tuple(errors)
 
 
-class EnvelopeSubmission(Contract):
-    """The envelope rules read from the notes, your layout of the buildings, and open points."""
+class EnvelopeDraft(Contract):
+    """The envelope rules read from the notes and your layout of the buildings."""
 
     rules: EnvelopeRules
     layout: Layout
-    open_points: tuple[OpenPoint, ...] = ()
-    """Rules you need that the notes do not give or leave unclear; never guess a value."""
 
     @model_validator(mode="after")
     def _layout_fits_rules(self) -> Self:
@@ -209,6 +207,13 @@ class EnvelopeSubmission(Contract):
         if errors:
             raise ValueError("; ".join(errors))
         return self
+
+
+class EnvelopeSubmission(EnvelopeDraft):
+    """The envelope rules read from the notes, your layout of the buildings, and open points."""
+
+    open_points: tuple[OpenPoint, ...] = ()
+    """Rules you need that the notes do not give or leave unclear; never guess a value."""
 
 
 class EnvelopeStudy(Contract):

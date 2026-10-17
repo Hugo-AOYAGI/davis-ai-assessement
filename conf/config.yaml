@@ -3,7 +3,7 @@
 # `subagents` is a multi-select group: one file per sub-agent in conf/subagents/, whose content
 # is nested under a top-level key equal to the file name (conf/subagents/surveyor.yaml starts
 # with `surveyor:`), so several selected files merge side by side into `subagents.<name>`.
-# The three study sub-agents are enabled below; select others on the command line, e.g.
+# The four study sub-agents are enabled below; select others on the command line, e.g.
 # `subagents=[surveyor,zoning_analyst]`.
 defaults:
   - models: default
@@ -14,7 +14,7 @@ defaults:
   - geo: default
   - images: default
   - retrieval: full_sections
-  - subagents: [surveyor, zoning_analyst, doc_analyst]
+  - subagents: [surveyor, zoning_analyst, doc_analyst, architect]
   - _self_
 
 hydra:

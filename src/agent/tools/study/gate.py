@@ -10,15 +10,13 @@ from pathlib import Path
 from typing import Protocol
 
 from langchain_core.tools import BaseTool
-from pydantic import NonNegativeFloat
 
 from agent.adapters.images.pages import RegionError
-from agent.contracts.base import Contract
 from agent.contracts.evidence import Citation, CitationCheck, ImageRegion, StoredCrop
 from agent.contracts.inputs.corpus import Corpus
 from agent.contracts.study import Study, VerifiedStudy
-from agent.runtime.geometry.edges import label_edges
-from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
+from agent.runtime.geometry.envelope.study import EnvelopeSettings
+from agent.tools.envelope.compute import GeometrySettings, site_envelope
 from agent.tools.study.checks import CitationRules, CorpusFacts, check_submission, corpus_facts
 from agent.tools.study.envelope import EnvelopeCitations, envelope_errors
 from agent.tools.study.inputs import (
@@ -45,15 +43,6 @@ class CropStore(Protocol):
             RegionError: If the document, page or region does not exist.
         """
         ...
-
-
-class GeometrySettings(Contract):
-    """Knobs of the edge labelling."""
-
-    snap_tolerance_m: NonNegativeFloat
-    """Edges shorter than this never split a limit."""
-    collinear_angle_deg: NonNegativeFloat
-    """Largest direction change between parcel edges of one limit."""
 
 
 def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
@@ -106,25 +95,21 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
         """Check the study against the findings and complete it with what code computes."""
         findings = read_findings(artifacts, inputs)
         checks = _check(study, findings, inputs, corpus_index(), citations)
-        boundaries = label_edges(
-            findings.site.edges,
-            snap_tolerance_m=geometry.snap_tolerance_m,
-            collinear_angle_deg=geometry.collinear_angle_deg,
-        )
         delivered = findings.envelope
+        computed = site_envelope(
+            findings.site,
+            delivered.rules,
+            delivered.layout,
+            geometry=geometry,
+            settings=envelope,
+            open_points=delivered.open_points,
+        )
         return VerifiedStudy(
             study=study,
             site=findings.site,
-            boundaries=boundaries,
+            boundaries=computed.boundaries,
             zone=findings.zone,
-            envelope=compute_envelope_study(
-                findings.site.polygon,
-                boundaries,
-                delivered.rules,
-                delivered.layout,
-                settings=envelope,
-                open_points=delivered.open_points,
-            ),
+            envelope=computed.study,
             citation_checks=checks,
             evidence=_save_crops(evidence_regions(findings, inputs), images, crops_dir),
         )
