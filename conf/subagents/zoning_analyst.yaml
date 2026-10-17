@@ -14,8 +14,10 @@ zoning_analyst:
     - ${geo.site_view}
     - _target_: agent.tools.images.view.view_image_tool
       pages: ${images.pages}
+      store: ${images.store}
     - _target_: agent.tools.images.view.zoom_tool
       pages: ${images.pages}
+      store: ${images.store}
     - _target_: agent.tools.submit.factory.submit_tool
       name: submit_zone
       artifact: zone

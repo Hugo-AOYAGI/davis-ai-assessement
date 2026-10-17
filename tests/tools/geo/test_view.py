@@ -1,19 +1,24 @@
-import base64
-
 import pymupdf
 import pytest
 
+from agent.adapters.images.store import ImageStore
 from agent.tools.geo.view import site_view_tool
 
 PLOT, STRIP = "91272000CR0247", "91272000CR0249"
 
 
 @pytest.fixture
-def make_view(style):
+def store(tmp_path):
+    return ImageStore(directory=tmp_path / "images", url_prefix="/images")
+
+
+@pytest.fixture
+def make_view(style, store):
     def build(surveyor, imagery, half_widths_m=None, image_px=64):
         return site_view_tool(
             surveyor=surveyor,
             imagery=imagery,
+            store=store,
             half_widths_m=half_widths_m or {"town": 1500, "neighbourhood": 250},
             parcel_margin_ratio=0.3,
             min_half_width_m=40,
@@ -37,7 +42,9 @@ def test_schema(make_view, surveyor, imagery):
     ("kind", "layer"),
     [("aerial", "ORTHOIMAGERY.ORTHOPHOTOS"), ("map", "GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2")],
 )
-def test_parcel_view_returns_caption_and_image(make_view, surveyor, imagery, kind, layer):
+def test_parcel_view_returns_caption_and_image(  # noqa: PLR0913, PLR0917 - pytest fixtures
+    make_view, store, surveyor, imagery, kind, layer
+):
     caption, image = make_view(surveyor, imagery).invoke(
         {"ids": [PLOT, STRIP], "kind": kind, "scale": "parcel"}
     )
@@ -47,7 +54,7 @@ def test_parcel_view_returns_caption_and_image(make_view, surveyor, imagery, kin
     assert f"layer {layer}" in text
     assert "Geometric source, not regulatory" in text
     assert image["type"] == "image"
-    pixmap = pymupdf.Pixmap(base64.b64decode(image["base64"]))
+    pixmap = pymupdf.Pixmap(store.read(image["url"]))
     assert (pixmap.width, pixmap.height) == (64, 64)
 
 

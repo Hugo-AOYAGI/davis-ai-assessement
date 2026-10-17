@@ -746,6 +746,7 @@ dependencies = [
     { name = "rank-bm25" },
     { name = "rapidfuzz" },
     { name = "shapely" },
+    { name = "starlette" },
 ]
 
 [package.dev-dependencies]
@@ -773,6 +774,7 @@ requires-dist = [
     { name = "rank-bm25", specifier = ">=0.2.2" },
     { name = "rapidfuzz", specifier = ">=3.14.6" },
     { name = "shapely", specifier = ">=2.2.0" },
+    { name = "starlette", specifier = ">=1.8.0" },
 ]
 
 [package.metadata.requires-dev]

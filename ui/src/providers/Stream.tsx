@@ -69,6 +69,9 @@ const SUBAGENT_OPTIONS: { filterSubagentMessages: boolean } = {
   filterSubagentMessages: true,
 };
 
+/** Coalesces re-renders: each streamed token chunk otherwise re-renders the whole thread. */
+const RENDER_THROTTLE_MS = 50;
+
 type StreamContextType = ReturnType<typeof useTypedStream> &
   SubagentLookup & {
     apiUrl: string;
@@ -117,6 +120,7 @@ const StreamSession = ({
   const { getThreads, setThreads } = useThreads();
   const streamValue = useTypedStream({
     ...SUBAGENT_OPTIONS,
+    throttle: RENDER_THROTTLE_MS,
     apiUrl,
     apiKey: apiKey ?? undefined,
     assistantId,

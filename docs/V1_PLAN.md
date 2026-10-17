@@ -137,3 +137,4 @@ Where the merged packages depart from, or add to, the seams above.
 | Gate wiring | `submit_study_tool` takes config bundles, visible in `conf/agent/default.yaml`: `StudyInputs` (`tools/study/inputs.py`: artifact and producer of `site`, `zone`, `notes.{label}`, plus the required labels), `GeometrySettings` (`tools/study/gate.py`: edge and envelope knobs), `CitationRules` (`tools/study/checks.py`, built by `citation_rules`). |
 | Report | `runtime/report/program.py` (was `envelope.py`): admissibility, parking and envelope sections. |
 | Run outputs | The CLI copies the study's evidence crops into `<run_dir>/evidence/`; `report.md` links them there. |
+| Tool images | Stored by reference: image tools write PNGs to `images.store` (`data/images`, content-addressed) and reply with `{type: image, url}`; `InlineImagesMiddleware` inlines them in each model request only; the Agent Server serves them at `/images/<id>.png` (`entrypoints/http.py`). |

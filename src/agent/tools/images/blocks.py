@@ -1,4 +1,4 @@
-import base64
+from agent.adapters.images.store import ImageStore
 
 type ContentBlock = dict[str, str]
 """A tool-result content block (``text`` or ``image``) as LangChain passes it to the model."""
@@ -18,13 +18,17 @@ def text_block(text: str) -> ContentBlock:
     return {"type": "text", "text": text}
 
 
-def image_block(png: bytes) -> ContentBlock:
-    """Wrap a PNG as an inline image content block.
+def image_block(store: ImageStore, png: bytes) -> ContentBlock:
+    """Store a PNG and wrap its reference as an image content block.
+
+    The block references the stored PNG, so the graph state and the stream carry a short URL
+    instead of the image; ``InlineImagesMiddleware`` gives the model the bytes at each call.
 
     Args:
+        store: Where the PNG is stored.
         png: PNG bytes.
 
     Returns:
-        An ``image`` block carrying the base64 data.
+        An ``image`` block whose ``url`` references the stored PNG.
     """
-    return {"type": "image", "base64": base64.b64encode(png).decode("ascii"), "mime_type": _PNG}
+    return {"type": "image", "url": store.put(png), "mime_type": _PNG}

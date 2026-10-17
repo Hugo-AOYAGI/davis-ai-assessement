@@ -1,4 +1,5 @@
-# Corpus page images shown to the models (view_image, zoom) and saved as evidence crops.
+# Corpus page images shown to the models (view_image, zoom) and saved as evidence crops, and
+# the store every image tool writes to (replies reference a stored PNG, not its bytes).
 # Every `${images.pages}` gets the same instance (one cache of decoded pages per settings).
 pages:
   _target_: agent.adapters.images.shared.page_images
@@ -13,3 +14,9 @@ pages:
   ruler_step_px: 100       # ruler tick spacing, in image pixels
   crop_max_px: 3000        # long edge cap of saved evidence crops
   cache_size: 2            # decoded full-resolution pages kept in memory
+store:
+  _target_: agent.adapters.images.store.ImageStore
+  directory:
+    _target_: agent.agents.config.project_path
+    relative: data/images
+  url_prefix: /images      # the Agent Server serves each image at <url_prefix>/<id>.png

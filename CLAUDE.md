@@ -31,8 +31,9 @@ Layering: `contracts ← runtime ← adapters ← tools ← agents ← entrypoin
 `case/` input address + program · `corpus/` corpus id and paths · `models/` per-node model
 settings · `agent/` orchestrator + playbook · `subagents/` enabled sub-agents and their prompts ·
 `retrieval/` navigation vs full sections, tool limits · `geo/` geographic services, site geometry
-knobs, the shared `site_view` tool node · `images/` corpus page images (render dpi, image sizes) ·
-`policies/` ask_user, citation check, required notes, evidence crops, tracing.
+knobs, the shared `site_view` tool node · `images/` corpus page images (render dpi, image sizes)
+and the tool image store · `policies/` ask_user, citation check, required notes, evidence crops,
+tracing.
 
 ## Resources
 

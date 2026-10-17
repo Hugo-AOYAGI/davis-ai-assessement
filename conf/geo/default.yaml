@@ -64,6 +64,7 @@ site_view:
   _target_: agent.tools.geo.view.site_view_tool
   surveyor: ${geo.surveyor}
   imagery: ${geo.imagery}
+  store: ${images.store}
   half_widths_m:             # half the side of the square view per fixed scale
     town: 1500
     neighbourhood: 250

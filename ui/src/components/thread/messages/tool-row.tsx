@@ -11,6 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { ToolCall, ToolStatus } from "@/lib/message-blocks";
 import { describeToolCall } from "@/lib/tool-labels";
+import { useStreamContext } from "@/providers/Stream";
 
 const STATUS_TEXT: Record<ToolStatus, string> = {
   running: "Running",
@@ -175,6 +176,12 @@ function ArgValue({ value }: { value: unknown }) {
 
 type ContentBlock = Record<string, any>;
 
+/** `/images/x.png` → `<apiUrl>/images/x.png`: server-relative URLs point at the agent server. */
+function resolveServerUrl(url: string, apiUrl: string): string {
+  if (!url.startsWith("/") || url.startsWith("//")) return url;
+  return `${apiUrl.replace(/\/+$/, "")}${url}`;
+}
+
 function imageSource(block: ContentBlock): string | undefined {
   if (block.type === "image_url") {
     return typeof block.image_url === "string"
@@ -189,7 +196,10 @@ function imageSource(block: ContentBlock): string | undefined {
   return `data:${mime};base64,${data}`;
 }
 
-function resultParts(result: ToolMessage): {
+function resultParts(
+  result: ToolMessage,
+  apiUrl: string,
+): {
   text: string;
   images: string[];
 } {
@@ -202,7 +212,10 @@ function resultParts(result: ToolMessage): {
       .filter((b) => b?.type === "text" && typeof b.text === "string")
       .map((b) => b.text as string)
       .join("\n\n"),
-    images: blocks.map(imageSource).filter((s): s is string => !!s),
+    images: blocks
+      .map(imageSource)
+      .filter((s): s is string => !!s)
+      .map((s) => resolveServerUrl(s, apiUrl)),
   };
 }
 
@@ -219,7 +232,8 @@ function prettyJson(text: string): { text: string; json: boolean } {
 }
 
 function ResultView({ result }: { result: ToolMessage }) {
-  const { text, images } = resultParts(result);
+  const { apiUrl } = useStreamContext();
+  const { text, images } = resultParts(result, apiUrl);
   const pretty = prettyJson(text);
   const isError = result.status === "error";
   return (
@@ -234,6 +248,7 @@ function ResultView({ result }: { result: ToolMessage }) {
               key={i}
               src={src}
               alt={`Tool result image ${i + 1}`}
+              loading="lazy"
               className="bg-muted max-h-64 max-w-full rounded-md border object-contain"
             />
           ))}

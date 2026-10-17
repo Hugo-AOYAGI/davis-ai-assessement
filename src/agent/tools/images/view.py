@@ -6,15 +6,17 @@ from pydantic import ValidationError
 
 from agent.adapters.images.pages import PageImages, RegionError, RenderedImage
 from agent.adapters.images.render import RULER_BAND_PX
+from agent.adapters.images.store import ImageStore
 from agent.contracts.evidence import ImageRegion
 from agent.tools.images.blocks import ContentBlock, image_block, text_block
 
 
-def view_image_tool(*, pages: PageImages) -> BaseTool:
+def view_image_tool(*, pages: PageImages, store: ImageStore) -> BaseTool:
     """Build the ``view_image`` tool, showing a whole corpus page as an image.
 
     Args:
         pages: The corpus page images.
+        store: Where the returned images are stored.
 
     Returns:
         The tool.
@@ -42,16 +44,17 @@ def view_image_tool(*, pages: PageImages) -> BaseTool:
             f"page is {view.full_size[0]}x{view.full_size[1]} px. The rulers give overview "
             "coordinates: read a region [x0, y0, x1, y1] on them and pass it to zoom."
         )
-        return [text_block(caption), image_block(view.png)]
+        return [text_block(caption), image_block(store, view.png)]
 
     return StructuredTool.from_function(view_image, parse_docstring=True, handle_tool_error=True)
 
 
-def zoom_tool(*, pages: PageImages) -> BaseTool:
+def zoom_tool(*, pages: PageImages, store: ImageStore) -> BaseTool:
     """Build the ``zoom`` tool, showing a region of a corpus page in detail.
 
     Args:
         pages: The corpus page images.
+        store: Where the returned images are stored.
 
     Returns:
         The tool.
@@ -74,7 +77,7 @@ def zoom_tool(*, pages: PageImages) -> BaseTool:
         with _region_errors():
             area = ImageRegion.model_validate({"doc": doc, "page": page, "region": region})
             view = pages.zoom(area)
-        return [text_block(_zoom_caption(area, view)), image_block(view.png)]
+        return [text_block(_zoom_caption(area, view)), image_block(store, view.png)]
 
     return StructuredTool.from_function(zoom, parse_docstring=True, handle_tool_error=True)
 

@@ -4,6 +4,7 @@ import pytest
 from langchain_core.messages import ToolMessage
 
 from agent.adapters.images.pages import PageImages
+from agent.adapters.images.store import ImageStore
 
 
 def quadrants(width, height):
@@ -30,6 +31,11 @@ def images(tmp_path_factory):
         cache_size=2,
         scan_min_coverage=0.8,
     )
+
+
+@pytest.fixture
+def store(tmp_path):
+    return ImageStore(directory=tmp_path / "images", url_prefix="/images")
 
 
 @pytest.fixture

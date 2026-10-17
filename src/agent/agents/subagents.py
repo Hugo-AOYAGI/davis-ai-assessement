@@ -13,6 +13,7 @@ from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
 from agent.llm.truncation import OutputCapMiddleware
 from agent.observability.logs import get_logger
+from agent.tools.images.inline import InlineImagesMiddleware
 from agent.tools.submit.artifacts import ArtifactsMiddleware, ArtifactsState
 
 logger = get_logger(__name__)
@@ -55,7 +56,8 @@ def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None)
     The same graph is delegated to by the orchestrator's ``task`` tool and invoked directly by
     per-sub-agent evals with ``{"messages": [HumanMessage(task)]}``. It declares the
     ``artifacts`` state key, so what its ``submit_<artifact>`` tool stores flows back to the
-    parent. Prompt caching is added here because deepagents only adds it to the sub-agents it
+    parent. Image tool replies reference stored PNGs, inlined only in each model request.
+    Prompt caching is added here because deepagents only adds it to the sub-agents it
     compiles itself; it is a no-op for non-Anthropic models.
 
     Args:
@@ -82,6 +84,7 @@ def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None)
         tools=tools,
         system_prompt=read_prompt(spec.prompt),
         middleware=[
+            InlineImagesMiddleware(instantiate(cfg.images.store)),
             ArtifactsMiddleware(),
             OutputCapMiddleware(),
             AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),

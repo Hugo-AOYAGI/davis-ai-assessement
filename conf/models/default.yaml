@@ -17,14 +17,21 @@ pricing:  # USD per million tokens; cache_write is the 5-minute TTL rate
 nodes:
   # No `effort`: the langchain-anthropic profile for Haiku 5.5 declares no reasoning-effort
   # levels. Its max output is 128000 tokens.
-  orchestrator: &agent
+  surveyor: &agent
     _target_: langchain_anthropic.ChatAnthropic
     model: claude-haiku-5-5
     max_tokens: 16000
     max_retries: 3
     timeout: 300
-  surveyor: *agent
+    # Sub-agent replies reach the chat UI whole, not token by token: two sub-agents streaming
+    # long tool calls in parallel send hundreds of chunks per second, more than the browser
+    # can process. LangGraph's `messages` stream skips the tokens of models tagged `nostream`.
+    tags: [nostream]
   zoning_analyst: *agent
+  orchestrator:  # its submit_study call carries the whole study in one reply
+    <<: *agent
+    max_tokens: 32000
+    tags: []     # its replies stream token by token in the chat
   doc_analyst:  # its submit_notes call carries every note and citation in one reply
     <<: *agent
     max_tokens: 32000

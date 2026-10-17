@@ -3,5 +3,8 @@
   "graphs": {
     "agent": "./src/agent/entrypoints/graph.py:graph"
   },
+  "http": {
+    "app": "./src/agent/entrypoints/http.py:app"
+  },
   "env": ".env"
 }

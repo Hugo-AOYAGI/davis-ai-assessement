@@ -8,6 +8,7 @@ from deepagents import (
     register_harness_profile,
 )
 from deepagents._models import get_model_identifier, get_model_provider
+from hydra.utils import instantiate
 from langchain_core.language_models import BaseChatModel
 from langchain_core.tools import BaseTool
 from omegaconf import DictConfig
@@ -18,6 +19,7 @@ from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
 from agent.llm.truncation import OutputCapMiddleware
 from agent.observability.logs import get_logger
+from agent.tools.images.inline import InlineImagesMiddleware
 from agent.tools.interaction.ask import ask_user_tool
 from agent.tools.interaction.playbook import Playbook, load_playbook_tool
 from agent.tools.submit.artifacts import ArtifactsMiddleware
@@ -152,7 +154,11 @@ def build(cfg: DictConfig, ledger: CostLedger | None = None) -> AgentGraph:
             model=model,
             tools=tools,
             system_prompt=read_prompt(cfg.agent.prompt),
-            middleware=[ArtifactsMiddleware(), OutputCapMiddleware()],
+            middleware=[
+                InlineImagesMiddleware(instantiate(cfg.images.store)),
+                ArtifactsMiddleware(),
+                OutputCapMiddleware(),
+            ],
             subagents=subagents,
             name="orchestrator",
         )

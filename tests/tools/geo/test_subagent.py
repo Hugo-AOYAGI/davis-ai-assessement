@@ -43,6 +43,7 @@ def cfg(monkeypatch, tmp_path) -> DictConfig:
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
     cfg = load_config()
     cfg.geo.http.cache_dir.relative = str(tmp_path)
+    cfg.images.store.directory.relative = str(tmp_path / "images")
     return cfg
 
 
@@ -101,6 +102,8 @@ def test_scripted_run_stores_site(cfg, monkeypatch, offline, tmp_path):
     view = replies["v1"].content
     assert isinstance(view, list)
     assert [block["type"] for block in view if isinstance(block, dict)] == ["text", "image"]
+    assert any((tmp_path / "images").glob("*.png"))
+    assert all("base64" not in block for block in view if isinstance(block, dict))
     accepted, summary = str(replies["s1"].content).split("\n\n", 1)
     assert accepted == "site accepted."
     assert json.loads(summary)["parcels"] == [{"id": PLOT, "contenance_m2": 5960}]

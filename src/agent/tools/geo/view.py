@@ -9,6 +9,7 @@ from agent.adapters.geo.imagery import ImageryClient, Outline, OutlineStyle, dra
 from agent.adapters.geo.records import SiteError
 from agent.adapters.geo.survey import SiteSurveyor
 from agent.adapters.http import ServiceError
+from agent.adapters.images.store import ImageStore
 from agent.contracts.base import Contract
 from agent.contracts.findings.site import Parcel
 from agent.runtime.geometry.parcels import to_shape
@@ -40,6 +41,7 @@ def site_view_tool(  # noqa: PLR0913 - one argument per config knob
     *,
     surveyor: SiteSurveyor,
     imagery: ImageryClient,
+    store: ImageStore,
     half_widths_m: Mapping[str, float],
     parcel_margin_ratio: float,
     min_half_width_m: float,
@@ -51,6 +53,7 @@ def site_view_tool(  # noqa: PLR0913 - one argument per config knob
     Args:
         surveyor: Site surveyor, which fetches the parcels.
         imagery: WMS client; its layers must cover every image kind.
+        store: Where the returned images are stored.
         half_widths_m: Half the side of the square view per fixed scale (``town``,
             ``neighbourhood``), in metres.
         parcel_margin_ratio: Margin around the parcels at the ``parcel`` scale, as a share of
@@ -104,7 +107,7 @@ def site_view_tool(  # noqa: PLR0913 - one argument per config knob
             return [text_block(f"site_view failed: {error}")]
         png = draw_outlines(image, _outlines(parcels, bounds, size), settings.style)
         caption = _caption(parcels, kind, scale, bounds, settings=settings, imagery=imagery)
-        return [text_block(caption), image_block(png)]
+        return [text_block(caption), image_block(store, png)]
 
     return StructuredTool.from_function(site_view, name="site_view", parse_docstring=True)
 
