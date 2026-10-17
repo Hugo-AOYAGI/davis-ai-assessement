@@ -1,2 +1,144 @@
-# Placeholder owned by WP1 (ingestion), which fills in corpus paths.
+# Corpus ingested by `uv run python -m agent.entrypoints.ingest` and read by the corpus adapter.
 id: gif-sur-yvette@2021-07-06
+dir: data/${corpus.id}  # output directory (corpus.json + images/), relative to the project root
+
+# Source PDFs. `kind` / `title` are optional: when set they replace the classifier's answer.
+documents:
+  - id: plu_reglement
+    path: ressources/plu_reglement_91272_20210706.pdf
+  - id: plu_reglement_graphique
+    path: ressources/plu_reglement_graphique_91272_20210706.pdf
+  - id: oap
+    path: ressources/oap_91272_20210706.pdf
+
+lexicon:  # sections whose children are glossary definitions
+  - plu_reglement/titre-iii/lexique
+
+classifier:
+  model: ingest_classifier            # key in models.nodes
+  prompt: prompts/ingest/classifier.md
+  sample_pages: 3                     # first pages with a text layer shown to the model
+  sample_chars: 1500                  # characters taken from each of them
+
+images:
+  figure_kinds: [regulatory_text, oap]  # kinds whose text pages with images are rendered
+  dpi: 110             # resolution of those renders; raster-only pages keep their native image
+
+search:
+  stopwords: [le, la, les, l, de, des, du, d, un, une, et, en, a, au, aux, pour, par, sur, dans,
+    est, sont, ou, que, qui, ne, pas, se, ce, ces, cet, cette, il, elle, ils, elles, son, sa, ses,
+    leur, leurs, avec, sans, être, etre, peut, peuvent, doit, doivent, y, s, n, qu]
+
+# Heading splitters per document kind (agent.ingest.rules.SplitterConfig). Patterns are matched
+# with re.match on the stripped line; rules are tried in order and the first match wins. A match
+# whose key equals the open section's key at that level is a running heading and is dropped.
+splitter:
+  regulatory_text:
+    levels: [titre, sector, zone, article, part, term]
+    header_max_y: 70      # running header: commune line, "Règlement de zone", zone label
+    footer_min_y: 785     # running footer: approval line and page number
+    footer: '^Modification n°1 et révision allégée n°1( approuvées le .*)?$'  # higher footers
+    max_continuation: 2   # wrapped heading lines appended to a title
+    preamble: Préambule
+    rules:
+      - level: titre    # "TITRE II :" then "DISPOSITIONS PAR ZONES" on the next line
+        pattern: '^TITRE (?P<number>I{1,3}) :$'
+        font: Bold
+        min_size: 20
+        key: 'titre-{number}'
+        continuation: '^[^a-zà-ÿ]+$'
+      - level: sector   # header label "Moulon - UMG", or "Moulon" alone on divider pages
+        scope: header
+        inside: titre/titre-ii
+        pattern: '^(?P<sector>[^\W\d_]+)( - [A-Za-z]+)?$'
+        font: Bold
+        min_size: 20
+        key: '{sector}'
+        title: '{sector}'
+      - level: zone
+        scope: header
+        inside: titre/titre-ii
+        pattern: '^(?P<sector>[^\W\d_]+) - (?P<zone>[A-Za-z]+)$'
+        font: Bold
+        min_size: 20
+        key: '{zone}'
+      - level: article  # Moulon style: "ARTICLE 1 - zone UMG - OCCUPATIONS…"
+        inside: zone
+        pattern: '^(ARTICLE|Article)\s*[-–]?\s*(?P<article>\d+)\s*[-–]\s*zone\s+(?P<zone>[A-Za-z]+)\s*[-–]'
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        # wrapped title in capitals, but not the next article heading ("ARTICLE …", "UED13…", "6.1 …")
+        continuation: &caps_tail '^(?!(ARTICLE|Article)\b)(?![A-Z]{0,4} ?\d)[^a-zà-ÿ]*[A-Z]{2}[^a-zà-ÿ]*$'
+      - level: article  # "ARTICLE UA2 -", "ARTICLE - NF 15 –", "Article UA11 -", "UED12-…"
+        inside: zone
+        pattern: '^(ARTICLE|Article)?\s*[-–]?\s*(?P<zone>UMG|UME|UED|AURc|U[A-Z]|NF|NE|N|A)\s?(?P<article>\d{1,2})\s*[-–]'
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        continuation: *caps_tail
+        continuation_min_size: 10.5  # Chevry UED/UG titles wrap in 10.8 pt
+      - level: article  # Titre I: "Article 5 – PERMIS DE DEMOLIR…"
+        inside: titre/titre-i
+        pattern: '^Article (?P<article>\d+)\s*[-–]'
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        continuation: *caps_tail
+      - level: part     # Titre III glossary, letter-spaced "L E X I Q U E"
+        inside: titre/titre-iii
+        pattern: '^L ?E ?X ?I ?Q ?U ?E$'
+        font: Bold
+        min_size: 16
+        title: Lexique
+      - level: part     # Titre III chapters in capitals ("LES EMPLACEMENTS RESERVES…")
+        inside: titre/titre-iii
+        pattern: '^[A-ZÀ-Þ][^a-zà-ÿ]+$'
+        font: '^CenturyGothic-Bold$'
+        min_size: 13.5
+        max_size: 14.5
+        continuation: '^[^a-zà-ÿ]+$'
+      - level: part     # "LES ESPACES BOISES CLASSES" (12 pt Times bold)
+        inside: titre/titre-iii
+        pattern: '^[A-ZÀ-Þ][^a-zà-ÿ]+$'
+        font: '^TimesNewRoman.*Bold'
+        min_size: 11.5
+      - level: part     # solar panel advice sheets
+        inside: titre/titre-iii
+        pattern: '^[A-ZÀ-Þ][^a-zà-ÿ]+$'
+        font: JimmySans
+        min_size: 12.5
+        max_size: 13.5
+      - level: part     # annex cover "ANNEXES :"
+        inside: titre/titre-iii
+        pattern: '^ANNEXES :$'
+        font: Bold
+        min_size: 20
+        title: Annexes
+      - level: term     # glossary entry: bold lead "Emprise au sol :" then its definition
+        inside: part/lexique
+        field: lead
+        pattern: '^(?P<title>[^:]+?)\s*:?$'
+        font: '^ArialNarrow-Bold$'
+        min_size: 10.5
+        max_size: 11.2
+        title: '{title}'
+
+  oap:
+    levels: [chapter]
+    header_max_y: 50      # "COMMUNE DE GIF SUR YVETTE" / "Plan local d'Urbanisme"
+    footer_min_y: 790     # "Modification … 2021 - <page>"
+    max_continuation: 1
+    preamble: Préambule
+    rules:
+      - level: chapter  # " 1    Le plateau de Chevry", repeated on every page of the chapter
+        pattern: '^(?P<number>\d)\s{3,}(?P<title>\S.*)$'
+        font: Bold
+        min_size: 20
+        key: 'chapitre-{number}'
+        title: '{number} {title}'
+      - level: chapter  # sector divider pages ("PLATEAU DE" / "CHEVRY")
+        pattern: '^[A-ZÀ-Þ][^a-zà-ÿ]+$'
+        font: Italic
+        min_size: 30
+        continuation: '^[^a-zà-ÿ]+$'
