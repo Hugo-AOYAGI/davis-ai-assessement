@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.165254,
+          48.709836
+        ]
+      },
+      "properties": {
+        "label": "4 Rue Joliot-curie 91190 Gif-sur-Yvette",
+        "score": 0.9634963636363636,
+        "housenumber": "4",
+        "id": "91272_1599_00004",
+        "banId": "3ecc6d51-ee86-4652-895b-cda26ae7bddc",
+        "name": "4 Rue Joliot-curie",
+        "postcode": "91190",
+        "citycode": "91272",
+        "x": 638580.2,
+        "y": 6845846.57,
+        "city": "Gif-sur-Yvette",
+        "context": "91, Essonne, Île-de-France",
+        "type": "housenumber",
+        "importance": 0.59846,
+        "depcode": "91",
+        "street": "Rue Joliot-curie",
+        "_type": "address"
+      }
+    }
+  ],
+  "query": "4 rue Joliot Curie, 91190 Gif-sur-Yvette"
+}
