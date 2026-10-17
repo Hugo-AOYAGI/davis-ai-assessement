@@ -1,0 +1,5 @@
+# Orchestrator assembly.
+prompt: prompts/orchestrator/system.md  # relative to the project root
+model: orchestrator                     # key in models.nodes
+tools: []                               # list of `_target_` tool factories
+playbook: null                          # prompts/playbooks/ file, set by WP6

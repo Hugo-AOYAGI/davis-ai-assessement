@@ -1,0 +1,7 @@
+# Reference case from the assessment brief.
+address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+program: >-
+  One Résidence Sociale Étudiante (RSE) and one Résidence Jeunes Actifs,
+  in two separate buildings.
+corpus_id: ${corpus.id}
+facts: []

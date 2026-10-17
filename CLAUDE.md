@@ -66,5 +66,58 @@ uv run langgraph dev                         # Agent Server on http://localhost:
 cd tools/agent-chat-ui && pnpm install && pnpm dev   # chat UI on http://localhost:3000
 ```
 
+Smoke checks: `uv run pytest tests/entrypoints` (offline graph build) and
+`uv run python scripts/smoke_server.py` (starts `langgraph dev` on port 2025, sends one cheap
+message, ~$0.01).
+
+## How to extend
+
+Everything is assembled from the composed config (`agent.agents.config.load_config(overrides)`,
+the single loader for server, CLI and evals). Never build models, read prompts or hardcode
+values elsewhere.
+
+**Add a config knob**: put the value in the right `conf/<group>/` file, read it from the `cfg`
+passed down to you, and pass it to your factory as an argument. Override it on the CLI
+(`group.key=value`) or per run on the server:
+`{"configurable": {"overrides": ["models.nodes.orchestrator.effort=low"]}}`.
+
+**Add a tool**: write a factory function in `src/agent/tools/<area>/` that takes its knobs as
+arguments and returns a `BaseTool`. Keep it thin (logic in `runtime/` or `adapters/`); its
+description is what the model reads. Declare it in the `tools` list of the agent or sub-agent
+that uses it:
+
+```yaml
+tools:
+  - _target_: agent.tools.geo.geocode.geocode_tool   # factory, called by hydra.utils.instantiate
+    max_results: ${retrieval.max_results}            # knobs as arguments
+```
+
+**Add a sub-agent**: one file `conf/subagents/<name>.yaml`, content nested under `<name>:` (Hydra
+merges all selected files into `subagents`), plus its prompt `prompts/subagents/<name>.md` and a
+model node `models.nodes.<name>`. It must end by calling its `submit_<artifact>` tool:
+
+```yaml
+site_locator:
+  description: Turns an address into the site (parcels, polygon, typed boundaries).  # read by the orchestrator
+  prompt: prompts/subagents/site_locator.md
+  model: site_locator            # key in models.nodes
+  tools:
+    - _target_: agent.tools.submit.factory.submit_tool
+      artifact: site             # state key; tool is named submit_site
+      contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.site.SiteContext}
+```
+
+Enable it with `subagents=[site_locator,...]` (the enabled list in `conf/config.yaml` is WP6's).
+`build_subagent(cfg, name)` returns the standalone graph; the orchestrator delegates to that same
+graph, and evals invoke it with `{"messages": [HumanMessage(task)]}`.
+
+**Artifacts and submit tools**: the graph state has an `artifacts` mapping (`ArtifactsMiddleware`
+in `tools/submit/artifacts.py`). `submit_tool(artifact, contract, finalize=None)` validates the
+model's arguments against the contract, returns `field.path: message` errors to the model, and
+stores the result as JSON under `artifacts[artifact]`. Artifacts written by a sub-agent reach the
+orchestrator's state. Read one back with `read_artifact(state["artifacts"], key, Contract)`. A
+gate such as `submit_study` passes `finalize(submission, artifacts) -> stored` and raises
+`SubmissionRejected(errors)` to refuse.
+
 Dependencies: `uv add <pkg>` / `uv add --dev <pkg>`; never edit `uv.lock` by hand.
 Secrets live in `.env` (`ANTHROPIC_API_KEY`), never committed.

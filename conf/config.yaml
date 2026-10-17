@@ -1,6 +1,21 @@
+# Root config. The defaults list is final: later work packages only add files inside groups.
+#
+# `subagents` is a multi-select group: one file per sub-agent in conf/subagents/, whose content
+# is nested under a top-level key equal to the file name (conf/subagents/site_locator.yaml starts
+# with `site_locator:`), so several selected files merge side by side into `subagents.<name>`.
+# Enable them in the list below or on the command line: `subagents=[site_locator,oap_analyst]`.
 defaults:
+  - models: default
+  - agent: default
+  - case: reference
+  - policies: default
+  - corpus: default
+  - retrieval: navigation
+  - subagents: []
   - _self_
 
 hydra:
   run:
     dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+
+subagents: {}  # an empty selection leaves no `subagents` key; this keeps it present

@@ -1,0 +1,12 @@
+ask_user:
+  mode: interactive  # interactive | disabled
+citations:
+  policy: reject     # reject | flag
+  min_score: 0.9
+tracing:
+  enabled: false
+  project: davis-assessment
+logging:
+  level: INFO
+server:
+  graph_cache_size: 8  # compiled graphs kept by the Agent Server factory, one per distinct override set

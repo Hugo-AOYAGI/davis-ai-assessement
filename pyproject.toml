@@ -65,7 +65,7 @@ python-version = "3.13"
 root = ["./src", "./tests"]
 
 [tool.ty.src]
-include = ["src", "tests"]
+include = ["src", "tests", "scripts"]
 exclude = ["tools", "ressources"]
 
 [tool.ty.rules]
