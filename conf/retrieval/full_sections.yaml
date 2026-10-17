@@ -1,0 +1,8 @@
+# Retrieval variant loading whole sections into context: read_zone returns the full zone chapter
+# with the general sections, read_section returns a section with all its sub-sections.
+defaults:
+  - navigation
+  - _self_
+
+mode: full_sections
+max_chars: 120000     # zone chapter + Titre I + lexique is ~55k characters for UMG
