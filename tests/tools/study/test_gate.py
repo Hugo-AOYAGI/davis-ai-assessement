@@ -317,7 +317,9 @@ def test_mislabelled_corpus_citation_is_rejected_under_flag_with_unverified_ones
 def test_other_geometric_citations_are_accepted_unchecked(study, site):
     verified = stored(invoke(gate(), citing(study, CADASTRE), site))
     assert verified.study.regime.citations == (CADASTRE,)
-    assert all(check.citation.source_kind is SourceKind.REGULATORY for check in verified.citation_checks)
+    assert all(
+        check.citation.source_kind is SourceKind.REGULATORY for check in verified.citation_checks
+    )
     assert CADASTRE not in [check.citation for check in verified.citation_checks]
 
 
