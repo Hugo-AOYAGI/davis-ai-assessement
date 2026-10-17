@@ -1,11 +1,15 @@
-from collections.abc import Sequence
+from collections import Counter
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
-from agent.contracts.evidence import Citation, CitationCheck
+from agent.contracts.evidence import Citation, CitationCheck, ImageRegion
+from agent.contracts.geometry import BoundaryKind
+from agent.contracts.study import VerifiedStudy
+from agent.runtime.report.markdown import area, metres, number
 
 ADVICE = (
-    "Read the page with the regulation tools and copy the exact text, or fix the page number; "
-    "drop the claim if no page supports it."
+    "Re-read the page and copy the exact text (in a study, take the citation as it is in the "
+    "notes), or fix the page number; drop the claim if no page supports it."
 )
 
 
@@ -110,3 +114,114 @@ def shorten(quote: str, max_chars: int) -> str:
     """
     flat = " ".join(quote.split())
     return flat if len(flat) <= max_chars else f"{flat[: max_chars - 3].rstrip()}..."
+
+
+def describe_missing_artifact(artifact: str, producer: str) -> str:
+    """Write the error for a sub-agent artifact the study needs but the state lacks.
+
+    Args:
+        artifact: The missing artifact key, e.g. ``site``.
+        producer: The sub-agent delivering it.
+
+    Returns:
+        One line saying whom to delegate to.
+    """
+    return (
+        f"(whole study): no `{artifact}` artifact in state. Delegate to {producer} so that it "
+        f"delivers `{artifact}`, then submit the study again."
+    )
+
+
+def describe_missing_notes(artifact: str, label: str, producer: str) -> str:
+    """Write the error for required document notes the state lacks.
+
+    Args:
+        artifact: The missing artifact key, e.g. ``notes.rules``.
+        label: The notes label, e.g. ``rules``.
+        producer: The sub-agent delivering notes.
+
+    Returns:
+        One line saying whom to delegate to, with which label.
+    """
+    return (
+        f"(whole study): no `{artifact}` artifact in state. Delegate to {producer} with the "
+        f"`{label}` task of the playbook (label `{label}`), read `{artifact}` with "
+        "read_artifact, then submit the study again."
+    )
+
+
+def describe_open_point(artifact: str, question: str) -> str:
+    """Write the error for an open point of the notes that no ambiguity answers.
+
+    Args:
+        artifact: The notes artifact holding the open point, e.g. ``notes.rules``.
+        question: The open point's question.
+
+    Returns:
+        One line quoting the question and asking for an ambiguity copying it.
+    """
+    return (
+        f'ambiguities: the open point "{" ".join(question.split())}" of `{artifact}` has no '
+        "ambiguity. Add an ambiguity whose question copies this text exactly, with the "
+        "options, your choice and its rationale."
+    )
+
+
+def describe_unsaved_crop(region: ImageRegion, artifact: str, producer: str, error: str) -> str:
+    """Write the error for an evidence region that cannot be saved.
+
+    Args:
+        region: The region, as delivered.
+        artifact: The artifact it comes from.
+        producer: The sub-agent that delivered it.
+        error: Why it cannot be saved.
+
+    Returns:
+        One line saying whom to delegate to so that the region is corrected.
+    """
+    box = ", ".join(str(value) for value in region.region)
+    return (
+        f"(evidence) {region.doc} p.{region.page} [{box}] from `{artifact}`: {error}. Delegate "
+        f"to {producer} again so that it delivers a valid region, then submit the study again."
+    )
+
+
+def describe_accepted(verified: VerifiedStudy) -> str:
+    """Write the figures the gate computed, for the orchestrator's reply to the user.
+
+    Args:
+        verified: The accepted study.
+
+    Returns:
+        The envelope figures, the site limits by kind, the envelope assumptions and the number of
+        evidence crops saved.
+    """
+    envelope = verified.envelope
+    kinds = Counter(boundary.kind for boundary in verified.boundaries)
+    limits = ", ".join(f"{kinds[kind]} {kind.value}" for kind in BoundaryKind if kinds[kind])
+    figures = (
+        f"Site area: {area(envelope.site_area_m2)}",
+        f"Buildable footprint after setbacks: {area(envelope.footprint_area_m2)}",
+        f"Maximum footprint: {area(envelope.max_footprint_area_m2)}",
+        f"Minimum green area: {_optional(envelope.min_green_area_m2, area)}",
+        f"Maximum height: {_optional(envelope.max_height_m, metres)}",
+        f"Maximum volume: {_optional(envelope.max_volume_m3, _cubic)}",
+        f"Site limits (edges by kind): {limits}",
+        f"Evidence crops saved: {len(verified.evidence)}",
+    )
+    assumptions = "\n".join(f"- {line}" for line in envelope.assumptions) or "- none"
+    lines = "\n".join(f"- {line}" for line in figures)
+    return (
+        "Envelope computed by the gate; report these figures, do not recompute them:\n"
+        f"{lines}\n\nEnvelope assumptions:\n{assumptions}"
+    )
+
+
+def _optional(value: float | None, fmt: Callable[[float], str]) -> str:
+    """Format a computed value, or say that no limit was set."""
+    return "no limit set" if value is None else fmt(value)
+
+
+def _cubic(value: float) -> str:
+    """Format a volume in cubic metres."""
+    return f"{number(value, 1)} m³"

@@ -80,6 +80,31 @@ def parse_policy(policy: str) -> CitationPolicy:
         raise ValueError(msg) from error
 
 
+def citation_rules(
+    *, policy: str, min_score: float, neighbour_pages: int, max_quote_chars: int, check_raster: bool
+) -> CitationRules:
+    """Bundle the ``policies.citations`` knobs, failing at build time on an unknown policy.
+
+    Args:
+        policy: ``reject`` or ``flag``, see ``CitationPolicy``.
+        min_score: Similarity in [0, 1] from which a quote counts as found on its page.
+        neighbour_pages: How many pages around the cited one are also searched.
+        max_quote_chars: Quotes longer than this are truncated in error messages.
+        check_raster: Whether citations of raster documents are text-checked, and then fail.
+
+    Returns:
+        The rules.
+
+    Raises:
+        ValueError: If ``policy`` is not a ``CitationPolicy`` value.
+    """
+    return CitationRules(
+        parse_policy(policy),
+        Verification(min_score, neighbour_pages, max_quote_chars),
+        check_raster,
+    )
+
+
 def corpus_facts(corpus: Corpus) -> CorpusFacts:
     """Index a corpus for citation checks.
 

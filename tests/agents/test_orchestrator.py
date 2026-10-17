@@ -19,7 +19,7 @@ from agent.agents.orchestrator import (
     parse_ask_user_mode,
 )
 from agent.agents.subagents import build_subagent, build_tools, subagent_specs
-from agent.contracts.findings.oap import OAPFindings
+from agent.contracts.findings.notes import DocNotes
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -39,29 +39,36 @@ def call(name: str, args: dict[str, JsonValue], call_id: str) -> AIMessage:
     return AIMessage(content="", tool_calls=[{"name": name, "args": args, "id": call_id}])
 
 
-OAP_ARGS: dict[str, JsonValue] = {
-    "applicable": True,
-    "name": "Joliot Curie",
-    "rationale": "The site lies inside the OAP perimeter.",
-    "citations": [{"doc": "oap", "page": 33, "quote": "Joliot Curie", "source_kind": "regulatory"}],
+NOTES_ARGS: dict[str, JsonValue] = {
+    "label": "oap",
+    "notes": [
+        {
+            "topic": "perimeter",
+            "text": "The site lies inside the OAP perimeter.",
+            "citations": [
+                {"doc": "oap", "page": 33, "quote": "Joliot Curie", "source_kind": "regulatory"}
+            ],
+        }
+    ],
 }
 
-SUBMIT_OAP: dict[str, JsonValue] = {
+SUBMIT_NOTES: dict[str, JsonValue] = {
     "_target_": "agent.tools.submit.factory.submit_tool",
-    "artifact": "oap_findings",
+    "name": "submit_notes",
+    "artifact": "notes.{label}",
     "contract": {
         "_target_": "hydra.utils.get_class",
-        "path": "agent.contracts.findings.oap.OAPFindings",
+        "path": "agent.contracts.findings.notes.DocNotes",
     },
 }
 
-DESCRIPTION = "Reads the OAP covering the site and reports its prescriptions."
+DESCRIPTION = "Reads the documents for an aim and returns cited notes."
 
 TESTER: dict[str, JsonValue] = {
     "description": DESCRIPTION,
     "prompt": "prompts/orchestrator/system.md",
-    "model": "oap_analyst",
-    "tools": [SUBMIT_OAP],
+    "model": "doc_analyst",
+    "tools": [SUBMIT_NOTES],
 }
 
 
@@ -70,12 +77,16 @@ def dummy_key(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
 
 
-@pytest.fixture
-def cfg() -> DictConfig:
-    cfg = load_config(["subagents=[]"])
+def with_tester(*overrides: str) -> DictConfig:
+    cfg = load_config(["subagents=[]", *overrides])
     with open_dict(cfg):
         cfg.subagents.tester = TESTER
     return cfg
+
+
+@pytest.fixture
+def cfg() -> DictConfig:
+    return with_tester()
 
 
 def install_fakes(monkeypatch: pytest.MonkeyPatch, models: dict[str, ScriptedModel]) -> None:
@@ -90,8 +101,8 @@ def graph_tools(graph) -> dict[str, BaseTool]:
     return cast(ToolNode, graph.nodes["tools"].bound).tools_by_name
 
 
-SUBAGENTS = ("site_locator", "zoning_map_reader", "regulation_researcher", "oap_analyst")
-OWN_TOOLS = {"read_artifact", "compute_envelope", "submit_study", "load_playbook", "ask_user"}
+SUBAGENTS = ("surveyor", "zoning_analyst", "doc_analyst")
+OWN_TOOLS = {"read_artifact", "submit_study", "load_playbook", "ask_user"}
 
 
 def test_default_config_builds():
@@ -105,28 +116,35 @@ def test_default_config_builds():
     assert "- general-purpose:" not in description
 
 
-def test_ask_user_disabled():
-    graph = build(load_config(["policies.ask_user.mode=disabled"]))
+def test_orchestrator_tools(cfg):
+    graph = build(cfg)
+    assert "artifacts" in graph.channels
     tools = graph_tools(graph)
+    assert {"task", *OWN_TOOLS} <= tools.keys()
+    assert "compute_envelope" not in tools
+
+
+def test_ask_user_disabled():
+    tools = graph_tools(build(with_tester("policies.ask_user.mode=disabled")))
     assert "ask_user" not in tools
     assert {"task", *OWN_TOOLS - {"ask_user"}} <= tools.keys()
 
 
 def test_general_purpose_follows_config_on_rebuild():
-    enabled = build(load_config(["agent.general_purpose_subagent=true"]))
+    enabled = build(with_tester("agent.general_purpose_subagent=true"))
     assert "- general-purpose:" in graph_tools(enabled)["task"].description
-    disabled = build(load_config())
+    disabled = build(with_tester())
     assert "- general-purpose:" not in graph_tools(disabled)["task"].description
 
 
 def test_unknown_ask_user_mode():
     with pytest.raises(ValueError, match=r"unknown policies\.ask_user\.mode 'sometimes'"):
-        build(load_config(["policies.ask_user.mode=sometimes"]))
+        build(with_tester("policies.ask_user.mode=sometimes"))
     assert parse_ask_user_mode("disabled") is AskUserMode.DISABLED
 
 
 def test_playbook_tool_reads_configured_files():
-    cfg = load_config(["agent.language=French"])
+    cfg = load_config(["subagents=[]", "agent.language=French"])
     tools = {tool.name: tool for tool in orchestrator_tools(cfg)}
     playbook = tools["load_playbook"]
     assert "- `study`: Full buildability study" in playbook.description
@@ -151,7 +169,7 @@ def test_gate_corpus_is_loaded_lazily(monkeypatch):
         return "corpus"
 
     monkeypatch.setattr("agent.adapters.corpus.store.load_corpus", fake_load_corpus)
-    cfg = load_config()
+    cfg = with_tester()
     build(cfg)
     assert calls == []
     [gate] = [node for node in cfg.agent.tools if node._target_.endswith(".submit_study_tool")]
@@ -162,8 +180,8 @@ def test_gate_corpus_is_loaded_lazily(monkeypatch):
 
 
 def test_build_tools_instantiates_submit_tool():
-    tools = build_tools(OmegaConf.create([SUBMIT_OAP]))
-    assert [tool.name for tool in tools] == ["submit_oap_findings"]
+    tools = build_tools(OmegaConf.create([SUBMIT_NOTES]))
+    assert [tool.name for tool in tools] == ["submit_notes"]
 
 
 def test_build_tools_rejects_non_tools():
@@ -184,13 +202,13 @@ def test_specs_follow_config(cfg):
 def test_subagent_standalone(cfg, monkeypatch):
     install_fakes(
         monkeypatch,
-        {"oap_analyst": scripted(call("submit_oap_findings", OAP_ARGS, "s1"), AIMessage("done"))},
+        {"doc_analyst": scripted(call("submit_notes", NOTES_ARGS, "s1"), AIMessage("done"))},
     )
     graph = build_subagent(cfg, "tester")
     assert "artifacts" in graph.channels
-    state = graph.invoke({"messages": [HumanMessage("analyse the OAP")]})
-    assert OAPFindings.model_validate(state["artifacts"]["oap_findings"]) == (
-        OAPFindings.model_validate(OAP_ARGS)
+    state = graph.invoke({"messages": [HumanMessage("read the OAP")]})
+    assert DocNotes.model_validate(state["artifacts"]["notes.oap"]) == (
+        DocNotes.model_validate(NOTES_ARGS)
     )
     assert state["messages"][-1].content == "done"
 
@@ -200,18 +218,18 @@ def test_end_to_end_delegation(cfg, monkeypatch):
         monkeypatch,
         {
             "orchestrator": scripted(
-                call("task", {"description": "analyse the OAP", "subagent_type": "tester"}, "t1"),
+                call("task", {"description": "read the OAP", "subagent_type": "tester"}, "t1"),
                 AIMessage("parent done"),
             ),
-            "oap_analyst": scripted(
-                call("submit_oap_findings", OAP_ARGS, "s1"), AIMessage("child done")
+            "doc_analyst": scripted(
+                call("submit_notes", NOTES_ARGS, "s1"), AIMessage("child done")
             ),
         },
     )
     state = build(cfg).invoke({"messages": [HumanMessage("go")]})
 
-    assert OAPFindings.model_validate(state["artifacts"]["oap_findings"]) == (
-        OAPFindings.model_validate(OAP_ARGS)
+    assert DocNotes.model_validate(state["artifacts"]["notes.oap"]) == (
+        DocNotes.model_validate(NOTES_ARGS)
     )
     replies = {m.tool_call_id: m.content for m in state["messages"] if isinstance(m, ToolMessage)}
     assert replies == {"t1": "child done"}

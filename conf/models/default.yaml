@@ -1,5 +1,5 @@
 # Per-node chat models. Temperature is left unset: Claude 5.5 models reject non-default values.
-# Override one node from the command line, e.g. `models.nodes.site_locator.model=claude-haiku-5-5`.
+# Override one node from the command line, e.g. `models.nodes.surveyor.model=claude-haiku-5-5`.
 
 pricing:  # USD per million tokens; cache_write is the 5-minute TTL rate
   claude-sonnet-5-5:
@@ -21,10 +21,9 @@ nodes:
     max_retries: 3
     timeout: 300
     effort: medium  # low | medium | high | xhigh | max
-  site_locator: *agent
-  zoning_map_reader: *agent
-  regulation_researcher: *agent
-  oap_analyst: *agent
+  surveyor: *agent
+  zoning_analyst: *agent
+  doc_analyst: *agent
   # No `effort`: the langchain-anthropic profile for Haiku 5.5 declares no reasoning-effort levels.
   ingest_classifier:
     _target_: langchain_anthropic.ChatAnthropic

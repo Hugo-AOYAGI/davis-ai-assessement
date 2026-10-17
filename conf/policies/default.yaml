@@ -9,6 +9,10 @@ citations:
 envelope:
   quad_segs: 8       # segments per quarter circle in the round setback buffers
   min_area_m2: 1.0   # footprint parts smaller than this are discarded as slivers
+study:
+  required_notes: [rules, oap]  # doc_analyst labels submit_study requires, read from notes.<label>
+evidence:
+  crops_dir: data/crops  # where submit_study saves the evidence crops, relative to the project root
 tracing:
   enabled: false
   project: davis-assessment

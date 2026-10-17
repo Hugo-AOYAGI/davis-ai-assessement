@@ -4,12 +4,14 @@ from agent.contracts.evidence import (
     Ambiguity,
     Citation,
     CitationCheck,
+    ImageRegion,
     Limit,
     Resolution,
     SourceKind,
+    StoredCrop,
 )
-from agent.contracts.findings.regulation import Admissibility, Verdict
-from agent.contracts.findings.site import Parcel, SiteContext
+from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
+from agent.contracts.findings.zone import LegendItem, ZoneFindings
 from agent.contracts.geometry import (
     Boundary,
     BoundaryKind,
@@ -17,7 +19,7 @@ from agent.contracts.geometry import (
     EnvelopeParameters,
     Polygon,
 )
-from agent.contracts.study import Regime, Study, VerifiedStudy
+from agent.contracts.study import Admissibility, Regime, Study, Verdict, VerifiedStudy
 
 SQUARE = ((0.0, 0.0), (40.0, 0.0), (40.0, 30.0), (0.0, 30.0), (0.0, 0.0))
 USES = Citation(
@@ -28,6 +30,10 @@ HEIGHT = Citation(
 )
 PLAN = Citation(doc="plu_graphique", page=1, quote="UMG", source_kind=SourceKind.REGULATORY)
 CADASTRE = Citation(doc="cadastre", quote="91272000AB0123", source_kind=SourceKind.GEOMETRIC)
+PLAN_REGION = ImageRegion(doc="plu_graphique", page=1, region=(10, 20, 110, 90))
+CROP = StoredCrop(
+    region=PLAN_REGION, pixels=(35, 70, 386, 316), path="data/crops/plu_graphique_p1.png"
+)
 
 
 def limit(value):
@@ -38,24 +44,44 @@ def limit(value):
 def verified():
     polygon = Polygon(crs="EPSG:2154", exterior=SQUARE)
     kinds = (BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR, BoundaryKind.SIDE)
-    site = SiteContext(
+    sides = (EdgeSide.PUBLIC_LAND, EdgeSide.PARCEL, EdgeSide.PARCEL, EdgeSide.PARCEL)
+    site = Site(
         address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
         longitude=2.16,
         latitude=48.71,
+        choice=ParcelChoice(
+            address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
+            parcel_ids=("91272000AB0123",),
+            rationale="Only parcel at the address.",
+        ),
         parcels=(Parcel(id="91272000AB0123", area_m2=1200, polygon=polygon),),
         polygon=polygon,
         area_m2=1200,
-        boundaries=tuple(
-            Boundary(kind=kind, start=start, end=end)
-            for kind, start, end in zip(kinds, SQUARE[:-1], SQUARE[1:], strict=True)
+        edges=tuple(
+            Edge(start=start, end=end, length_m=1, other_side=side)
+            for side, start, end in zip(sides, SQUARE[:-1], SQUARE[1:], strict=True)
         ),
-        method="geocoded",
         citations=(CADASTRE,),
+    )
+    boundaries = tuple(
+        Boundary(kind=kind, start=start, end=end)
+        for kind, start, end in zip(kinds, SQUARE[:-1], SQUARE[1:], strict=True)
+    )
+    zone = ZoneFindings(
+        zone="UMG",
+        overlays=(LegendItem(item="Périmètre d'OAP", applies=True, note="site inside"),),
+        rationale="Found by the road layout.",
+        region=PLAN_REGION,
     )
     study = Study(
         address="4 rue Joliot Curie, 91190 Gif-sur-Yvette",
         program="RSE + RJA",
-        regime=Regime(zone="UMG", overlays=(), oap_applicable=False, citations=(USES,)),
+        regime=Regime(
+            zone="UMG",
+            overlays=(LegendItem(item="Périmètre d'OAP", applies=True, note="site inside"),),
+            oap_applicable=True,
+            citations=(USES,),
+        ),
         admissibility=(
             Admissibility(
                 building="RSE",
@@ -107,4 +133,12 @@ def verified():
         CitationCheck(citation=HEIGHT, verified=False, score=0.4),
         CitationCheck(citation=PLAN, verified=False, score=0.0, text_verifiable=False),
     )
-    return VerifiedStudy(study=study, site=site, envelope=envelope, citation_checks=checks)
+    return VerifiedStudy(
+        study=study,
+        site=site,
+        boundaries=boundaries,
+        zone=zone,
+        envelope=envelope,
+        citation_checks=checks,
+        evidence=(CROP,),
+    )

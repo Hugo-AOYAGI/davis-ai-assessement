@@ -4,8 +4,8 @@ import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from agent.agents.config import load_config
-from agent.contracts.findings.regulation import Verdict
 from agent.contracts.inputs.case import Case
+from agent.contracts.study import Verdict
 from agent.entrypoints import run
 from agent.entrypoints.summary import (
     RunMetrics,
@@ -61,6 +61,10 @@ def test_summary_of_accepted_study(verified):
     assert summary.accepted
     assert summary.study is not None
     assert summary.study.zone == "UMG"
+    assert summary.study.parcel_ids == ("91272000AB0123",)
+    assert summary.study.overlays == ("Périmètre d'OAP",)
+    assert summary.study.oap_applicable
+    assert summary.study.evidence_crops == 1
     assert [(entry.building, entry.verdict) for entry in summary.study.admissibility] == [
         ("RSE", Verdict.PERMITTED),
         ("RJA", Verdict.CONDITIONAL),
@@ -70,6 +74,7 @@ def test_summary_of_accepted_study(verified):
     assert envelope.max_footprint_ratio is None
     assert envelope.min_green_ratio == 0.2
     assert envelope.max_volume_m3 == 13020
+    assert envelope.min_green_area_m2 == 240
     assert summary.study.ambiguities == 1
     stats = summary.study.citations
     assert (stats.checks, stats.text_verifiable, stats.verified) == (3, 2, 1)
@@ -97,13 +102,13 @@ def test_final_text():
 
 
 def test_make_unattended_disables_ask_user():
-    cfg = load_config(["policies.ask_user.mode=interactive"])
+    cfg = load_config(["subagents=[]", "policies.ask_user.mode=interactive"])
     run.make_unattended(cfg)
     assert cfg.policies.ask_user.mode == "disabled"
 
 
 def test_run_study_offline(monkeypatch, verified):
-    cfg = load_config()
+    cfg = load_config(["subagents=[]"])
     state = {"messages": MESSAGES, "artifacts": {"study": verified.model_dump(mode="json")}}
     fake = FakeGraph(state)
     monkeypatch.setattr(run, "build", lambda _cfg: fake)
@@ -122,13 +127,30 @@ def test_run_study_offline(monkeypatch, verified):
 
 
 def test_write_outputs(tmp_path, verified):
+    root = tmp_path / "root"
+    crop = root / verified.evidence[0].path
+    crop.parent.mkdir(parents=True)
+    crop.write_bytes(b"png")
+    run_dir = tmp_path / "run"
+    run_dir.mkdir()
     summary = run_summary(METRICS, verified)
-    run.write_outputs(tmp_path, summary, verified, max_quote_chars=50)
-    assert json.loads((tmp_path / "run_summary.json").read_text(encoding="utf-8"))["accepted"]
-    assert (tmp_path / "verified_study.json").exists()
-    assert (tmp_path / "report.md").read_text(encoding="utf-8").startswith("# Buildability study")
+    run.write_outputs(run_dir, summary, verified, max_quote_chars=50, root=root)
+    assert json.loads((run_dir / "run_summary.json").read_text(encoding="utf-8"))["accepted"]
+    assert (run_dir / "verified_study.json").exists()
+    report = (run_dir / "report.md").read_text(encoding="utf-8")
+    assert report.startswith("# Buildability study")
+    assert "(evidence/plu_graphique_p1.png)" in report
+    assert (run_dir / "evidence" / "plu_graphique_p1.png").read_bytes() == b"png"
+
+
+def test_missing_crop_is_skipped(tmp_path, verified, caplog):
+    run.write_outputs(
+        tmp_path, run_summary(METRICS, verified), verified, max_quote_chars=50, root=tmp_path
+    )
+    assert not (tmp_path / "evidence").exists()
+    assert "plu_graphique_p1.png is missing, not copied" in caplog.text
 
 
 def test_write_outputs_without_study(tmp_path):
-    run.write_outputs(tmp_path, run_summary(METRICS, None), None, max_quote_chars=50)
+    run.write_outputs(tmp_path, run_summary(METRICS, None), None, max_quote_chars=50, root=tmp_path)
     assert sorted(path.name for path in tmp_path.iterdir()) == ["run_summary.json"]
