@@ -1,0 +1,25 @@
+# Zoning analyst: the site on the zoning plan -> ZoneFindings (artifact `zone`).
+zoning_analyst:
+  description: >-
+    Reads the zoning plan for the site: finds the site on the plan by eye, reads its zone and
+    checks every legend item (overlays, perimeters, protections) as applying or not. Needs the
+    site first (surveyor's `site` artifact): give it the address and the parcel ids. Delivers the
+    artifact `zone`.
+  prompt: prompts/subagents/zoning_analyst.md
+  model: zoning_analyst  # key in models.nodes
+  tools:
+    - _target_: agent.tools.documents.navigate.list_documents_tool
+      corpus: ${retrieval.corpus}
+      documents: ${corpus.documents}
+    - ${geo.site_view}
+    - _target_: agent.tools.images.view.view_image_tool
+      pages: ${images.pages}
+    - _target_: agent.tools.images.view.zoom_tool
+      pages: ${images.pages}
+    - _target_: agent.tools.submit.factory.submit_tool
+      name: submit_zone
+      artifact: zone
+      contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.zone.ZoneFindings}
+      finalize:                    # the region must lie on its page
+        _target_: agent.tools.images.zone.zone_finalizer
+        images: ${images.pages}

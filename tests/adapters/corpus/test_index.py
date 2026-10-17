@@ -1,8 +1,6 @@
-from pathlib import Path
-
 import pytest
 
-from agent.adapters.corpus.index import CorpusIndex, load_index
+from agent.adapters.corpus.index import load_index
 from agent.adapters.corpus.store import save_corpus
 
 UMG = "plu_reglement/titre-ii/moulon/umg"
@@ -27,9 +25,7 @@ def test_documents(index):
 
 def test_page_and_pages(index):
     assert index.page("plu_reglement", 3).text == "règlement page 3"
-    assert index.page("plu_reglement_graphique", 1).image == Path(
-        "images/plu_reglement_graphique/p0001.jpg"
-    )
+    assert index.page("plu_reglement_graphique", 1).text == ""
     assert [page.number for page in index.pages("oap", 2, 4)] == [2, 3, 4]
 
 
@@ -73,74 +69,6 @@ def test_parent_children_subtree(index):
     ]
 
 
-def test_zone_lookup_is_case_insensitive(index):
-    assert index.zone("umg").id == UMG
-
-
-def test_zone_ambiguous_lists_sectors(index):
-    with pytest.raises(LookupError, match=r"several sectors.*Vallée, Chevry.*sector"):
-        index.zone("UA")
-
-
-def test_zone_sector_disambiguates(index):
-    assert index.zone("UA", sector="vallee").id == "plu_reglement/titre-ii/vallee/ua"
-    assert index.zone("ua", sector="CHEVRY").id == "plu_reglement/titre-ii/chevry/ua"
-
-
-def test_zone_wrong_sector(index):
-    with pytest.raises(LookupError, match=r"not in sector 'Moulon'.*Vallée, Chevry"):
-        index.zone("UA", sector="Moulon")
-
-
-def test_zone_unknown_lists_zones(index):
-    with pytest.raises(LookupError, match="Known zones: UA, UMG"):
-        index.zone("UX")
-
-
-def test_article_lookup(index):
-    assert index.article("UMG", "10").id == f"{UMG}/10"
-    assert index.article("umg", 12).id == f"{UMG}/12"
-    assert index.article("UA", "2", sector="Chevry").id == "plu_reglement/titre-ii/chevry/ua/2"
-    assert index.article("UA", "1", sector="Vallée").id == "plu_reglement/titre-ii/vallee/ua/1"
-
-
-def test_article_ambiguous_zone(index):
-    with pytest.raises(LookupError, match="pass one as `sector`"):
-        index.article("UA", "1")
-
-
-def test_article_not_found_lists_available(index):
-    with pytest.raises(LookupError, match=r"zone UMG \(Moulon\)\. Available articles: 1, 10, 12"):
-        index.article("UMG", "15")
-
-
-def test_definition_ordering(index):
-    assert ids(index.definition("accès")) == [
-        "plu_reglement/titre-iii/lexique/acces",
-        "plu_reglement/titre-iii/lexique/acces-privatif",
-        "plu_reglement/titre-iii/lexique/voie-d-acces",
-    ]
-
-
-def test_definition_folding_and_partial_matches(index):
-    lexique = "plu_reglement/titre-iii/lexique"
-    assert ids(index.definition("HAUTEUR")) == [f"{lexique}/hauteur-de-construction-art-10"]
-    assert ids(index.definition("Acces :")) == ids(index.definition("accès"))
-    assert ids(index.definition("faitage ou faite")) == [f"{lexique}/faitage-ou-faite"]
-    assert ids(index.definition("le faîtage ou faîte d'un toit")) == [f"{lexique}/faitage-ou-faite"]
-    assert index.definition("piscine") == []
-    assert index.definition("  ") == []
-
-
-def test_definition_without_lexicon(corpus):
-    assert CorpusIndex(corpus).definition("accès") == []
-
-
-def test_unknown_lexicon_section(corpus):
-    with pytest.raises(ValueError, match="plu_reglement/lexique"):
-        CorpusIndex(corpus, lexicon=("plu_reglement/lexique",))
-
-
 def test_search_ranks_height_article_first(index):
     hits = index.search("hauteur maximale", k=3)
 
@@ -164,10 +92,9 @@ def test_search_empty_query_and_unknown_doc(index):
 
 def test_load_index_is_cached(tmp_path, corpus):
     save_corpus(corpus, tmp_path)
-    lexicon = ("plu_reglement/titre-iii/lexique",)
 
-    first = load_index(tmp_path, lexicon, ("de",))
+    first = load_index(tmp_path, ("de",))
 
-    assert load_index(tmp_path, lexicon, ("de",)) is first
-    assert load_index(tmp_path, lexicon, ()) is not first
-    assert first.zone("UMG").id == UMG
+    assert load_index(tmp_path, ("de",)) is first
+    assert load_index(tmp_path, ()) is not first
+    assert first.section(UMG).zone == "UMG"

@@ -33,11 +33,10 @@ def settings() -> CorpusSettings:
             "id": "demo@1",
             "dir": "data/demo",
             "documents": [
-                {"id": "rules", "path": "src/rules.pdf"},
+                {"id": "rules", "path": "src/rules.pdf", "legal_force": "conformity"},
                 {"id": "map", "path": "src/map.pdf", "kind": "zoning_map", "title": "Plan"},
             ],
             "classifier": {"model": "m", "prompt": "p.md", "sample_pages": 1, "sample_chars": 50},
-            "images": {"figure_kinds": ["oap"], "dpi": 36},
             "splitter": {
                 "regulatory_text": {
                     "levels": ["chapter"],
@@ -54,7 +53,7 @@ def settings() -> CorpusSettings:
                     ],
                 }
             },
-            "lexicon": ["ignored by ingestion"],
+            "search": {"stopwords": ["ignored by ingestion"]},
         }
     )
 
@@ -80,17 +79,13 @@ def test_ingest_corpus_saves_a_loadable_corpus(tmp_path: Path):
     assert [s.id for s in corpus.sections] == ["rules/preamble", "rules/chapter-1"]
     assert corpus.sections[1].text == "CHAPTER 1\nChapter body"
     assert "Running header" in corpus.pages[0].text
-    map_page = corpus.pages[1]
-    assert map_page.image == tmp_path / "data" / "demo" / "images" / "map" / "p0001.jpeg"
-    loaded = load_corpus(tmp_path / "data" / "demo")
-    assert loaded.sections == corpus.sections
-    assert loaded.documents == corpus.documents
-    assert loaded.pages[1].image is not None
-    assert loaded.pages[1].image.resolve() == map_page.image.resolve()
+    assert corpus.pages[1].text == ""
+    assert load_corpus(tmp_path / "data" / "demo") == corpus
+    assert [path.name for path in (tmp_path / "data" / "demo").iterdir()] == ["corpus.json"]
 
 
 def test_project_corpus_config_is_valid():
-    loaded = load_settings(load_config().corpus)
+    loaded = load_settings(load_config(["subagents=[]"]).corpus)
     assert loaded.id == "gif-sur-yvette@2021-07-06"
     assert loaded.dir == "data/gif-sur-yvette@2021-07-06"
     assert [d.id for d in loaded.documents] == ["plu_reglement", "plu_reglement_graphique", "oap"]

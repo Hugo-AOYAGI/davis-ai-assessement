@@ -37,36 +37,21 @@ def pdf(tmp_path: Path) -> Path:
     return make_pdf(tmp_path / "sample.pdf")
 
 
-def test_extracts_lines_and_page_text(pdf, tmp_path):
-    extraction = extract_document(pdf, "doc", tmp_path / "corpus", figures=False, dpi=36)
+def test_extracts_lines_and_page_text(pdf):
+    extraction = extract_document(pdf, "doc")
     first, raster, figure = extraction.pages
     assert first.text == "Header line\nBody line"
-    assert first.image is None
     body = next(line for line in extraction.lines if line.text == "Body line")
     assert (body.page, body.size, body.lead) == (1, 12.0, "Body line")
     assert body.y0 < 300 < body.y0 + 20
     assert raster.text == ""
-    assert figure.image is None
-    assert (extraction.raster_pages, extraction.figure_pages) == (1, 0)
+    assert figure.text == "Schema"
 
 
-def test_raster_page_keeps_native_image(pdf, tmp_path):
-    corpus = tmp_path / "corpus"
-    raster = extract_document(pdf, "doc", corpus, figures=False, dpi=36).pages[1]
-    assert raster.image == corpus / "images" / "doc" / "p0002.png"
-    stored = pymupdf.Pixmap(str(raster.image))
-    assert (stored.width, stored.height) == (60, 40)
-
-
-def test_figure_pages_are_rendered(pdf, tmp_path):
-    corpus = tmp_path / "corpus"
-    extraction = extract_document(pdf, "doc", corpus, figures=True, dpi=36)
-    assert extraction.pages[0].image is None
-    assert extraction.pages[2].image == corpus / "images" / "doc" / "p0003.png"
-    image = extraction.pages[2].image
-    assert image is not None
-    assert image.is_file()
-    assert (extraction.raster_pages, extraction.figure_pages) == (1, 1)
+def test_no_image_is_written(pdf, tmp_path):
+    before = set(tmp_path.rglob("*"))
+    extract_document(pdf, "doc")
+    assert set(tmp_path.rglob("*")) == before
 
 
 def test_lead_stops_at_font_change():

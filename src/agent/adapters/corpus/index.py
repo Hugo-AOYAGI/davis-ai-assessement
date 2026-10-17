@@ -7,10 +7,7 @@ from typing import NamedTuple
 
 from agent.adapters.corpus.search import Bm25
 from agent.adapters.corpus.store import load_corpus
-from agent.adapters.corpus.text import fold
 from agent.contracts.inputs.corpus import Corpus, Document, Page, Section
-
-_NO_MATCH = 3
 
 
 class Hit(NamedTuple):
@@ -28,39 +25,22 @@ class CorpusIndex:
     message listing the valid options, meant to be relayed to the model.
     """
 
-    def __init__(
-        self, corpus: Corpus, lexicon: Sequence[str] = (), stopwords: Sequence[str] = ()
-    ) -> None:
+    def __init__(self, corpus: Corpus, stopwords: Sequence[str] = ()) -> None:
         """Build the lookup tables and the search index.
 
         Args:
             corpus: The ingested corpus.
-            lexicon: Ids of glossary sections whose children are term definitions.
             stopwords: Words ignored by keyword search.
-
-        Raises:
-            ValueError: When a lexicon id is not a section of the corpus.
         """
         self._corpus = corpus
         self._documents = {document.id: document for document in corpus.documents}
         self._pages = {(page.doc, page.number): page for page in corpus.pages}
         self._sections = {section.id: section for section in corpus.sections}
         self._children: defaultdict[str, list[Section]] = defaultdict(list)
-        self._zones: defaultdict[str, list[Section]] = defaultdict(list)
         for section in corpus.sections:
             parent = self.parent(section.id)
             if parent is not None:
                 self._children[parent.id].append(section)
-            zone = fold(section.zone or "")
-            if zone and (parent is None or fold(parent.zone or "") != zone):
-                self._zones[zone].append(section)
-        missing = [key for key in lexicon if key not in self._sections]
-        if missing:
-            msg = f"Lexicon sections not found in corpus {corpus.id!r}: {', '.join(missing)}"
-            raise ValueError(msg)
-        self._terms = [
-            (_term_key(t.heading_path[-1]), t) for key in lexicon for t in self._children[key]
-        ]
         self._bm25 = Bm25(
             ["\n".join((*section.heading_path, section.text)) for section in corpus.sections],
             stopwords,
@@ -131,65 +111,6 @@ class CorpusIndex:
             if section.id == section_id or section.id.startswith(prefix)
         ]
 
-    def zone(self, zone: str, sector: str | None = None) -> Section:
-        """Return the chapter section of a zone (its intro; articles are its children).
-
-        Args:
-            zone: Zone code, case-insensitive, e.g. ``UMG``.
-            sector: Sector name, needed when the zone code exists in several sectors.
-
-        Raises:
-            LookupError: Unknown zone, no match in the sector, or ambiguous without a sector.
-        """
-        candidates = self._zones.get(fold(zone.strip()), [])
-        if not candidates:
-            known = sorted({s.zone or "" for found in self._zones.values() for s in found})
-            raise LookupError(f"Unknown zone {zone!r}. Known zones: {', '.join(known)}.")
-        sectors = [self._sector(section) for section in candidates]
-        matches = candidates if sector is None else self._in_sector(candidates, sector)
-        if len(matches) == 1:
-            return matches[0]
-        problem = f"is not in sector {sector!r}" if not matches else "exists in several sectors"
-        msg = f"Zone {zone!r} {problem}. Its sectors: {', '.join(sectors)}; pass one as `sector`."
-        raise LookupError(msg)
-
-    def article(self, zone: str, article: str | int, sector: str | None = None) -> Section:
-        """Return an article of a zone chapter.
-
-        Args:
-            zone: Zone code, case-insensitive, e.g. ``UMG``.
-            article: Article number, e.g. ``10``.
-            sector: Sector name, needed when the zone code exists in several sectors.
-
-        Raises:
-            LookupError: Unknown or ambiguous zone (see :meth:`zone`), or unknown article.
-        """
-        head = self.zone(zone, sector)
-        articles = [section for section in self.subtree(head.id) if section.article is not None]
-        key = fold(str(article).strip())
-        for section in articles:
-            if fold(section.article or "") == key:
-                return section
-        available = ", ".join(dict.fromkeys(section.article or "" for section in articles))
-        msg = (
-            f"Article {article!r} not found in zone {head.zone} ({self._sector(head)}). "
-            f"Available articles: {available or 'none'}."
-        )
-        raise LookupError(msg)
-
-    def definition(self, term: str) -> list[Section]:
-        """Return the glossary entries matching a term (e.g. ``hauteur``), best first.
-
-        Titles are compared after folding accents and case, collapsing spaces and dropping a
-        trailing colon. Order: exact title, titles starting with the term, then titles containing
-        the term or contained in it. Empty when nothing matches.
-        """
-        query = _term_key(term)
-        if not query:
-            return []
-        ranked = [(_match_rank(title, query), term) for title, term in self._terms]
-        return [term for rank, term in sorted(ranked, key=lambda pair: pair[0]) if rank < _NO_MATCH]
-
     def search(self, query: str, k: int, doc: str | None = None) -> list[Hit]:
         """Return up to ``k`` sections ranked by BM25 over heading path and text, best first.
 
@@ -202,49 +123,16 @@ class CorpusIndex:
         hits = [Hit(sections[i], score) for i, score in ranked if doc in (None, sections[i].doc)]
         return hits[:k]
 
-    def _sector(self, section: Section) -> str:
-        """Return the heading of the nearest ancestor outside any zone (the sector)."""
-        node = self.parent(section.id)
-        while node is not None and node.zone is not None:
-            node = self.parent(node.id)
-        return node.heading_path[-1] if node is not None else section.doc
-
-    def _in_sector(self, candidates: list[Section], sector: str) -> list[Section]:
-        """Keep the candidates with a heading path component containing the sector name."""
-        key = _term_key(sector)
-        return [
-            section
-            for section in candidates
-            if any(key in _term_key(heading) for heading in section.heading_path)
-        ]
-
 
 @cache
-def load_index(
-    directory: Path, lexicon: tuple[str, ...], stopwords: tuple[str, ...]
-) -> CorpusIndex:
+def load_index(directory: Path, stopwords: tuple[str, ...]) -> CorpusIndex:
     """Load a corpus directory into a shared, cached index.
 
     Args:
         directory: Corpus directory written by ``ingest``.
-        lexicon: Ids of glossary sections whose children are term definitions.
         stopwords: Words ignored by keyword search.
 
     Returns:
         The same index for the same arguments (clear with ``load_index.cache_clear()``).
     """
-    return CorpusIndex(load_corpus(directory), lexicon, stopwords)
-
-
-def _match_rank(title: str, query: str) -> int:
-    """Rank a normalized title against a normalized query: 0 exact, 1 prefix, 2 partial."""
-    if title == query:
-        return 0
-    if title.startswith(query):
-        return 1
-    return 2 if query in title or title in query else _NO_MATCH
-
-
-def _term_key(text: str) -> str:
-    """Normalize a heading or term for comparison: folded, single-spaced, no trailing colon."""
-    return " ".join(fold(text).split()).rstrip(":").strip()
+    return CorpusIndex(load_corpus(directory), stopwords)

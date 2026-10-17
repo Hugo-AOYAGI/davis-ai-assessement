@@ -17,7 +17,12 @@ logger = get_logger(__name__)
 
 
 class DocumentSettings(Contract):
-    """One source PDF of the corpus."""
+    """One source PDF of the corpus.
+
+    Unknown keys are ignored: the entry also holds settings read by the tools (``legal_force``).
+    """
+
+    model_config = ConfigDict(frozen=True, extra="ignore")
 
     id: str = Field(min_length=1)
     path: str
@@ -39,14 +44,6 @@ class ClassifierSettings(Contract):
     sample_chars: int = Field(ge=1)
 
 
-class ImageSettings(Contract):
-    """Page image settings."""
-
-    figure_kinds: tuple[DocumentKind, ...]
-    """Kinds whose text pages containing images are rendered to PNG."""
-    dpi: int = Field(ge=1)
-
-
 class CorpusSettings(Contract):
     """The part of the ``corpus`` config group used by ingestion.
 
@@ -60,7 +57,6 @@ class CorpusSettings(Contract):
     """Output directory relative to the project root."""
     documents: tuple[DocumentSettings, ...] = Field(min_length=1)
     classifier: ClassifierSettings
-    images: ImageSettings
     splitter: dict[DocumentKind, SplitterConfig]
     """Heading splitter per kind; kinds without one get no sections."""
 
@@ -100,23 +96,16 @@ def _ingest_document(
         classifier = settings.classifier
         answer = classify(text_sample(path, classifier.sample_pages, classifier.sample_chars))
         kind, title = kind or answer.kind, title or answer.title
-    extraction = extract_document(
-        path,
-        document.id,
-        root / settings.dir,
-        figures=kind in settings.images.figure_kinds,
-        dpi=settings.images.dpi,
-    )
+    extraction = extract_document(path, document.id)
     splitter = settings.splitter.get(kind)
     sections = () if splitter is None else split_document(document.id, extraction.lines, splitter)
     logger.info(
-        "%s: %s, %d pages, %d sections, %d raster and %d figure images",
+        "%s: %s, %d pages (%d without text), %d sections",
         document.id,
         kind,
         len(extraction.pages),
+        sum(not page.text.strip() for page in extraction.pages),
         len(sections),
-        extraction.raster_pages,
-        extraction.figure_pages,
     )
     meta = Document(
         id=document.id,
