@@ -1,28 +1,26 @@
 # Corpus ingested by `uv run python -m agent.entrypoints.ingest` and read by the corpus adapter.
 id: gif-sur-yvette@2021-07-06
-dir: data/${corpus.id}  # output directory (corpus.json + images/), relative to the project root
+dir: data/${corpus.id}  # output directory (corpus.json), relative to the project root
 
 # Source PDFs. `kind` / `title` are optional: when set they replace the classifier's answer.
+# `legal_force` (shown by list_documents): conformity = a project must follow the document
+# exactly; compatibility = a project must not contradict its intent.
 documents:
   - id: plu_reglement
     path: ressources/plu_reglement_91272_20210706.pdf
+    legal_force: conformity
   - id: plu_reglement_graphique
     path: ressources/plu_reglement_graphique_91272_20210706.pdf
+    legal_force: conformity
   - id: oap
     path: ressources/oap_91272_20210706.pdf
-
-lexicon:  # sections whose children are glossary definitions
-  - plu_reglement/titre-iii/lexique
+    legal_force: compatibility
 
 classifier:
   model: ingest_classifier            # key in models.nodes
   prompt: prompts/ingest/classifier.md
   sample_pages: 3                     # first pages with a text layer shown to the model
   sample_chars: 1500                  # characters taken from each of them
-
-images:
-  figure_kinds: [regulatory_text, oap]  # kinds whose text pages with images are rendered
-  dpi: 110             # resolution of those renders; raster-only pages keep their native image
 
 search:
   stopwords: [le, la, les, l, de, des, du, d, un, une, et, en, a, au, aux, pour, par, sur, dans,
@@ -142,33 +140,3 @@ splitter:
         font: Italic
         min_size: 30
         continuation: '^[^a-zà-ÿ]+$'
-
-# Raster zoning plan (owned by WP3). Pixel coordinates are [column, row] of the image embedded in
-# the PDF page, at its native size, origin top-left.
-zoning_map:
-  doc: plu_reglement_graphique  # corpus document id used in citations
-  source: ressources/plu_reglement_graphique_91272_20210706.pdf  # PDF or image, relative to the project root
-  page: 1
-  size_px: [7021, 4966]  # checked on load: the control points are only valid at this size
-  georeference:
-    crs: EPSG:2154
-    # Calibrated once: rotation and translation fitted on the commune outline (scale fixed by the
-    # printed 1:7000 on A0), then refined by matching projected cadastre parcel edges (API Carto,
-    # PCI) against the cadastral lines printed on the plan, in 400 m windows. Residual of the
-    # affine fitted on these points: median 0.1 m, max 1.2 m over 73 windows.
-    control_points:
-      - {pixel: [529.7, 2412.2], world: [633664.6, 6844508.7]}
-      - {pixel: [4916.3, 725.1], world: [638864.6, 6846508.7]}
-      - {pixel: [3229.4, 3087.2], world: [636864.6, 6843708.7]}
-      - {pixel: [1204.6, 4437.0], world: [634464.6, 6842108.7]}
-      - {pixel: [2217.1, 1399.8], world: [635664.6, 6845708.7]}
-      - {pixel: [3904.1, 1737.3], world: [637664.6, 6845308.7]}
-      - {pixel: [1879.5, 2749.7], world: [635264.6, 6844108.7]}
-      - {pixel: [1204.6, 1063.1], world: [634464.6, 6846108.7]}
-      - {pixel: [1204.6, 3424.6], world: [634464.6, 6843308.7]}
-      - {pixel: [2891.8, 2074.7], world: [636464.6, 6844908.7]}
-      - {pixel: [867.1, 1737.2], world: [634064.6, 6845308.7]}
-      - {pixel: [1542.1, 2074.8], world: [634864.6, 6844908.7]}
-  legend:  # pixel boxes [x0, y0, x1, y1] of the legend panels
-    - [5748, 1874, 7021, 3124]  # overlays: limits, protections, risks, OAP, reserved sites
-    - [5748, 3499, 7021, 4645]  # zones

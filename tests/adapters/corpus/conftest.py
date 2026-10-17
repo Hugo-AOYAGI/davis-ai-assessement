@@ -1,4 +1,3 @@
-from collections.abc import Callable
 from pathlib import Path
 
 import pytest
@@ -6,7 +5,6 @@ import pytest
 from agent.adapters.corpus.index import CorpusIndex
 from agent.contracts.inputs.corpus import Corpus, Document, DocumentKind, Page, Section
 
-LEXICON = ("plu_reglement/titre-iii/lexique",)
 STOPWORDS = ("de", "des", "du", "la", "le", "les", "et", "en", "au")
 
 T1 = "TITRE I : DISPOSITIONS GENERALES"
@@ -140,7 +138,7 @@ def _section(doc: str, row: Row) -> Section:
     )
 
 
-def build_corpus(image: Path | None) -> Corpus:
+def build_corpus() -> Corpus:
     documents = (
         Document(
             id="plu_reglement",
@@ -166,7 +164,7 @@ def build_corpus(image: Path | None) -> Corpus:
     )
     pages = (
         *(Page(doc="plu_reglement", number=n, text=f"règlement page {n}") for n in range(1, 13)),
-        Page(doc="plu_reglement_graphique", number=1, text="", image=image),
+        Page(doc="plu_reglement_graphique", number=1, text=""),
         *(Page(doc="oap", number=n, text=f"oap page {n}") for n in range(1, 5)),
     )
     oap = Section(
@@ -182,15 +180,10 @@ def build_corpus(image: Path | None) -> Corpus:
 
 
 @pytest.fixture
-def corpus_factory() -> Callable[[Path | None], Corpus]:
-    return build_corpus
-
-
-@pytest.fixture
 def corpus() -> Corpus:
-    return build_corpus(Path("images/plu_reglement_graphique/p0001.jpg"))
+    return build_corpus()
 
 
 @pytest.fixture
 def index(corpus: Corpus) -> CorpusIndex:
-    return CorpusIndex(corpus, lexicon=LEXICON, stopwords=STOPWORDS)
+    return CorpusIndex(corpus, stopwords=STOPWORDS)

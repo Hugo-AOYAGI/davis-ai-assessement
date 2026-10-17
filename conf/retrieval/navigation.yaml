@@ -1,17 +1,8 @@
-# Retrieval over the ingested corpus, read by the regulation tools (agent.tools.regulation).
-# `navigation`: the agent browses one level at a time (outlines, single articles, pages).
-# Select the other variant with `retrieval=full_sections`.
-mode: navigation      # navigation | full_sections
-corpus:               # where the tools read the corpus; loaded on first tool call, then shared
-  _target_: agent.tools.regulation.source.CorpusSource
-  directory: ${corpus.dir}
-  lexicon: ${corpus.lexicon}
-  stopwords: ${corpus.search.stopwords}
-general_sections:     # read with every zone chapter: general provisions (Titre I) and the lexique
-  - plu_reglement/titre-i
-  - plu_reglement/titre-iii/lexique
-max_chars: 30000      # longest tool reply; longer text is cut with a hint to read narrower
-max_pages: 4          # pages per read_pages call
-search_k: 8           # hits per search call
-snippet_chars: 300    # text shown around each search hit
-max_definitions: 3    # lexique entries per get_definition call
+# Retrieval variant browsing one level at a time: read_section returns a section's own text and
+# an outline of its sub-sections. Every other knob comes from full_sections.
+defaults:
+  - full_sections
+  - _self_
+
+mode: navigation
+max_chars: 30000      # longest tool reply

@@ -3,14 +3,13 @@
 import re
 from collections import defaultdict
 
-import pymupdf
 import pytest
 
 from agent.adapters.corpus.store import CORPUS_FILE, load_corpus
 from agent.agents.config import load_config, project_path
 from agent.contracts.inputs.corpus import Corpus, DocumentKind
 
-CORPUS_DIR = project_path(str(load_config().corpus.dir))
+CORPUS_DIR = project_path(str(load_config(["subagents=[]"]).corpus.dir))
 UMG = "plu_reglement/titre-ii/moulon/umg"
 UMG_PAGES = {
     1: 320, 2: 321, 3: 321, 4: 322, 5: 324, 6: 324, 7: 325, 8: 325,
@@ -62,7 +61,7 @@ def test_oap_chapter_8(corpus):
     assert (chapter.page_start, chapter.page_end) == (33, 36)
 
 
-def test_zoning_map_image(corpus):
+def test_document_kinds_and_text_layers(corpus):
     kinds = {d.id: d.kind for d in corpus.documents}
     assert kinds == {
         "plu_reglement": DocumentKind.REGULATORY_TEXT,
@@ -70,7 +69,6 @@ def test_zoning_map_image(corpus):
         "oap": DocumentKind.OAP,
     }
     (page,) = [p for p in corpus.pages if p.doc == "plu_reglement_graphique"]
-    assert page.image is not None
-    assert page.image.suffix in {".jpeg", ".jpg"}
-    pixmap = pymupdf.Pixmap(str(page.image))
-    assert (pixmap.width, pixmap.height) == (7021, 4966)
+    assert page.text == ""
+    oap_34 = next(p for p in corpus.pages if (p.doc, p.number) == ("oap", 34))
+    assert "Joliot" in oap_34.text

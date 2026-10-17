@@ -1,6 +1,7 @@
 # Corpus page images shown to the models (view_image, zoom) and saved as evidence crops.
+# Every `${images.pages}` gets the same instance (one cache of decoded pages per settings).
 pages:
-  _target_: agent.adapters.images.pages.PageImages
+  _target_: agent.adapters.images.shared.page_images
   documents: ${corpus.documents}  # {id, path} of each source PDF, paths relative to root
   root:
     _target_: agent.agents.config.project_path
