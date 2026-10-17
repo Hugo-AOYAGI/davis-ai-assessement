@@ -1,0 +1,65 @@
+# Site locator: address -> parcels -> site polygon with typed boundaries (artifact `site`).
+# Every knob lives once under `geo`; the tools reference it by absolute interpolation, and
+# Hydra builds a separate (identically configured) client per tool.
+site_locator:
+  description: >-
+    Turns the case address into the site under study: geocodes the address, selects the
+    cadastral parcel(s) forming the plot, and computes their union polygon in a metric CRS
+    (Lambert-93), its area and every boundary typed road / side / rear, with geometric source
+    citations. Stores the result as the `site` artifact. Give it the address and, if known, the
+    program (it helps tell the plot from technical strips).
+  prompt: prompts/subagents/site_locator.md
+  model: site_locator
+  geo:
+    crs: EPSG:2154
+    geographic_crs: EPSG:4326
+    decimals: 2
+    max_results: 5
+    search_radius_m: 50
+    http:
+      _target_: agent.adapters.geo.http.CachedHttp
+      cache_dir:
+        _target_: agent.agents.config.project_path
+        relative: data/cache/geo
+      timeout_s: 30
+    geocoder:
+      _target_: agent.adapters.geo.geocoder.AddressGeocoder
+      url: https://data.geopf.fr/geocodage/search  # Base Adresse Nationale, served by the Géoplateforme
+      http: ${subagents.site_locator.geo.http}
+    cadastre:
+      _target_: agent.adapters.geo.cadastre.CadastreClient
+      url: https://apicarto.ign.fr/api/cadastre/parcelle
+      http: ${subagents.site_locator.geo.http}
+      page_size: 500
+    surveyor:
+      _target_: agent.adapters.geo.survey.SiteSurveyor
+      geocoder: ${subagents.site_locator.geo.geocoder}
+      cadastre: ${subagents.site_locator.geo.cadastre}
+      crs: ${subagents.site_locator.geo.crs}
+      geographic_crs: ${subagents.site_locator.geo.geographic_crs}
+      decimals: ${subagents.site_locator.geo.decimals}
+      grid_size_m: 0.05          # union precision; closes digitising gaps below 10 cm
+      max_sliver_area_m2: 1.0    # holes and parts smaller than this are noise
+      neighbour_buffer_m: 2.0    # parcels within this distance of the site are neighbours
+      snap_tolerance_m: 0.5      # two limits closer than this are the same limit
+      min_shared_ratio: 0.5      # share of an edge on a neighbour's limit to be separating
+      collinear_angle_deg: 20    # direction change that splits a separating limit
+      geocoder_source: geoplateforme-geocodage
+      cadastre_source: apicarto-cadastre
+  tools:
+    - _target_: agent.tools.geo.geocode.geocode_tool
+      geocoder: ${subagents.site_locator.geo.geocoder}
+      max_results: ${subagents.site_locator.geo.max_results}
+    - _target_: agent.tools.geo.parcels.find_parcels_tool
+      surveyor: ${subagents.site_locator.geo.surveyor}
+      radius_m: ${subagents.site_locator.geo.search_radius_m}
+    - _target_: agent.tools.geo.site.preview_site_tool
+      surveyor: ${subagents.site_locator.geo.surveyor}
+    - _target_: agent.tools.submit.factory.submit_tool
+      artifact: site
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.tools.geo.site.SiteSelection
+      finalize:
+        _target_: agent.tools.geo.site.site_finalizer
+        surveyor: ${subagents.site_locator.geo.surveyor}
