@@ -127,6 +127,9 @@ Validate supported template syntax at construction, with malformed-template test
 
 ## Field and configuration usage
 
+The dedicated [Vulture follow-up](DEAD_CODE.md) records detector commands, confirmed unused
+data, test-only APIs and framework/configuration false positives.
+
 No public output fields were removed based on a backend-only search. A field can be useful to
 a reader or an external client without participating in a numeric score. UI usage was deliberately
 not verified.

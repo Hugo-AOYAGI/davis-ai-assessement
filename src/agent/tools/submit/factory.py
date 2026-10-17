@@ -55,7 +55,7 @@ def submit_tool[C: Contract, S: Contract](
     inside the tool: a rejected submission returns an error ``ToolMessage`` listing every
     ``field.path: message`` and stores nothing, its ``artifact`` keeping the rejected arguments
     as the draft the revise tool edits (see ``submit_tools``); an accepted one is stored as JSON
-    in the ``artifacts`` state under its key, and the reply says ``<key> accepted.``. 
+    in the ``artifacts`` state under its key, and the reply says ``<key> accepted.``.
     The reply ends with ``DONE``.
 
     Args:

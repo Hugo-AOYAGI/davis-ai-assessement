@@ -39,7 +39,7 @@ submit_envelope delivers. Invalid arguments come back as `field.path: message` l
 and call again."""
 
 
-def preview_envelope_tool(
+def preview_envelope_tool(  # noqa: PLR0913 - one argument per configured bundle
     *,
     site: str,
     geometry: GeometrySettings,

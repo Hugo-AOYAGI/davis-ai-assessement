@@ -24,14 +24,15 @@ export type Block =
   | { kind: "study"; key: string };
 
 export const SUBAGENT_TOOL = "task";
-export const STUDY_TOOL = "submit_study";
+/** Tools whose acceptance stores the study: the submission and its revision. */
+export const STUDY_TOOLS = ["submit_study", "revise_study"];
 
 /** Text of a ToolMessage (or any message), joining its text blocks. */
 export function messageText(message: Pick<Message, "content">): string {
   return getContentString(message.content);
 }
 
-/** Whether a `submit_study` result says the study was stored. */
+/** Whether a `submit_study` or `revise_study` result says the study was stored. */
 export function isStudyAccepted(result: ToolMessage | undefined): boolean {
   return (
     !!result &&
@@ -131,7 +132,7 @@ export function buildBlocks(
     const callsSubagent = calls.some((tc) => tc.name === SUBAGENT_TOOL);
     const studyAccepted = calls.some(
       (tc) =>
-        tc.name === STUDY_TOOL &&
+        STUDY_TOOLS.includes(tc.name) &&
         !!tc.id &&
         isStudyAccepted(results.get(tc.id)),
     );

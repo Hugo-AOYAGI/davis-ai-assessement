@@ -81,6 +81,8 @@ def build_scoring(cfg: DictConfig, judge: Judge) -> Scoring:
             tolerance=tolerances.envelope,
             quad_segs=tolerances.quad_segs,
             min_area_m2=tolerances.min_area_m2,
+            level_step_m=tolerances.level_step_m,
+            cut_tolerance_m=tolerances.cut_tolerance_m,
         ),
     )
 

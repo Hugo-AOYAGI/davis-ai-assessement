@@ -23,18 +23,22 @@ def test_json_output_gives_the_same_checks(study, study_json, matcher):
 
 def test_fabricated_quote_lowers_the_share(variant, matcher):
     def fabricate(data):
-        data["study"]["envelope"]["max_height_m"]["citations"][0]["quote"] = "Hauteur 25 mètres."
+        data["envelope"]["rules"]["buildings"][0]["max_height_m"]["citations"][0]["quote"] = (
+            "Hauteur 25 mètres."
+        )
 
     result = score_citations(variant(fabricate), matcher, [])
     assert result.verified == result.text_verifiable - 1
     failed = [c for c in result.checks if not c.check.verified]
-    assert failed[0].paths == ("study.envelope.max_height_m.citations.0",)
+    assert failed[0].paths == ("envelope.rules.buildings.0.max_height_m.citations.0",)
 
 
 def test_share_of_facts_cited_on_an_evidence_page(items, study, matcher):
-    facts = [f for f in items["e01_reference"].facts if f.key != "envelope.max_volume_m3"]
+    facts = [
+        f for f in items["e01_reference"].facts if f.key != "envelope.proposal.total_volume_m3"
+    ]
     off_page = KeyFact(
-        key="study.envelope.max_height_m",
+        key='envelope.rules.buildings[building~"Sociale"].max_height_m',
         expect=18,
         evidence=(Evidence(doc="plu_reglement", page=100),),
     )

@@ -69,8 +69,13 @@ const SUBAGENT_OPTIONS: { filterSubagentMessages: boolean } = {
   filterSubagentMessages: true,
 };
 
-/** Coalesces re-renders: each streamed token chunk otherwise re-renders the whole thread. */
-const RENDER_THROTTLE_MS = 50;
+/**
+ * Coalesces re-renders: the thread renders once per batch of events read together from the
+ * network, instead of once per event. `true` defers the render to the next task; a number of
+ * milliseconds would be a debounce in the SDK (each event re-arms the timer), holding
+ * renders back for as long as events keep arriving faster than that.
+ */
+const RENDER_THROTTLE = true;
 
 type StreamContextType = ReturnType<typeof useTypedStream> &
   SubagentLookup & {
@@ -120,7 +125,7 @@ const StreamSession = ({
   const { getThreads, setThreads } = useThreads();
   const streamValue = useTypedStream({
     ...SUBAGENT_OPTIONS,
-    throttle: RENDER_THROTTLE_MS,
+    throttle: RENDER_THROTTLE,
     apiUrl,
     apiKey: apiKey ?? undefined,
     assistantId,
@@ -165,15 +170,19 @@ const StreamSession = ({
     });
   }, [apiKey, apiUrl, authScheme]);
 
-  return (
-    <StreamContext.Provider
-      value={{
-        ...(streamValue as typeof streamValue & SubagentLookup),
+  // The hook returns a new handle on each render, so the value still changes with every
+  // stream update. Inheriting from the handle (rather than spreading it) leaves its getters
+  // (`messages`, `toolCalls`, `interrupts`...) to be computed only when a consumer reads them.
+  const value = useMemo(
+    () =>
+      Object.assign(Object.create(streamValue) as StreamContextType, {
         apiUrl,
-      }}
-    >
-      {children}
-    </StreamContext.Provider>
+      }),
+    [streamValue, apiUrl],
+  );
+
+  return (
+    <StreamContext.Provider value={value}>{children}</StreamContext.Provider>
   );
 };
 

@@ -29,11 +29,11 @@ def test_every_kind_of_break_is_made(made):
 
 
 def test_changed_limit_keeps_rule_and_citations(study, made, settings):
-    good = study.study.envelope.max_height_m
-    bad = made[BreakKind.CHANGED_LIMIT].study.study.envelope.max_height_m
+    good = study.envelope.rules.buildings[0].max_height_m
+    bad = made[BreakKind.CHANGED_LIMIT].study.envelope.rules.buildings[0].max_height_m
     assert bad.value == good.value + settings.shift
     assert (bad.rule, bad.citations) == (good.rule, good.citations)
-    assert made[BreakKind.CHANGED_LIMIT].study.envelope == study.envelope
+    assert made[BreakKind.CHANGED_LIMIT].study.envelope.proposal == study.envelope.proposal
 
 
 def test_invented_condition_cites_a_quote_without_it(study, made, settings):
@@ -47,8 +47,8 @@ def test_invented_condition_cites_a_quote_without_it(study, made, settings):
 
 
 def test_hedge_gives_two_values_for_one_limit(study, made):
-    good = study.study.envelope.max_height_m
-    bad = made[BreakKind.HEDGE].study.study.envelope.max_height_m
+    good = study.envelope.rules.buildings[0].max_height_m
+    bad = made[BreakKind.HEDGE].study.envelope.rules.buildings[0].max_height_m
     assert bad.value == good.value
     assert bad.rule.startswith(good.rule)
     assert "between 17 and 20 m" in bad.rule
@@ -58,7 +58,7 @@ def test_contradiction_only_changes_the_summary(study, made):
     broken = made[BreakKind.CONTRADICTION].study
     assert broken.study.summary.startswith(study.study.summary)
     assert broken.study.summary.endswith("buildings may rise to 23 m.")
-    assert broken.study.envelope == study.study.envelope
+    assert broken.envelope == study.envelope
     assert broken.study.model_copy(update={"summary": study.study.summary}) == study.study
 
 
@@ -78,16 +78,16 @@ def test_breaks_render_differently(study, made):
 
 
 def test_limit_without_value_and_no_ambiguity(study, settings):
-    envelope = study.study.envelope
-    unset = envelope.max_height_m.model_copy(update={"value": None, "citations": ()})
+    rules = study.envelope.rules
+    first, *rest = rules.buildings
+    unset = first.max_height_m.model_copy(update={"value": None, "citations": ()})
+    rules = rules.model_copy(
+        update={"buildings": (first.model_copy(update={"max_height_m": unset}), *rest)}
+    )
     bare = study.model_copy(
         update={
-            "study": study.study.model_copy(
-                update={
-                    "envelope": envelope.model_copy(update={"max_height_m": unset}),
-                    "ambiguities": (),
-                }
-            )
+            "envelope": study.envelope.model_copy(update={"rules": rules}),
+            "study": study.study.model_copy(update={"ambiguities": ()}),
         }
     )
     assert [item.kind for item in breaks(bare, settings)] == [BreakKind.INVENTED_CONDITION]

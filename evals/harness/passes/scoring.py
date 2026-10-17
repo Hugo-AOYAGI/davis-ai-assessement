@@ -27,6 +27,8 @@ class EnvelopeSettings:
     tolerance: float
     quad_segs: int
     min_area_m2: float
+    level_step_m: float
+    cut_tolerance_m: float
 
 
 @dataclass(frozen=True)
@@ -186,6 +188,8 @@ def _envelope(
         tolerance=settings.tolerance,
         quad_segs=settings.quad_segs,
         min_area_m2=settings.min_area_m2,
+        level_step_m=settings.level_step_m,
+        cut_tolerance_m=settings.cut_tolerance_m,
     )
 
 

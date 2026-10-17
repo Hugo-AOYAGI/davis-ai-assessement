@@ -12,8 +12,12 @@ from agent.tools.envelope.preview import preview_envelope_tool
 def make_preview(geometry, settings, plan, tmp_path):
     def build(imagery):
         return preview_envelope_tool(
-            site="site", geometry=geometry, settings=settings, imagery=imagery, plan=plan,
-            store=ImageStore(directory=tmp_path, url_prefix="/images")
+            site="site",
+            geometry=geometry,
+            settings=settings,
+            imagery=imagery,
+            plan=plan,
+            store=ImageStore(directory=tmp_path, url_prefix="/images"),
         )
 
     return build
@@ -42,7 +46,7 @@ def test_schema_is_the_draft(make_preview, imagery):
     assert "only submit_envelope delivers" in " ".join(tool.description.split())
 
 
-def test_preview_returns_figures_and_plan_and_stores_nothing(
+def test_preview_returns_figures_and_plan_and_stores_nothing(  # noqa: PLR0913, PLR0917
     preview, imagery, reply, draft_args, artifacts, tmp_path
 ):
     result = preview(imagery, draft_args, artifacts)
@@ -67,7 +71,7 @@ def test_preview_returns_figures_and_plan_and_stores_nothing(
     assert (pixmap.width, pixmap.height) == (200, 200)
 
 
-def test_plan_fills_the_buildings_and_the_setback_strip(
+def test_plan_fills_the_buildings_and_the_setback_strip(  # noqa: PLR0913, PLR0917
     preview, imagery, reply, draft_args, artifacts, tmp_path
 ):
     _, _, image = reply(preview(imagery, draft_args, artifacts)).content

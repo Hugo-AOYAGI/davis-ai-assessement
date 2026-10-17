@@ -168,162 +168,6 @@
         ]
       }
     ],
-    "envelope": {
-      "setback_road_m": {
-        "value": 1.0,
-        "rule": "Alignment or set back at least 1 m (UMG 6.3). OAP principle: building on the alignment.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 324,
-            "article": "UMG 6.3",
-            "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 379,
-            "article": "Lexique - Voie",
-            "quote": "Emprise publique ou privée composée de la chaussée et des trottoirs ou bas-côtés.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 374,
-            "article": "Lexique - Alignement",
-            "quote": "Il s’agit de la limite entre le domaine public et la propriété privée.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "setback_side_m": {
-        "value": 6.0,
-        "rule": "On boundary or set back: 6 m for facades with views, 3 m without (UMG 7.2.1). 6 m retained as conservative value (residential facades with views).",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 325,
-            "article": "UMG 7.2.1",
-            "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 325,
-            "article": "UMG 7.2.1",
-            "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 378,
-            "article": "Lexique - Limite séparative",
-            "quote": "Limite séparative : Ligne commune, séparant deux propriétés privées et/ou publiques.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "setback_rear_m": {
-        "value": 6.0,
-        "rule": "Same rule as side limits (UMG 7 covers lateral and rear boundaries): 6 m with views, 3 m without; 6 m retained.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 325,
-            "article": "UMG 7.1.1",
-            "quote": "c'est-à-dire les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction du terrain ou des terrains voisins et qui ne sont pas concernées par l’application de l’article 6.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 325,
-            "article": "UMG 7.2.1",
-            "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "max_height_m": {
-        "value": 20.0,
-        "rule": "Principally housing: 20 m max, R+5 (UMG 10.2); measured from natural ground to ridge/acrotère. OAP average R+4 objective is an orientation, not a cap.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 10.2",
-            "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 10.1",
-            "quote": "à partir du sol naturel existant avant travaux;",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "max_storeys": {
-        "value": 6.0,
-        "rule": "R+5 = 6 storeys (UMG 10.2); OAP targets an average R+4 across the stepping.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 10.2",
-            "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "oap",
-            "page": 33,
-            "article": "OAP 8 - morphologie",
-            "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "max_footprint_ratio": {
-        "value": null,
-        "rule": "Footprint not regulated by UMG 9; project must be compatible with the OAP, which gives no figure.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 326,
-            "article": "UMG 9",
-            "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
-            "source_kind": "regulatory"
-          }
-        ]
-      },
-      "min_green_ratio": {
-        "value": 0.2,
-        "rule": "At least 20% of plot as green space (planted, 60 cm topsoil), of which at least 10% pleine terre (UMG 13.3). Surface car parks and green roofs do not count.",
-        "citations": [
-          {
-            "doc": "plu_reglement",
-            "page": 331,
-            "article": "UMG 13.3",
-            "quote": "En espace vert 20% au moins de la superficie du terrain.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 331,
-            "article": "UMG 13.3",
-            "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
-            "source_kind": "regulatory"
-          },
-          {
-            "doc": "plu_reglement",
-            "page": 330,
-            "article": "UMG 13.1",
-            "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
-            "source_kind": "regulatory"
-          }
-        ]
-      }
-    },
     "parking": [
       {
         "use": "Résidence Sociale Étudiante (résidence étudiante)",
@@ -1308,213 +1152,1626 @@
     ]
   },
   "envelope": {
-    "site_area_m2": 5951.632500010313,
-    "footprint": {
-      "crs": "EPSG:2154",
-      "exterior": [
-        [
-          638618.5222539209,
-          6845910.86043671
-        ],
-        [
-          638620.4041562934,
-          6845904.024138295
-        ],
-        [
-          638620.4500788939,
-          6845895.069231173
-        ],
-        [
-          638620.4772010767,
-          6845894.807615788
-        ],
-        [
-          638620.4757608618,
-          6845894.544602196
-        ],
-        [
-          638620.5377011696,
-          6845894.224043468
-        ],
-        [
-          638620.5713683957,
-          6845893.899295847
-        ],
-        [
-          638620.6490080637,
-          6845893.647998601
-        ],
-        [
-          638620.6989069281,
-          6845893.389757772
-        ],
-        [
-          638620.8221949751,
-          6845893.0874424465
-        ],
-        [
-          638620.9185704134,
-          6845892.775502908
-        ],
-        [
-          638621.0437439174,
-          6845892.544181016
-        ],
-        [
-          638621.1430642757,
-          6845892.300636997
-        ],
-        [
-          638635.7745166542,
-          6845864.5628347695
-        ],
-        [
-          638625.2625908718,
-          6845864.847796612
-        ],
-        [
-          638624.8386099209,
-          6845864.817612184
-        ],
-        [
-          638624.4136135529,
-          6845864.810610173
-        ],
-        [
-          638624.2531290295,
-          6845864.775930108
-        ],
-        [
-          638624.0893546612,
-          6845864.7642705375
-        ],
-        [
-          638623.6794090753,
-          6845864.651951514
-        ],
-        [
-          638623.2639449178,
-          6845864.562171367
-        ],
-        [
-          638623.1133098066,
-          6845864.496848693
-        ],
-        [
-          638622.9549569841,
-          6845864.453462363
-        ],
-        [
-          638622.5748007419,
-          6845864.263325102
-        ],
-        [
-          638622.1848348499,
-          6845864.094217019
-        ],
-        [
-          638622.0498379702,
-          6845864.000762048
-        ],
-        [
-          638621.9029921073,
-          6845863.927316273
-        ],
-        [
-          638621.5672344033,
-          6845863.666667644
-        ],
-        [
-          638621.2177529437,
-          6845863.424730352
-        ],
-        [
-          638621.1035821509,
-          6845863.306734507
-        ],
-        [
-          638620.9738864509,
-          6845863.206051765
-        ],
-        [
-          638620.6954302602,
-          6845862.884908346
-        ],
-        [
-          638620.3998636148,
-          6845862.5794393625
-        ],
-        [
-          638620.3109064304,
-          6845862.44143716
-        ],
-        [
-          638620.2033450241,
-          6845862.317386631
-        ],
-        [
-          638619.9928912628,
-          6845861.948089782
-        ],
-        [
-          638619.7625978913,
-          6845861.5908281095
-        ],
-        [
-          638619.1955948187,
-          6845860.486664232
-        ],
-        [
-          638618.9275926058,
-          6845860.2001791075
-        ],
-        [
-          638611.5641124119,
-          6845855.9486459
-        ],
-        [
-          638609.7794483624,
-          6845855.147368164
-        ],
-        [
-          638607.9570422028,
-          6845854.621674079
-        ],
-        [
-          638606.2760449909,
-          6845854.363059123
-        ],
-        [
-          638560.0652919302,
-          6845855.677108973
-        ],
-        [
-          638562.0299948476,
-          6845925.9365937365
-        ],
-        [
-          638603.7673572791,
-          6845924.783155881
-        ],
-        [
-          638608.1251434626,
-          6845922.961991506
-        ],
-        [
-          638618.5222539209,
-          6845910.86043671
-        ]
+    "rules": {
+      "setbacks": [
+        {
+          "kind": "road",
+          "on_limit_allowed": false,
+          "with_windows": {
+            "min_m": 1.0,
+            "height_ratio": null,
+            "rule": "Alignment or set back at least 1 m (UMG 6.3). OAP principle: building on the alignment.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 324,
+                "article": "UMG 6.3",
+                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 379,
+                "article": "Lexique - Voie",
+                "quote": "Emprise publique ou privée composée de la chaussée et des trottoirs ou bas-côtés.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 374,
+                "article": "Lexique - Alignement",
+                "quote": "Il s’agit de la limite entre le domaine public et la propriété privée.",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 1.0,
+            "height_ratio": null,
+            "rule": "Alignment or set back at least 1 m (UMG 6.3). OAP principle: building on the alignment.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 324,
+                "article": "UMG 6.3",
+                "quote": "En cas de recul, ce dernier doit être au moins égal à 1 mètre.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 379,
+                "article": "Lexique - Voie",
+                "quote": "Emprise publique ou privée composée de la chaussée et des trottoirs ou bas-côtés.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 374,
+                "article": "Lexique - Alignement",
+                "quote": "Il s’agit de la limite entre le domaine public et la propriété privée.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "side",
+          "on_limit_allowed": false,
+          "with_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "On boundary or set back: 6 m for facades with views, 3 m without (UMG 7.2.1). 6 m retained as conservative value (residential facades with views).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 378,
+                "article": "Lexique - Limite séparative",
+                "quote": "Limite séparative : Ligne commune, séparant deux propriétés privées et/ou publiques.",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "On boundary or set back: 6 m for facades with views, 3 m without (UMG 7.2.1). 6 m retained as conservative value (residential facades with views).",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 378,
+                "article": "Lexique - Limite séparative",
+                "quote": "Limite séparative : Ligne commune, séparant deux propriétés privées et/ou publiques.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "rear",
+          "on_limit_allowed": false,
+          "with_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "Same rule as side limits (UMG 7 covers lateral and rear boundaries): 6 m with views, 3 m without; 6 m retained.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.1.1",
+                "quote": "c'est-à-dire les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction du terrain ou des terrains voisins et qui ne sont pas concernées par l’application de l’article 6.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "without_windows": {
+            "min_m": 6.0,
+            "height_ratio": null,
+            "rule": "Same rule as side limits (UMG 7 covers lateral and rear boundaries): 6 m with views, 3 m without; 6 m retained.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.1.1",
+                "quote": "c'est-à-dire les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction du terrain ou des terrains voisins et qui ne sont pas concernées par l’application de l’article 6.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 325,
+                "article": "UMG 7.2.1",
+                "quote": "à 6 mètres pour les façades ou parties de façade comportant des vues ;",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        }
       ],
-      "holes": []
+      "buildings": [
+        {
+          "building": "Résidence Sociale Étudiante (RSE)",
+          "max_height_m": {
+            "value": 20.0,
+            "rule": "Principally housing: 20 m max, R+5 (UMG 10.2); measured from natural ground to ridge/acrotère. OAP average R+4 objective is an orientation, not a cap.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.1",
+                "quote": "à partir du sol naturel existant avant travaux;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "max_storeys": {
+            "value": 6.0,
+            "rule": "R+5 = 6 storeys (UMG 10.2); OAP targets an average R+4 across the stepping.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "oap",
+                "page": 33,
+                "article": "OAP 8 - morphologie",
+                "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        },
+        {
+          "building": "Résidence Jeunes Actifs",
+          "max_height_m": {
+            "value": 20.0,
+            "rule": "Principally housing: 20 m max, R+5 (UMG 10.2); measured from natural ground to ridge/acrotère. OAP average R+4 objective is an orientation, not a cap.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.1",
+                "quote": "à partir du sol naturel existant avant travaux;",
+                "source_kind": "regulatory"
+              }
+            ]
+          },
+          "max_storeys": {
+            "value": 6.0,
+            "rule": "R+5 = 6 storeys (UMG 10.2); OAP targets an average R+4 across the stepping.",
+            "citations": [
+              {
+                "doc": "plu_reglement",
+                "page": 326,
+                "article": "UMG 10.2",
+                "quote": "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5.",
+                "source_kind": "regulatory"
+              },
+              {
+                "doc": "oap",
+                "page": 33,
+                "article": "OAP 8 - morphologie",
+                "quote": "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen.",
+                "source_kind": "regulatory"
+              }
+            ]
+          }
+        }
+      ],
+      "spacing_with_windows": null,
+      "spacing_without_windows": null,
+      "max_footprint_ratio": {
+        "value": null,
+        "rule": "Footprint not regulated by UMG 9; project must be compatible with the OAP, which gives no figure.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 326,
+            "article": "UMG 9",
+            "quote": "L’emprise au sol des constructions n’est pas réglementée, toutefois, tout projet doit être compatible avec les orientations d’aménagement et de programmation définies au document 3 du PLU.",
+            "source_kind": "regulatory"
+          }
+        ]
+      },
+      "min_green_ratio": {
+        "value": 0.2,
+        "rule": "At least 20% of plot as green space (planted, 60 cm topsoil), of which at least 10% pleine terre (UMG 13.3). Surface car parks and green roofs do not count.",
+        "citations": [
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace vert 20% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 331,
+            "article": "UMG 13.3",
+            "quote": "En espace de pleine terre 10% au moins de la superficie du terrain.",
+            "source_kind": "regulatory"
+          },
+          {
+            "doc": "plu_reglement",
+            "page": 330,
+            "article": "UMG 13.1",
+            "quote": "Les aires  de  stationnement  aménagées  en  surface  et  les  toitures  végétalisées  ne  sont  pas comptabilisées en espaces verts.",
+            "source_kind": "regulatory"
+          }
+        ]
+      }
     },
-    "footprint_area_m2": 4241.440786859832,
-    "max_footprint_area_m2": 4241.440786859832,
+    "layout": {
+      "cut": "across_long_axis",
+      "first_share": 0.5,
+      "order": [
+        "Résidence Sociale Étudiante (RSE)",
+        "Résidence Jeunes Actifs"
+      ],
+      "facing_windows": false,
+      "heights_m": [],
+      "oap": [],
+      "reasons": "Equal shares for the evaluation fixture."
+    },
+    "site_area_m2": 5951.632500010313,
     "min_green_area_m2": 1190.3265000020626,
-    "max_height_m": 20.0,
-    "max_volume_m3": 84828.81573719664,
-    "assumptions": [
-      "No footprint ratio set: footprint not capped by a ratio."
-    ]
+    "bounds": [
+      {
+        "name": "largest",
+        "footprint": {
+          "crs": "EPSG:2154",
+          "exterior": [
+            [
+              638618.5222539209,
+              6845910.86043671
+            ],
+            [
+              638620.4041562934,
+              6845904.024138295
+            ],
+            [
+              638620.4500788939,
+              6845895.069231173
+            ],
+            [
+              638620.4772010767,
+              6845894.807615788
+            ],
+            [
+              638620.4757608618,
+              6845894.544602196
+            ],
+            [
+              638620.5377011696,
+              6845894.224043468
+            ],
+            [
+              638620.5713683957,
+              6845893.899295847
+            ],
+            [
+              638620.6490080637,
+              6845893.647998601
+            ],
+            [
+              638620.6989069281,
+              6845893.389757772
+            ],
+            [
+              638620.8221949751,
+              6845893.0874424465
+            ],
+            [
+              638620.9185704134,
+              6845892.775502908
+            ],
+            [
+              638621.0437439174,
+              6845892.544181016
+            ],
+            [
+              638621.1430642757,
+              6845892.300636997
+            ],
+            [
+              638635.7745166542,
+              6845864.5628347695
+            ],
+            [
+              638625.2625908718,
+              6845864.847796612
+            ],
+            [
+              638624.8386099209,
+              6845864.817612184
+            ],
+            [
+              638624.4136135529,
+              6845864.810610173
+            ],
+            [
+              638624.2531290295,
+              6845864.775930108
+            ],
+            [
+              638624.0893546612,
+              6845864.7642705375
+            ],
+            [
+              638623.6794090753,
+              6845864.651951514
+            ],
+            [
+              638623.2639449178,
+              6845864.562171367
+            ],
+            [
+              638623.1133098066,
+              6845864.496848693
+            ],
+            [
+              638622.9549569841,
+              6845864.453462363
+            ],
+            [
+              638622.5748007419,
+              6845864.263325102
+            ],
+            [
+              638622.1848348499,
+              6845864.094217019
+            ],
+            [
+              638622.0498379702,
+              6845864.000762048
+            ],
+            [
+              638621.9029921073,
+              6845863.927316273
+            ],
+            [
+              638621.5672344033,
+              6845863.666667644
+            ],
+            [
+              638621.2177529437,
+              6845863.424730352
+            ],
+            [
+              638621.1035821509,
+              6845863.306734507
+            ],
+            [
+              638620.9738864509,
+              6845863.206051765
+            ],
+            [
+              638620.6954302602,
+              6845862.884908346
+            ],
+            [
+              638620.3998636148,
+              6845862.5794393625
+            ],
+            [
+              638620.3109064304,
+              6845862.44143716
+            ],
+            [
+              638620.2033450241,
+              6845862.317386631
+            ],
+            [
+              638619.9928912628,
+              6845861.948089782
+            ],
+            [
+              638619.7625978913,
+              6845861.5908281095
+            ],
+            [
+              638619.1955948187,
+              6845860.486664232
+            ],
+            [
+              638618.9275926058,
+              6845860.2001791075
+            ],
+            [
+              638611.5641124119,
+              6845855.9486459
+            ],
+            [
+              638609.7794483624,
+              6845855.147368164
+            ],
+            [
+              638607.9570422028,
+              6845854.621674079
+            ],
+            [
+              638606.2760449909,
+              6845854.363059123
+            ],
+            [
+              638560.0652919302,
+              6845855.677108973
+            ],
+            [
+              638562.0299948476,
+              6845925.9365937365
+            ],
+            [
+              638603.7673572791,
+              6845924.783155881
+            ],
+            [
+              638608.1251434626,
+              6845922.961991506
+            ],
+            [
+              638618.5222539209,
+              6845910.86043671
+            ]
+          ],
+          "holes": []
+        },
+        "footprint_area_m2": 4241.440786859832,
+        "buildings": [
+          {
+            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
+            "footprint": {
+              "crs": "EPSG:2154",
+              "exterior": [
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ],
+                [
+                  638620.4500788939,
+                  6845895.069231173
+                ],
+                [
+                  638620.4772010767,
+                  6845894.807615788
+                ],
+                [
+                  638620.4757608618,
+                  6845894.544602196
+                ],
+                [
+                  638620.5377011696,
+                  6845894.224043468
+                ],
+                [
+                  638620.5713683957,
+                  6845893.899295847
+                ],
+                [
+                  638620.6490080637,
+                  6845893.647998601
+                ],
+                [
+                  638620.6989069281,
+                  6845893.389757772
+                ],
+                [
+                  638620.8221949751,
+                  6845893.0874424465
+                ],
+                [
+                  638620.9185704134,
+                  6845892.775502908
+                ],
+                [
+                  638621.0437439174,
+                  6845892.544181016
+                ],
+                [
+                  638621.1430642757,
+                  6845892.300636997
+                ],
+                [
+                  638635.7745166542,
+                  6845864.5628347695
+                ],
+                [
+                  638625.2625908718,
+                  6845864.847796612
+                ],
+                [
+                  638624.8386099209,
+                  6845864.817612184
+                ],
+                [
+                  638624.4136135529,
+                  6845864.810610173
+                ],
+                [
+                  638624.2531290295,
+                  6845864.775930108
+                ],
+                [
+                  638624.0893546612,
+                  6845864.7642705375
+                ],
+                [
+                  638623.6794090753,
+                  6845864.651951514
+                ],
+                [
+                  638623.2639449178,
+                  6845864.562171367
+                ],
+                [
+                  638623.1133098066,
+                  6845864.496848693
+                ],
+                [
+                  638622.9549569841,
+                  6845864.453462363
+                ],
+                [
+                  638622.5748007419,
+                  6845864.263325102
+                ],
+                [
+                  638622.1848348499,
+                  6845864.094217019
+                ],
+                [
+                  638622.0498379702,
+                  6845864.000762048
+                ],
+                [
+                  638621.9029921073,
+                  6845863.927316273
+                ],
+                [
+                  638621.5672344033,
+                  6845863.666667644
+                ],
+                [
+                  638621.2177529437,
+                  6845863.424730352
+                ],
+                [
+                  638621.1035821509,
+                  6845863.306734507
+                ],
+                [
+                  638620.9738864509,
+                  6845863.206051765
+                ],
+                [
+                  638620.6954302602,
+                  6845862.884908346
+                ],
+                [
+                  638620.3998636148,
+                  6845862.5794393625
+                ],
+                [
+                  638620.3109064304,
+                  6845862.44143716
+                ],
+                [
+                  638620.2033450241,
+                  6845862.317386631
+                ],
+                [
+                  638619.9928912628,
+                  6845861.948089782
+                ],
+                [
+                  638619.7625978913,
+                  6845861.5908281095
+                ],
+                [
+                  638619.1955948187,
+                  6845860.486664232
+                ],
+                [
+                  638618.9275926058,
+                  6845860.2001791075
+                ],
+                [
+                  638611.5641124119,
+                  6845855.9486459
+                ],
+                [
+                  638609.7794483624,
+                  6845855.147368164
+                ],
+                [
+                  638607.9570422028,
+                  6845854.621674079
+                ],
+                [
+                  638606.2760449909,
+                  6845854.363059123
+                ],
+                [
+                  638560.0652919302,
+                  6845855.677108973
+                ],
+                [
+                  638562.0299948476,
+                  6845925.9365937365
+                ],
+                [
+                  638603.7673572791,
+                  6845924.783155881
+                ],
+                [
+                  638608.1251434626,
+                  6845922.961991506
+                ],
+                [
+                  638618.5222539209,
+                  6845910.86043671
+                ],
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ]
+              ],
+              "holes": []
+            },
+            "footprint_area_m2": 4241.440786859833,
+            "max_height_m": 20.0,
+            "levels": [
+              {
+                "from_m": 0.0,
+                "to_m": 20.0,
+                "area_m2": 4241.440786859833
+              }
+            ],
+            "volume_m3": 84828.81573719665
+          }
+        ],
+        "fits": true,
+        "total_volume_m3": 84828.81573719665,
+        "assumptions": [
+          "Each limit at its smallest allowed distance, 0 where building on it is allowed: the legal maximum."
+        ],
+        "warnings": []
+      },
+      {
+        "name": "windows",
+        "footprint": {
+          "crs": "EPSG:2154",
+          "exterior": [
+            [
+              638618.5222539209,
+              6845910.86043671
+            ],
+            [
+              638620.4041562934,
+              6845904.024138295
+            ],
+            [
+              638620.4500788939,
+              6845895.069231173
+            ],
+            [
+              638620.4772010767,
+              6845894.807615788
+            ],
+            [
+              638620.4757608618,
+              6845894.544602196
+            ],
+            [
+              638620.5377011696,
+              6845894.224043468
+            ],
+            [
+              638620.5713683957,
+              6845893.899295847
+            ],
+            [
+              638620.6490080637,
+              6845893.647998601
+            ],
+            [
+              638620.6989069281,
+              6845893.389757772
+            ],
+            [
+              638620.8221949751,
+              6845893.0874424465
+            ],
+            [
+              638620.9185704134,
+              6845892.775502908
+            ],
+            [
+              638621.0437439174,
+              6845892.544181016
+            ],
+            [
+              638621.1430642757,
+              6845892.300636997
+            ],
+            [
+              638635.7745166542,
+              6845864.5628347695
+            ],
+            [
+              638625.2625908718,
+              6845864.847796612
+            ],
+            [
+              638624.8386099209,
+              6845864.817612184
+            ],
+            [
+              638624.4136135529,
+              6845864.810610173
+            ],
+            [
+              638624.2531290295,
+              6845864.775930108
+            ],
+            [
+              638624.0893546612,
+              6845864.7642705375
+            ],
+            [
+              638623.6794090753,
+              6845864.651951514
+            ],
+            [
+              638623.2639449178,
+              6845864.562171367
+            ],
+            [
+              638623.1133098066,
+              6845864.496848693
+            ],
+            [
+              638622.9549569841,
+              6845864.453462363
+            ],
+            [
+              638622.5748007419,
+              6845864.263325102
+            ],
+            [
+              638622.1848348499,
+              6845864.094217019
+            ],
+            [
+              638622.0498379702,
+              6845864.000762048
+            ],
+            [
+              638621.9029921073,
+              6845863.927316273
+            ],
+            [
+              638621.5672344033,
+              6845863.666667644
+            ],
+            [
+              638621.2177529437,
+              6845863.424730352
+            ],
+            [
+              638621.1035821509,
+              6845863.306734507
+            ],
+            [
+              638620.9738864509,
+              6845863.206051765
+            ],
+            [
+              638620.6954302602,
+              6845862.884908346
+            ],
+            [
+              638620.3998636148,
+              6845862.5794393625
+            ],
+            [
+              638620.3109064304,
+              6845862.44143716
+            ],
+            [
+              638620.2033450241,
+              6845862.317386631
+            ],
+            [
+              638619.9928912628,
+              6845861.948089782
+            ],
+            [
+              638619.7625978913,
+              6845861.5908281095
+            ],
+            [
+              638619.1955948187,
+              6845860.486664232
+            ],
+            [
+              638618.9275926058,
+              6845860.2001791075
+            ],
+            [
+              638611.5641124119,
+              6845855.9486459
+            ],
+            [
+              638609.7794483624,
+              6845855.147368164
+            ],
+            [
+              638607.9570422028,
+              6845854.621674079
+            ],
+            [
+              638606.2760449909,
+              6845854.363059123
+            ],
+            [
+              638560.0652919302,
+              6845855.677108973
+            ],
+            [
+              638562.0299948476,
+              6845925.9365937365
+            ],
+            [
+              638603.7673572791,
+              6845924.783155881
+            ],
+            [
+              638608.1251434626,
+              6845922.961991506
+            ],
+            [
+              638618.5222539209,
+              6845910.86043671
+            ]
+          ],
+          "holes": []
+        },
+        "footprint_area_m2": 4241.440786859832,
+        "buildings": [
+          {
+            "building": "Résidence Sociale Étudiante (RSE), Résidence Jeunes Actifs",
+            "footprint": {
+              "crs": "EPSG:2154",
+              "exterior": [
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ],
+                [
+                  638620.4500788939,
+                  6845895.069231173
+                ],
+                [
+                  638620.4772010767,
+                  6845894.807615788
+                ],
+                [
+                  638620.4757608618,
+                  6845894.544602196
+                ],
+                [
+                  638620.5377011696,
+                  6845894.224043468
+                ],
+                [
+                  638620.5713683957,
+                  6845893.899295847
+                ],
+                [
+                  638620.6490080637,
+                  6845893.647998601
+                ],
+                [
+                  638620.6989069281,
+                  6845893.389757772
+                ],
+                [
+                  638620.8221949751,
+                  6845893.0874424465
+                ],
+                [
+                  638620.9185704134,
+                  6845892.775502908
+                ],
+                [
+                  638621.0437439174,
+                  6845892.544181016
+                ],
+                [
+                  638621.1430642757,
+                  6845892.300636997
+                ],
+                [
+                  638635.7745166542,
+                  6845864.5628347695
+                ],
+                [
+                  638625.2625908718,
+                  6845864.847796612
+                ],
+                [
+                  638624.8386099209,
+                  6845864.817612184
+                ],
+                [
+                  638624.4136135529,
+                  6845864.810610173
+                ],
+                [
+                  638624.2531290295,
+                  6845864.775930108
+                ],
+                [
+                  638624.0893546612,
+                  6845864.7642705375
+                ],
+                [
+                  638623.6794090753,
+                  6845864.651951514
+                ],
+                [
+                  638623.2639449178,
+                  6845864.562171367
+                ],
+                [
+                  638623.1133098066,
+                  6845864.496848693
+                ],
+                [
+                  638622.9549569841,
+                  6845864.453462363
+                ],
+                [
+                  638622.5748007419,
+                  6845864.263325102
+                ],
+                [
+                  638622.1848348499,
+                  6845864.094217019
+                ],
+                [
+                  638622.0498379702,
+                  6845864.000762048
+                ],
+                [
+                  638621.9029921073,
+                  6845863.927316273
+                ],
+                [
+                  638621.5672344033,
+                  6845863.666667644
+                ],
+                [
+                  638621.2177529437,
+                  6845863.424730352
+                ],
+                [
+                  638621.1035821509,
+                  6845863.306734507
+                ],
+                [
+                  638620.9738864509,
+                  6845863.206051765
+                ],
+                [
+                  638620.6954302602,
+                  6845862.884908346
+                ],
+                [
+                  638620.3998636148,
+                  6845862.5794393625
+                ],
+                [
+                  638620.3109064304,
+                  6845862.44143716
+                ],
+                [
+                  638620.2033450241,
+                  6845862.317386631
+                ],
+                [
+                  638619.9928912628,
+                  6845861.948089782
+                ],
+                [
+                  638619.7625978913,
+                  6845861.5908281095
+                ],
+                [
+                  638619.1955948187,
+                  6845860.486664232
+                ],
+                [
+                  638618.9275926058,
+                  6845860.2001791075
+                ],
+                [
+                  638611.5641124119,
+                  6845855.9486459
+                ],
+                [
+                  638609.7794483624,
+                  6845855.147368164
+                ],
+                [
+                  638607.9570422028,
+                  6845854.621674079
+                ],
+                [
+                  638606.2760449909,
+                  6845854.363059123
+                ],
+                [
+                  638560.0652919302,
+                  6845855.677108973
+                ],
+                [
+                  638562.0299948476,
+                  6845925.9365937365
+                ],
+                [
+                  638603.7673572791,
+                  6845924.783155881
+                ],
+                [
+                  638608.1251434626,
+                  6845922.961991506
+                ],
+                [
+                  638618.5222539209,
+                  6845910.86043671
+                ],
+                [
+                  638620.4041562934,
+                  6845904.024138295
+                ]
+              ],
+              "holes": []
+            },
+            "footprint_area_m2": 4241.440786859833,
+            "max_height_m": 20.0,
+            "levels": [
+              {
+                "from_m": 0.0,
+                "to_m": 20.0,
+                "area_m2": 4241.440786859833
+              }
+            ],
+            "volume_m3": 84828.81573719665
+          }
+        ],
+        "fits": true,
+        "total_volume_m3": 84828.81573719665,
+        "assumptions": [
+          "Every facade facing a limit has windows: each limit at its distance with windows (else without, else 0 where building on it is allowed)."
+        ],
+        "warnings": []
+      }
+    ],
+    "proposal": {
+      "name": "proposal",
+      "footprint": {
+        "crs": "EPSG:2154",
+        "exterior": [
+          [
+            638618.5222539209,
+            6845910.86043671
+          ],
+          [
+            638620.4041562934,
+            6845904.024138295
+          ],
+          [
+            638620.4500788939,
+            6845895.069231173
+          ],
+          [
+            638620.4772010767,
+            6845894.807615788
+          ],
+          [
+            638620.4757608618,
+            6845894.544602196
+          ],
+          [
+            638620.5377011696,
+            6845894.224043468
+          ],
+          [
+            638620.5713683957,
+            6845893.899295847
+          ],
+          [
+            638620.6490080637,
+            6845893.647998601
+          ],
+          [
+            638620.6989069281,
+            6845893.389757772
+          ],
+          [
+            638620.8221949751,
+            6845893.0874424465
+          ],
+          [
+            638620.9185704134,
+            6845892.775502908
+          ],
+          [
+            638621.0437439174,
+            6845892.544181016
+          ],
+          [
+            638621.1430642757,
+            6845892.300636997
+          ],
+          [
+            638635.7745166542,
+            6845864.5628347695
+          ],
+          [
+            638625.2625908718,
+            6845864.847796612
+          ],
+          [
+            638624.8386099209,
+            6845864.817612184
+          ],
+          [
+            638624.4136135529,
+            6845864.810610173
+          ],
+          [
+            638624.2531290295,
+            6845864.775930108
+          ],
+          [
+            638624.0893546612,
+            6845864.7642705375
+          ],
+          [
+            638623.6794090753,
+            6845864.651951514
+          ],
+          [
+            638623.2639449178,
+            6845864.562171367
+          ],
+          [
+            638623.1133098066,
+            6845864.496848693
+          ],
+          [
+            638622.9549569841,
+            6845864.453462363
+          ],
+          [
+            638622.5748007419,
+            6845864.263325102
+          ],
+          [
+            638622.1848348499,
+            6845864.094217019
+          ],
+          [
+            638622.0498379702,
+            6845864.000762048
+          ],
+          [
+            638621.9029921073,
+            6845863.927316273
+          ],
+          [
+            638621.5672344033,
+            6845863.666667644
+          ],
+          [
+            638621.2177529437,
+            6845863.424730352
+          ],
+          [
+            638621.1035821509,
+            6845863.306734507
+          ],
+          [
+            638620.9738864509,
+            6845863.206051765
+          ],
+          [
+            638620.6954302602,
+            6845862.884908346
+          ],
+          [
+            638620.3998636148,
+            6845862.5794393625
+          ],
+          [
+            638620.3109064304,
+            6845862.44143716
+          ],
+          [
+            638620.2033450241,
+            6845862.317386631
+          ],
+          [
+            638619.9928912628,
+            6845861.948089782
+          ],
+          [
+            638619.7625978913,
+            6845861.5908281095
+          ],
+          [
+            638619.1955948187,
+            6845860.486664232
+          ],
+          [
+            638618.9275926058,
+            6845860.2001791075
+          ],
+          [
+            638611.5641124119,
+            6845855.9486459
+          ],
+          [
+            638609.7794483624,
+            6845855.147368164
+          ],
+          [
+            638607.9570422028,
+            6845854.621674079
+          ],
+          [
+            638606.2760449909,
+            6845854.363059123
+          ],
+          [
+            638560.0652919302,
+            6845855.677108973
+          ],
+          [
+            638562.0299948476,
+            6845925.9365937365
+          ],
+          [
+            638603.7673572791,
+            6845924.783155881
+          ],
+          [
+            638608.1251434626,
+            6845922.961991506
+          ],
+          [
+            638618.5222539209,
+            6845910.86043671
+          ]
+        ],
+        "holes": []
+      },
+      "footprint_area_m2": 4241.440786859832,
+      "buildings": [
+        {
+          "building": "Résidence Sociale Étudiante (RSE)",
+          "footprint": {
+            "crs": "EPSG:2154",
+            "exterior": [
+              [
+                638592.1790204155,
+                6845925.103406746
+              ],
+              [
+                638590.2136432542,
+                6845854.819809884
+              ],
+              [
+                638560.0652919302,
+                6845855.677108973
+              ],
+              [
+                638562.0299948476,
+                6845925.9365937365
+              ],
+              [
+                638592.1790204155,
+                6845925.103406746
+              ]
+            ],
+            "holes": []
+          },
+          "footprint_area_m2": 2120.255726996662,
+          "max_height_m": 20.0,
+          "levels": [
+            {
+              "from_m": 0.0,
+              "to_m": 20.0,
+              "area_m2": 2120.255726996662
+            }
+          ],
+          "volume_m3": 42405.11453993324
+        },
+        {
+          "building": "Résidence Jeunes Actifs",
+          "footprint": {
+            "crs": "EPSG:2154",
+            "exterior": [
+              [
+                638620.4500788939,
+                6845895.069231173
+              ],
+              [
+                638620.4772010767,
+                6845894.807615788
+              ],
+              [
+                638620.4757608618,
+                6845894.544602196
+              ],
+              [
+                638620.5377011696,
+                6845894.224043468
+              ],
+              [
+                638620.5713683957,
+                6845893.899295847
+              ],
+              [
+                638620.6490080637,
+                6845893.647998601
+              ],
+              [
+                638620.6989069281,
+                6845893.389757772
+              ],
+              [
+                638620.8221949751,
+                6845893.0874424465
+              ],
+              [
+                638620.9185704134,
+                6845892.775502908
+              ],
+              [
+                638621.0437439174,
+                6845892.544181016
+              ],
+              [
+                638621.1430642757,
+                6845892.300636997
+              ],
+              [
+                638635.7745166542,
+                6845864.5628347695
+              ],
+              [
+                638625.2625908718,
+                6845864.847796612
+              ],
+              [
+                638624.8386099209,
+                6845864.817612184
+              ],
+              [
+                638624.4136135529,
+                6845864.810610173
+              ],
+              [
+                638624.2531290295,
+                6845864.775930108
+              ],
+              [
+                638624.0893546612,
+                6845864.7642705375
+              ],
+              [
+                638623.6794090753,
+                6845864.651951514
+              ],
+              [
+                638623.2639449178,
+                6845864.562171367
+              ],
+              [
+                638623.1133098066,
+                6845864.496848693
+              ],
+              [
+                638622.9549569841,
+                6845864.453462363
+              ],
+              [
+                638622.5748007419,
+                6845864.263325102
+              ],
+              [
+                638622.1848348499,
+                6845864.094217019
+              ],
+              [
+                638622.0498379702,
+                6845864.000762048
+              ],
+              [
+                638621.9029921073,
+                6845863.927316273
+              ],
+              [
+                638621.5672344033,
+                6845863.666667644
+              ],
+              [
+                638621.2177529437,
+                6845863.424730352
+              ],
+              [
+                638621.1035821509,
+                6845863.306734507
+              ],
+              [
+                638620.9738864509,
+                6845863.206051765
+              ],
+              [
+                638620.6954302602,
+                6845862.884908346
+              ],
+              [
+                638620.3998636148,
+                6845862.5794393625
+              ],
+              [
+                638620.3109064304,
+                6845862.44143716
+              ],
+              [
+                638620.2033450241,
+                6845862.317386631
+              ],
+              [
+                638619.9928912628,
+                6845861.948089782
+              ],
+              [
+                638619.7625978913,
+                6845861.5908281095
+              ],
+              [
+                638619.1955948187,
+                6845860.486664232
+              ],
+              [
+                638618.9275926058,
+                6845860.2001791075
+              ],
+              [
+                638611.5641124119,
+                6845855.9486459
+              ],
+              [
+                638609.7794483624,
+                6845855.147368164
+              ],
+              [
+                638607.9570422028,
+                6845854.621674079
+              ],
+              [
+                638606.2760449909,
+                6845854.363059123
+              ],
+              [
+                638590.2136432542,
+                6845854.819809884
+              ],
+              [
+                638592.1790204155,
+                6845925.103406746
+              ],
+              [
+                638603.7673572791,
+                6845924.783155881
+              ],
+              [
+                638608.1251434626,
+                6845922.961991506
+              ],
+              [
+                638618.5222539209,
+                6845910.86043671
+              ],
+              [
+                638620.4041562934,
+                6845904.024138295
+              ],
+              [
+                638620.4500788939,
+                6845895.069231173
+              ]
+            ],
+            "holes": []
+          },
+          "footprint_area_m2": 2121.1850598537753,
+          "max_height_m": 20.0,
+          "levels": [
+            {
+              "from_m": 0.0,
+              "to_m": 20.0,
+              "area_m2": 2121.1850598537753
+            }
+          ],
+          "volume_m3": 42423.701197075505
+        }
+      ],
+      "fits": true,
+      "total_volume_m3": 84828.81573700874,
+      "assumptions": [
+        "Every facade facing a limit has windows: each limit at its distance with windows (else without, else 0 where building on it is allowed).",
+        "No spacing rule between buildings: the parts only touch."
+      ],
+      "warnings": []
+    },
+    "open_points": []
   },
   "citation_checks": [
     {

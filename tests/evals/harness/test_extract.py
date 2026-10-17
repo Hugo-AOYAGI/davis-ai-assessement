@@ -25,10 +25,10 @@ def test_parse_key_rejects_bad_keys(key):
 
 
 def test_limit_resolves_to_its_value_and_own_citations(study):
-    [height] = resolve(study, "study.envelope.max_height_m")
+    [height] = resolve(study, 'envelope.rules.buildings[building~"Sociale"].max_height_m')
     assert height.value == 20.0
-    assert height.path == "study.envelope.max_height_m.value"
-    assert height.citations == study.study.envelope.max_height_m.citations
+    assert height.path == "envelope.rules.buildings.0.max_height_m.value"
+    assert height.citations == study.envelope.rules.buildings[0].max_height_m.citations
 
 
 def test_field_inherits_citations_of_nearest_enclosing_object(study):
@@ -62,13 +62,13 @@ def test_list_field_resolves_to_one_element(study):
 
 
 def test_dict_output_resolves_like_the_model(study, study_json):
-    key = "study.envelope.min_green_ratio"
+    key = "envelope.rules.min_green_ratio"
     assert resolve(study_json, key) == resolve(study, key)
 
 
 def test_null_on_the_way_resolves_to_nothing(variant):
-    no_footprint = variant(lambda data: data["envelope"].update(footprint=None))
-    assert resolve(no_footprint, "envelope.footprint.crs") == []
+    no_footprint = variant(lambda data: data["envelope"]["proposal"].update(footprint=None))
+    assert resolve(no_footprint, "envelope.proposal.footprint.crs") == []
 
 
 def test_unknown_field_and_selector_on_scalar_raise(study):

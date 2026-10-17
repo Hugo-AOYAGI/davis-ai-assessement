@@ -71,7 +71,9 @@ def scoring(matcher):
         judge=fake_judge(),
         sections=(),
         mode="full_sections",
-        envelope=EnvelopeSettings(tolerance=0.02, quad_segs=8, min_area_m2=1.0),
+        envelope=EnvelopeSettings(
+            tolerance=0.02, quad_segs=8, min_area_m2=1.0, level_step_m=1, cut_tolerance_m=0.01
+        ),
     )
 
 
@@ -106,8 +108,8 @@ def test_eval_config_composes_the_agent_config_and_the_eval_group():
     )
     assert cfg.eval.dataset == "surveyor"
     assert cfg.models.nodes.orchestrator.max_tokens == 8000
-    assert cfg.eval.tolerances.quad_segs == cfg.policies.envelope.quad_segs
-    assert cfg.eval.tolerances.min_area_m2 == cfg.policies.envelope.min_area_m2
+    assert cfg.eval.tolerances.quad_segs == cfg.policies.envelope.settings.quad_segs
+    assert cfg.eval.tolerances.min_area_m2 == cfg.policies.envelope.settings.min_area_m2
     assert cfg.eval.judge.model in cfg.models.nodes
     assert set(cfg.eval.eval_tasks.artifacts) == {"surveyor", "zoning", "doc"}
     assert cfg.policies.ask_user.mode == "disabled"

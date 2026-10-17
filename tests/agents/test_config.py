@@ -55,7 +55,7 @@ def test_overrides_apply():
 def test_default_models():
     nodes = load_config().models.nodes
     for node in NODES:
-        assert nodes[node].model == "claude-haiku-5-5"
+        assert nodes[node].model == ("claude-opus-5-5" if node == "judge" else "claude-haiku-5-5")
         assert "effort" not in nodes[node]
 
 

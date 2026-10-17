@@ -47,7 +47,7 @@ def test_example_contents(items):
     assert isinstance(d02.input, DocInput)
     assert d02.input.context.zone == "UGa"
     assert e01.from_items == ("s01", "z05", "d01", "d11")
-    footprint = next(f for f in e01.facts if f.key == "study.envelope.max_footprint_ratio")
+    footprint = next(f for f in e01.facts if f.key == "envelope.rules.max_footprint_ratio")
     assert footprint.expect is None
     assert "expect" in footprint.model_fields_set
     assert footprint.evidence[0].quote is None

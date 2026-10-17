@@ -21,12 +21,17 @@ def fact(**fields) -> KeyFact:
 
 
 def height_fact(**fields) -> KeyFact:
-    return fact(key="study.envelope.max_height_m", expect=20, evidence=HEIGHT_EVIDENCE, **fields)
+    return fact(
+        key='envelope.rules.buildings[building~"Sociale"].max_height_m',
+        expect=20,
+        evidence=HEIGHT_EVIDENCE,
+        **fields,
+    )
 
 
 def set_height(value=None, quote=None, page=None):
     def mutate(data):
-        limit = data["study"]["envelope"]["max_height_m"]
+        limit = data["envelope"]["rules"]["buildings"][0]["max_height_m"]
         if value is not None:
             limit["value"] = value
         for citation in limit["citations"]:
@@ -37,7 +42,9 @@ def set_height(value=None, quote=None, page=None):
 
 
 def test_e01_facts_on_the_real_study_are_grounded(items, study, matcher):
-    facts = [f for f in items["e01_reference"].facts if f.key != "envelope.max_volume_m3"]
+    facts = [
+        f for f in items["e01_reference"].facts if f.key != "envelope.proposal.total_volume_m3"
+    ]
     scores = score_facts(facts, study, matcher)
     assert all(score.correct and score.grounded for score in scores), scores
     assert [s.cited for s in scores] == [None, None, None, True, True, None, None]
@@ -58,7 +65,11 @@ def test_fabricated_quote_is_correct_but_not_grounded(variant, matcher):
 
 def test_right_value_cited_on_a_page_that_is_not_evidence(study, matcher, make_matcher):
     elsewhere = [{"doc": "plu_reglement", "page": 327}]
-    off_page = fact(key="study.envelope.max_height_m", expect=20, evidence=elsewhere)
+    off_page = fact(
+        key='envelope.rules.buildings[building~"Sociale"].max_height_m',
+        expect=20,
+        evidence=elsewhere,
+    )
     assert not score_fact(off_page, study, matcher).grounded
     assert score_fact(off_page, study, make_matcher(1)).grounded
 
@@ -75,16 +86,16 @@ def test_fact_without_evidence_is_grounded_when_correct(study, matcher):
 
 def test_null_means_not_regulated(study, matcher):
     assert score_fact(
-        fact(key="study.envelope.max_footprint_ratio", expect=None), study, matcher
+        fact(key="envelope.rules.max_footprint_ratio", expect=None), study, matcher
     ).correct
     assert not score_fact(
-        fact(key="study.envelope.min_green_ratio", expect=None), study, matcher
+        fact(key="envelope.rules.min_green_ratio", expect=None), study, matcher
     ).correct
 
 
 def test_percent_strings_and_tolerance(study, matcher):
     assert score_fact(
-        fact(key="study.envelope.min_green_ratio", expect="20 %"), study, matcher
+        fact(key="envelope.rules.min_green_ratio", expect="20 %"), study, matcher
     ).correct
     area = fact(key="site.area_m2", expect=6000, tolerance=0.01)
     assert score_fact(area, study, matcher).correct

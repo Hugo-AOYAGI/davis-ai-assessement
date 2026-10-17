@@ -11,8 +11,10 @@ rescore: null                 # a previous run dir: re-score its records/ withou
 
 tolerances:
   envelope: 0.02                               # reported vs recomputed envelope figures (relative)
-  quad_segs: ${policies.envelope.quad_segs}    # as used by the submit_study gate
-  min_area_m2: ${policies.envelope.min_area_m2}
+  quad_segs: ${policies.envelope.settings.quad_segs}    # as used by the submit_study gate
+  min_area_m2: ${policies.envelope.settings.min_area_m2}
+  level_step_m: ${policies.envelope.settings.level_step_m}
+  cut_tolerance_m: ${policies.envelope.settings.cut_tolerance_m}
 
 confidence: 0.95  # level of the Wilson and bootstrap intervals
 bootstrap:        # grounded and answer accuracy, resampled over items

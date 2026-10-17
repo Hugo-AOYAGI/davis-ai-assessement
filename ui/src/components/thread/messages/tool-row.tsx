@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { ToolMessage } from "@langchain/langgraph-sdk";
 import {
   ChevronRight,
@@ -232,9 +232,13 @@ function prettyJson(text: string): { text: string; json: boolean } {
 }
 
 function ResultView({ result }: { result: ToolMessage }) {
+  // Reading the stream context re-renders this on every stream update: keep the parsing of
+  // a possibly large result to when the result itself changes.
   const { apiUrl } = useStreamContext();
-  const { text, images } = resultParts(result, apiUrl);
-  const pretty = prettyJson(text);
+  const { images, pretty } = useMemo(() => {
+    const parts = resultParts(result, apiUrl);
+    return { images: parts.images, pretty: prettyJson(parts.text) };
+  }, [result, apiUrl]);
   const isError = result.status === "error";
   return (
     <div className="flex flex-col gap-2">

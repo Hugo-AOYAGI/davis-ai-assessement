@@ -71,7 +71,7 @@ def test_agent_revises_rejected_submission(notes_args, bad_notes_args):
     replies = {m.tool_call_id: m for m in state["messages"] if isinstance(m, ToolMessage)}
     assert replies["bad"].status == "error"
     assert replies["bad"].artifact["draft"] == bad_notes_args
-    assert replies["fix"].content == "notes.oap accepted."
+    assert replies["fix"].content == f"notes.oap accepted.\n\n{DONE}"
 
 
 def test_revised_subagent_artifact_reaches_parent(notes_args, bad_notes_args):

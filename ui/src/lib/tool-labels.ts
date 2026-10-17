@@ -175,6 +175,10 @@ const TOOLS: Record<string, ToolLabel> = {
   },
   submit_envelope: { label: "Submit envelope", icon: Send },
   submit_study: { label: "Submit study", icon: ClipboardCheck },
+  revise_parcel: { label: "Revise site", icon: Send },
+  revise_zone: { label: "Revise zone", icon: Send },
+  revise_notes: { label: "Revise notes", icon: Send },
+  revise_study: { label: "Revise study", icon: ClipboardCheck },
   // Scratch filesystem
   ls: { label: "List files", icon: Folder, summary: (a) => str(a.path) },
   read_file: {

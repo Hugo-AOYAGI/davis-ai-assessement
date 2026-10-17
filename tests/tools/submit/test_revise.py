@@ -11,7 +11,7 @@ from pydantic import JsonValue
 
 from agent.contracts.findings.notes import DocNotes
 from agent.tools.submit.artifacts import ArtifactData
-from agent.tools.submit.factory import SubmissionRejected, submit_tools
+from agent.tools.submit.factory import DONE, SubmissionRejected, submit_tools
 from agent.tools.submit.replies import revise_name
 
 TEXT_PATH = "notes.0.text"
@@ -88,7 +88,7 @@ def test_rejection_carries_the_draft(session, bad_notes_args):
 
 def test_acceptance_carries_no_draft(session, notes_args):
     reply = session.call("submit_notes", notes_args)
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
     assert reply.artifact == {"submission": "submit_notes"}
 
 
@@ -111,7 +111,7 @@ def test_revision_fixing_the_errors_is_stored(session, notes_args, bad_notes_arg
         {"path": TEXT_PATH, "value": "Inside the perimeter."},
         {"path": PAGE_PATH, "value": 33},
     )
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
     assert reply.artifact == {"submission": "submit_notes"}
     stored = DocNotes.model_validate(session.artifacts["notes.oap"])
     assert stored.notes[0].text == "Inside the perimeter."
@@ -127,7 +127,7 @@ def test_rejected_revision_becomes_the_new_draft(session, bad_notes_args):
     assert "notes.0.text" not in reply.content
     assert reply.artifact["draft"]["notes"][0]["text"] == "Inside the perimeter."
     reply = session.revise({"path": PAGE_PATH, "value": 33})
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
     assert session.artifacts["notes.oap"]["notes"][0]["text"] == "Inside the perimeter."
 
 
@@ -140,7 +140,7 @@ def test_invalid_edits_keep_the_draft(session, bad_notes_args):
     assert "- label: give a value, or remove: true" in reply.content
     assert reply.artifact == {"submission": "submit_notes", "draft": bad_notes_args}
     reply = session.revise({"path": TEXT_PATH, "value": "x"}, {"path": PAGE_PATH, "value": 33})
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
 
 
 def test_malformed_revision_keeps_the_draft(session, bad_notes_args):
@@ -154,7 +154,7 @@ def test_empty_revision_checks_the_draft_again(notes_args):
     session = Session(make_tools(finalize=needs_site))
     session.call("submit_notes", notes_args)
     session.artifacts["site"] = {"id": "ab0123"}
-    assert session.revise().content == "notes.oap accepted."
+    assert session.revise().content == f"notes.oap accepted.\n\n{DONE}"
     assert session.artifacts["notes.oap"]["label"] == "oap_ab0123"
 
 
@@ -168,14 +168,14 @@ def test_finalize_runs_on_revised_arguments(notes_args):
     session = Session(make_tools(finalize=needs_site), artifacts={"site": {"id": "ab0123"}})
     session.call("submit_notes", {**notes_args, "notes": []})
     reply = session.revise({"path": "notes", "value": notes_args["notes"]})
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
     assert session.artifacts["notes.oap"]["label"] == "oap_ab0123"
 
 
 def test_key_placeholder_follows_the_revised_field(session, notes_args):
     session.call("submit_notes", {**notes_args, "label": "Bad Label"})
     reply = session.revise({"path": "label", "value": "rules"})
-    assert reply.content == "notes.rules accepted."
+    assert reply.content == f"notes.rules accepted.\n\n{DONE}"
     assert set(session.artifacts) == {"notes.rules"}
 
 
@@ -186,7 +186,7 @@ def test_drafts_of_other_submit_tools_are_ignored(bad_notes_args):
     session.call("submit_other", bad_notes_args)
     assert session.call("revise_other", {"edits": []}).artifact["submission"] == "submit_other"
     reply = session.revise({"path": TEXT_PATH, "value": "x"}, {"path": PAGE_PATH, "value": 33})
-    assert reply.content == "notes.oap accepted."
+    assert reply.content == f"notes.oap accepted.\n\n{DONE}"
 
 
 def test_hydra_instantiates_the_pair():

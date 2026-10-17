@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import type { ToolMessage } from "@langchain/langgraph-sdk";
+import { memo, useEffect, useState } from "react";
+import type { Message, ToolMessage } from "@langchain/langgraph-sdk";
 import { LoaderCircle } from "lucide-react";
 import { useStreamContext } from "@/providers/Stream";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,8 @@ const STATUS_LABEL: Record<ToolStatus, string> = {
 const SHOW_SECONDS_FROM = 5;
 
 const text = (value: unknown) => (typeof value === "string" ? value : "");
+
+const NO_MESSAGES: Message[] = [];
 
 /**
  * A spinner row with the seconds elapsed since it mounted, ticking every second. Re-keyed on
@@ -62,6 +64,35 @@ function WaitingRow({
   );
 }
 
+const lengthOf = (value: unknown) =>
+  typeof value === "string" ? value.length : 0;
+
+/** A size that grows as a message streams: its text, tool inputs and tool call args. */
+function streamedSize(message: Message): number {
+  const content = message.content as unknown;
+  let size = lengthOf(content);
+  if (Array.isArray(content)) {
+    for (const block of content) {
+      size += 1 + lengthOf(block?.text) + lengthOf(block?.input);
+    }
+  }
+  if (message.type === "ai") {
+    size += JSON.stringify(message.tool_calls ?? []).length;
+  }
+  return size;
+}
+
+/**
+ * Changes when a sub-agent's messages do: one is added, or the last one grows as it streams
+ * (earlier ones no longer change). The client rebuilds the list on every read, so the list
+ * itself is new each time even when nothing changed.
+ */
+function messagesSignature(messages: Message[]): string {
+  const last = messages.at(-1);
+  if (!last) return "0";
+  return `${messages.length}:${last.id ?? ""}:${streamedSize(last)}`;
+}
+
 /**
  * A delegation to a sub-agent (`task` call): who, the task, its own steps while it works,
  * and its answer.
@@ -88,7 +119,6 @@ export function SubagentCard({
     text(subagent?.toolCall.args.subagent_type);
   const description =
     text(call.args.description) || text(subagent?.toolCall.args.description);
-  const { name, icon: Icon } = describeSubagent(type || undefined);
 
   const status: ToolStatus = result
     ? result.status === "error"
@@ -100,18 +130,53 @@ export function SubagentCard({
         ? "running"
         : "stopped";
 
-  const innerMessages = subagent?.messages ?? [];
-  const innerCalls = allToolCalls(innerMessages);
-  const innerResults = indexToolResults(innerMessages);
+  const messages = subagent?.messages ?? NO_MESSAGES;
+  const answer = result
+    ? messageText(result)
+    : (subagent?.result ?? text(subagent?.error));
+
+  return (
+    <SubagentCardView
+      type={type}
+      description={description}
+      status={status}
+      messages={messages}
+      signature={messagesSignature(messages)}
+      answer={answer}
+    />
+  );
+}
+
+type SubagentCardViewProps = {
+  type: string;
+  description: string;
+  status: ToolStatus;
+  /** The sub-agent's messages: compared through `signature`, not by identity. */
+  messages: Message[];
+  signature: string;
+  answer: string;
+};
+
+/**
+ * Re-renders only when what the card shows changes, not on every update of the thread:
+ * `messages` is a new list on each read, so it is compared through its signature.
+ */
+const SubagentCardView = memo(function SubagentCardView({
+  type,
+  description,
+  status,
+  messages,
+  answer,
+}: SubagentCardViewProps) {
+  const { name, icon: Icon } = describeSubagent(type || undefined);
+  const innerCalls = allToolCalls(messages);
+  const innerResults = indexToolResults(messages);
   /** Changes with the sub-agent's visible activity; keys the waiting row to restart its clock. */
   const activityKey = `${innerCalls.length}:${innerResults.size}`;
   const waiting =
     status === "running" &&
     innerCalls.every((c) => c.id && innerResults.has(c.id));
   const waitingLabel = innerCalls.length > 0 ? "Thinking…" : "Starting…";
-  const answer = result
-    ? messageText(result)
-    : (subagent?.result ?? text(subagent?.error));
 
   return (
     <div className="bg-card min-w-0 rounded-lg border shadow-xs">
@@ -182,5 +247,18 @@ export function SubagentCard({
         </div>
       )}
     </div>
+  );
+}, sameView);
+
+function sameView(
+  prev: SubagentCardViewProps,
+  next: SubagentCardViewProps,
+): boolean {
+  return (
+    prev.signature === next.signature &&
+    prev.type === next.type &&
+    prev.description === next.description &&
+    prev.status === next.status &&
+    prev.answer === next.answer
   );
 }

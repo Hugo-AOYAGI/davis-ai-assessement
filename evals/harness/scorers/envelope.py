@@ -6,11 +6,13 @@ calculation.
 
 from collections.abc import Sequence
 from enum import StrEnum
+from typing import cast
 
 from agent.contracts.base import Contract
-from agent.contracts.geometry import Envelope
+from agent.contracts.envelope import EnvelopeStudy
 from agent.contracts.study import VerifiedStudy
-from agent.runtime.geometry.envelope import compute_envelope
+from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
+from evals.harness.extract import resolve
 from evals.harness.items import Fact, KeyFact, Value
 from evals.harness.matching.values import normalise, same
 
@@ -19,13 +21,14 @@ ENVELOPE_PREFIX = "envelope."
 
 FIGURES = (
     "site_area_m2",
-    "footprint_area_m2",
-    "max_footprint_area_m2",
     "min_green_area_m2",
-    "max_height_m",
-    "max_volume_m3",
+    "proposal.footprint_area_m2",
+    "proposal.total_volume_m3",
+    "proposal.buildings.footprint_area_m2",
+    "proposal.buildings.max_height_m",
+    "proposal.buildings.volume_m3",
 )
-"""The numeric fields of ``Envelope`` that are compared."""
+"""Numeric envelope fields compared, including each proposed building."""
 
 
 class Diagnosis(StrEnum):
@@ -57,7 +60,7 @@ class EnvelopeScore(Contract):
     """One check per ``envelope.<figure>`` fact of the item with an ``expect``."""
     against_recomputed: tuple[FigureCheck, ...]
     """Every figure of ``FIGURES``, reported vs recomputed."""
-    recomputed: Envelope
+    recomputed: EnvelopeStudy
     diagnosis: Diagnosis
 
 
@@ -80,13 +83,15 @@ def expected_figures(facts: Sequence[Fact]) -> tuple[KeyFact, ...]:
     )
 
 
-def score_envelope(
+def score_envelope(  # noqa: PLR0913 - one argument per configured bundle
     output: VerifiedStudy,
     expected: Sequence[KeyFact],
     *,
     tolerance: float,
     quad_segs: int,
     min_area_m2: float,
+    level_step_m: float,
+    cut_tolerance_m: float,
 ) -> EnvelopeScore:
     """Score the envelope of an accepted study.
 
@@ -96,25 +101,35 @@ def score_envelope(
             compared with its own ``tolerance`` (exact when unset).
         tolerance: Relative tolerance between the reported and the recomputed figures.
         quad_segs: ``policies.envelope.quad_segs``, as used by the gate.
-        min_area_m2: ``policies.envelope.min_area_m2``, as used by the gate.
+        min_area_m2: Sliver area threshold, as used by the gate.
+        level_step_m: Slice thickness, as used by the gate.
+        cut_tolerance_m: Layout cut precision, as used by the gate.
 
     Returns:
         Both comparisons, the recomputed envelope and the diagnosis.
     """
     reported = output.envelope
-    recomputed = compute_envelope(
+    recomputed = compute_envelope_study(
         output.site.polygon,
         output.boundaries,
-        output.study.envelope,
-        quad_segs=quad_segs,
-        min_area_m2=min_area_m2,
+        reported.rules,
+        reported.layout,
+        settings=EnvelopeSettings(
+            quad_segs=quad_segs,
+            min_area_m2=min_area_m2,
+            level_step_m=level_step_m,
+            cut_tolerance_m=cut_tolerance_m,
+        ),
+        open_points=reported.open_points,
     )
     against_expected = tuple(
         _compare(fact.key.removeprefix(ENVELOPE_PREFIX), reported, fact.expect, fact.tolerance)
         for fact in expected
     )
     against_recomputed = tuple(
-        _compare(figure, reported, getattr(recomputed, figure), tolerance) for figure in FIGURES
+        _compare(value.path, reported, cast(Value, value.value), tolerance)
+        for figure in FIGURES
+        for value in resolve(recomputed, figure)
     )
     return EnvelopeScore(
         against_expected=against_expected,
@@ -125,10 +140,20 @@ def score_envelope(
 
 
 def _compare(
-    figure: str, reported: Envelope, expected: Value, tolerance: float | None
+    figure: str, reported: EnvelopeStudy, expected: Value, tolerance: float | None
 ) -> FigureCheck:
     """Compare one reported figure with a reference value; ``None`` only matches ``None``."""
-    actual = getattr(reported, figure)
+    data = reported.model_dump(mode="json")
+    if any(part.isdigit() for part in figure.split(".")):
+        actual = data
+        for part in figure.split("."):
+            actual = actual[int(part)] if isinstance(actual, list) else actual[part]
+    else:
+        [found] = resolve(reported, figure)
+        actual = found.value
+    if actual is not None and not isinstance(actual, (float, int)):
+        msg = f"{figure!r} is not a numeric envelope figure"
+        raise TypeError(msg)
     reference = normalise(expected)
     ok = same(normalise(actual), reference, tolerance)
     number = reference if isinstance(reference, float) else None

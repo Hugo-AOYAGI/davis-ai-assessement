@@ -12,11 +12,11 @@ facts:
   - {key: site.choice.parcel_ids, expect: [91272000CR0247], critical: true}
   - {key: study.regime.zone, expect: UMG, critical: true}
   - {key: study.regime.oap_applicable, expect: true}
-  - key: study.envelope.max_height_m
+  - key: envelope.rules.buildings[building~"Sociale"].max_height_m
     expect: 20
     critical: true
     evidence: [{doc: plu_reglement, page: 326, quote: "20 mètres"}]
-  - key: study.envelope.max_footprint_ratio
+  - key: envelope.rules.max_footprint_ratio
     expect: null                         # "not regulated" is the expected answer
     critical: true
     evidence: [{doc: plu_reglement, page: 326}]
@@ -26,7 +26,7 @@ facts:
   - key: study.admissibility[building~"Jeunes Actifs"].verdict
     any_of: [permitted, conditional]     # left open by the documents
     critical: true
-  - key: envelope.max_volume_m3
+  - key: envelope.proposal.total_volume_m3
     expect: <computed by compose_e2e.py>
     tolerance: 0.02
     source: geometry
