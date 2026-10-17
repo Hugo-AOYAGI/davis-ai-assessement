@@ -65,11 +65,11 @@ reply). Per-run Hydra overrides go in the run config:
 
 ```bash
 uv run phoenix serve                                          # UI and collector on http://localhost:6006
-uv run python -m agent.entrypoints.run policies.tracing.enabled=true
 ```
 
-For the Agent Server, set `policies.tracing.enabled: true` in `conf/policies/default.yaml`
-(tracing is set up once per process). Spans go to project `policies.tracing.project`.
+Tracing is on by default, for CLI runs and the Agent Server alike: start Phoenix first. Spans go to
+project `policies.tracing.project`. Turn it off with `AGENT_TRACING=false` (the test suite does),
+or with `policies.tracing.enabled=false` on a CLI run. The Agent Server reads it once at startup.
 
 ## How it works
 

@@ -14,7 +14,7 @@ study:
 evidence:
   crops_dir: data/crops  # where submit_study saves the evidence crops, relative to the project root
 tracing:
-  enabled: false
+  enabled: ${oc.decode:${oc.env:AGENT_TRACING,true}}  # set AGENT_TRACING=false to turn it off (the test suite does)
   project: davis-assessment
   endpoint: http://localhost:6006/v1/traces  # Phoenix collector (`uv run phoenix serve`)
 logging:
