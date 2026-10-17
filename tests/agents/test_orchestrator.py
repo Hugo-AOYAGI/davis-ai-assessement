@@ -2,6 +2,7 @@ from collections.abc import Iterator
 from typing import cast, override
 
 import pytest
+from hydra.utils import instantiate
 from langchain_core.language_models.fake_chat_models import GenericFakeChatModel
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import BaseTool
@@ -10,8 +11,13 @@ from langgraph.prebuilt import ToolNode
 from omegaconf import DictConfig, OmegaConf, open_dict
 from pydantic import JsonValue
 
-from agent.agents.config import load_config, read_prompt
-from agent.agents.orchestrator import build, system_prompt
+from agent.agents.config import load_config, project_path
+from agent.agents.orchestrator import (
+    AskUserMode,
+    build,
+    orchestrator_tools,
+    parse_ask_user_mode,
+)
 from agent.agents.subagents import build_subagent, build_tools, subagent_specs
 from agent.contracts.findings.oap import OAPFindings
 
@@ -66,7 +72,7 @@ def dummy_key(monkeypatch: pytest.MonkeyPatch):
 
 @pytest.fixture
 def cfg() -> DictConfig:
-    cfg = load_config()
+    cfg = load_config(["subagents=[]"])
     with open_dict(cfg):
         cfg.subagents.tester = TESTER
     return cfg
@@ -84,11 +90,50 @@ def graph_tools(graph) -> dict[str, BaseTool]:
     return cast(ToolNode, graph.nodes["tools"].bound).tools_by_name
 
 
+SUBAGENTS = ("site_locator", "zoning_map_reader", "regulation_researcher", "oap_analyst")
+OWN_TOOLS = {"read_artifact", "compute_envelope", "submit_study", "load_playbook", "ask_user"}
+
+
 def test_default_config_builds():
     graph = build(load_config())
     assert isinstance(graph, CompiledStateGraph)
     assert "artifacts" in graph.channels
-    assert "task" in graph_tools(graph)
+    tools = graph_tools(graph)
+    assert {"task", *OWN_TOOLS} <= tools.keys()
+    description = tools["task"].description
+    assert all(f"- {name}:" in description for name in SUBAGENTS)
+    assert "- general-purpose:" not in description
+
+
+def test_ask_user_disabled():
+    graph = build(load_config(["policies.ask_user.mode=disabled"]))
+    tools = graph_tools(graph)
+    assert "ask_user" not in tools
+    assert {"task", *OWN_TOOLS - {"ask_user"}} <= tools.keys()
+
+
+def test_general_purpose_follows_config_on_rebuild():
+    enabled = build(load_config(["agent.general_purpose_subagent=true"]))
+    assert "- general-purpose:" in graph_tools(enabled)["task"].description
+    disabled = build(load_config())
+    assert "- general-purpose:" not in graph_tools(disabled)["task"].description
+
+
+def test_unknown_ask_user_mode():
+    with pytest.raises(ValueError, match=r"unknown policies\.ask_user\.mode 'sometimes'"):
+        build(load_config(["policies.ask_user.mode=sometimes"]))
+    assert parse_ask_user_mode("disabled") is AskUserMode.DISABLED
+
+
+def test_playbook_tool_reads_configured_files():
+    cfg = load_config(["agent.language=French"])
+    tools = {tool.name: tool for tool in orchestrator_tools(cfg)}
+    playbook = tools["load_playbook"]
+    assert "- `study`: Full buildability study" in playbook.description
+    text = playbook.invoke({"name": "study"})
+    assert text.startswith("# Playbook: buildability study")
+    assert "$language" not in text
+    assert "French" in text
 
 
 def test_subagent_appears_in_task_tool(cfg):
@@ -98,11 +143,22 @@ def test_subagent_appears_in_task_tool(cfg):
     assert DESCRIPTION in description
 
 
-def test_playbook_is_appended():
-    agent_cfg = load_config(["agent.playbook=conf/config.yaml"]).agent
-    prompt = system_prompt(agent_cfg)
-    assert prompt.startswith(read_prompt(agent_cfg.prompt))
-    assert prompt.endswith(read_prompt("conf/config.yaml"))
+def test_gate_corpus_is_loaded_lazily(monkeypatch):
+    calls = []
+
+    def fake_load_corpus(directory):
+        calls.append(directory)
+        return "corpus"
+
+    monkeypatch.setattr("agent.adapters.corpus.store.load_corpus", fake_load_corpus)
+    cfg = load_config()
+    build(cfg)
+    assert calls == []
+    [gate] = [node for node in cfg.agent.tools if node._target_.endswith(".submit_study_tool")]
+    provider = instantiate(gate.corpus)
+    assert calls == []
+    assert provider() == "corpus"
+    assert calls == [project_path(cfg.corpus.dir)]
 
 
 def test_build_tools_instantiates_submit_tool():

@@ -1,16 +1,18 @@
 ask_user:
-  mode: interactive  # interactive | disabled
+  mode: interactive  # interactive (LangGraph interrupt) | disabled (tool not offered, Case.facts in the request)
 citations:
   policy: reject     # reject | flag
   min_score: 0.9
-  neighbour_pages: 1 # a quote is also searched this many pages before and after the cited one
+  neighbour_pages: 0 # a quote is also searched this many pages before and after the cited one
   max_quote_chars: 160 # quotes longer than this are truncated in submit_study's error messages
+  check_raster: false  # false: citations of documents without a text layer (the raster zoning plan) are recorded as not text-verifiable instead of checked
 envelope:
   quad_segs: 8       # segments per quarter circle in the round setback buffers
   min_area_m2: 1.0   # footprint parts smaller than this are discarded as slivers
 tracing:
   enabled: false
   project: davis-assessment
+  endpoint: http://localhost:6006/v1/traces  # Phoenix collector (`uv run phoenix serve`)
 logging:
   level: INFO
 server:

@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from agent.contracts.evidence import Citation, Limit, SourceKind
+from agent.contracts.evidence import Citation, CitationCheck, Limit, SourceKind
 from agent.contracts.inputs.clarification import Question, QuestionKind
 
 
@@ -22,6 +22,17 @@ def test_limit_with_value_requires_citation():
 
 def test_limit_without_value_may_be_uncited():
     assert Limit(value=None, rule="not regulated").citations == ()
+
+
+def test_citation_check_is_text_verifiable_by_default(citation: Citation):
+    check = CitationCheck(citation=citation, verified=True, score=1.0)
+    assert check.text_verifiable
+
+
+def test_citation_check_round_trips_text_verifiable(citation: Citation):
+    check = CitationCheck(citation=citation, verified=False, score=0.0, text_verifiable=False)
+    assert CitationCheck.model_validate_json(check.model_dump_json()) == check
+    assert not CitationCheck.model_validate(check.model_dump(mode="json")).text_verifiable
 
 
 def test_contracts_are_frozen(citation: Citation):

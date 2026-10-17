@@ -1,7 +1,10 @@
+from pathlib import Path
+
 import pytest
 
 from agent.contracts.evidence import Citation, SourceKind
-from agent.runtime.citations.match import check_citation
+from agent.contracts.inputs.corpus import Corpus, Document, DocumentKind, Page
+from agent.runtime.citations.match import check_citation, raster_documents, unverifiable
 
 MIN_SCORE = 0.9
 NEIGHBOURS = 1
@@ -167,3 +170,42 @@ def test_geometric_citation_is_rejected(pages):
     citation = Citation(doc="cadastre", quote="91272000AB0123", source_kind=SourceKind.GEOMETRIC)
     with pytest.raises(ValueError, match="regulatory"):
         check_citation(citation, pages, min_score=MIN_SCORE, neighbour_pages=NEIGHBOURS)
+
+
+def raster_corpus(*pages):
+    documents = tuple(
+        Document(
+            id=doc,
+            kind=DocumentKind.ZONING_MAP,
+            title=doc,
+            path=Path(f"{doc}.pdf"),
+            page_count=2,
+        )
+        for doc in ("plan", "text", "mixed", "empty")
+    )
+    return Corpus(id="test", documents=documents, pages=pages, sections=())
+
+
+def test_raster_documents_are_those_without_any_text():
+    corpus = raster_corpus(
+        Page(doc="plan", number=1, text=""),
+        Page(doc="plan", number=2, text="  \n\t"),
+        Page(doc="text", number=1, text="Article 10"),
+        Page(doc="mixed", number=1, text=""),
+        Page(doc="mixed", number=2, text="Légende"),
+    )
+    assert raster_documents(corpus) == frozenset({"plan", "empty"})
+
+
+def test_unverifiable_check_is_not_verified_and_scores_zero():
+    citation = Citation(doc="plan", page=1, quote="UMG", source_kind=SourceKind.REGULATORY)
+    result = unverifiable(citation)
+    assert result.citation == citation
+    assert not result.verified
+    assert result.score == 0.0
+    assert not result.text_verifiable
+    assert result.matched_page is None
+
+
+def test_checked_citations_are_text_verifiable(pages):
+    assert check(pages, HEIGHT_RULE, 326).text_verifiable

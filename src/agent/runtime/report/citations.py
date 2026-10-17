@@ -4,6 +4,7 @@ from agent.contracts.evidence import Citation, CitationCheck
 from agent.runtime.report.markdown import NONE, one_line, table
 
 ELLIPSIS = "…"
+RASTER = "not text-verifiable (raster)"
 
 
 class CitationIndex:
@@ -61,6 +62,8 @@ def truncate(text: str, max_chars: int) -> str:
 
 def _status(check: CitationCheck) -> str:
     """Render whether a check passed, and where the quote was found when on another page."""
+    if not check.text_verifiable:
+        return RASTER
     status = "verified" if check.verified else "NOT VERIFIED"
     if check.matched_page is not None:
         return f"{status} (found on p.{check.matched_page})"
@@ -87,7 +90,7 @@ def citations_section(checks: Sequence[CitationCheck], max_quote_chars: int) -> 
             check.citation.article or NONE,
             truncate(check.citation.quote, max_quote_chars),
             _status(check),
-            f"{check.score:.2f}",
+            f"{check.score:.2f}" if check.text_verifiable else NONE,
         )
         for position, check in enumerate(checks, start=1)
     )

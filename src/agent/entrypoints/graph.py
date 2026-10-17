@@ -8,10 +8,16 @@ from agent.agents.config import PROJECT_ROOT, load_config
 from agent.agents.orchestrator import build
 from agent.agents.subagents import AgentGraph
 from agent.observability.logs import get_logger, setup_logging
+from agent.observability.tracing import setup_tracing
 
 load_dotenv(PROJECT_ROOT / ".env", override=False)
 _DEFAULTS = load_config()
 setup_logging(_DEFAULTS.policies.logging.level)
+setup_tracing(
+    enabled=_DEFAULTS.policies.tracing.enabled,
+    project=_DEFAULTS.policies.tracing.project,
+    endpoint=_DEFAULTS.policies.tracing.endpoint,
+)
 # The server loads this file by path, so ``__name__`` is not under the ``agent`` hierarchy.
 logger = get_logger("agent.entrypoints.graph")
 

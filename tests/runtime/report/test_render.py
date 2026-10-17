@@ -1,4 +1,4 @@
-from agent.contracts.evidence import Limit
+from agent.contracts.evidence import Citation, CitationCheck, Limit, SourceKind
 from agent.runtime.report.render import render_report
 
 HEADINGS = (
@@ -109,6 +109,31 @@ def test_citations_table(verified):
     assert "Recul minimal de 5 mètres \\| par rapport" in citations
     assert "| verified (found on p.326) | 0.91 |" in line_with(citations, "| 2 |")
     assert "| NOT VERIFIED | 0.43 |" in line_with(citations, "| 4 |")
+
+
+def test_raster_citation_is_numbered_but_not_text_verifiable(verified):
+    plan = Citation(
+        doc="plu_reglement_graphique",
+        page=1,
+        article="Légende",
+        quote="UMG",
+        source_kind=SourceKind.REGULATORY,
+    )
+    regime = verified.study.regime.model_copy(update={"citations": (plan,)})
+    study = verified.study.model_copy(update={"regime": regime})
+    check = CitationCheck(citation=plan, verified=False, score=0.0, text_verifiable=False)
+    report = render_report(
+        verified.model_copy(
+            update={"study": study, "citation_checks": (*verified.citation_checks, check)}
+        ),
+        max_quote_chars=200,
+    )
+    assert "Zone: **UMG** [6]" in report
+    row = line_with(report.split("## Citations", 1)[1], "| 6 |")
+    assert row.endswith(
+        "| plu_reglement_graphique | 1 | Légende | UMG | not text-verifiable (raster) | — |"
+    )
+    assert "NOT VERIFIED" not in row
 
 
 def test_long_quote_truncated(verified):

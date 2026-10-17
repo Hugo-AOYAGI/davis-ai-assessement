@@ -1,5 +1,41 @@
 # Orchestrator assembly.
 prompt: prompts/orchestrator/system.md  # relative to the project root
 model: orchestrator                     # key in models.nodes
-tools: []                               # list of `_target_` tool factories
-playbook: null                          # prompts/playbooks/ file, set by WP6
+general_purpose_subagent: false         # deepagents' built-in general-purpose sub-agent
+language: English                       # language of the study's free text ($language in playbooks)
+recursion_limit: 300                    # graph steps per run (CLI and evals)
+
+# Task recipes loaded on demand with the `load_playbook` tool. Each file may use $language.
+playbooks:
+  study:
+    description: >-
+      Full buildability study of an address for a construction program: site, zoning plan,
+      regulation and OAP, reconciliation, envelope, then submit_study.
+    path: prompts/playbooks/study.md
+
+# Initial message of a CLI or eval run, rendered from the Case ($address, $program, $facts).
+request: prompts/orchestrator/request.md
+no_facts: "- none given"
+
+tools:
+  - _target_: agent.tools.submit.reader.read_artifact_tool
+  - _target_: agent.tools.envelope.compute.compute_envelope_tool
+    site_artifact: site
+    quad_segs: ${policies.envelope.quad_segs}
+    min_area_m2: ${policies.envelope.min_area_m2}
+  - _target_: agent.tools.study.gate.submit_study_tool
+    corpus:                           # provider, called on the first submission
+      _target_: agent.adapters.corpus.store.load_corpus
+      _partial_: true
+      directory:
+        _target_: agent.agents.config.project_path
+        relative: ${corpus.dir}
+    artifact: study
+    site_artifact: site
+    policy: ${policies.citations.policy}
+    min_score: ${policies.citations.min_score}
+    neighbour_pages: ${policies.citations.neighbour_pages}
+    max_quote_chars: ${policies.citations.max_quote_chars}
+    check_raster: ${policies.citations.check_raster}
+    quad_segs: ${policies.envelope.quad_segs}
+    min_area_m2: ${policies.envelope.min_area_m2}

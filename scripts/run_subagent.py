@@ -26,7 +26,8 @@ from agent.contracts.evidence import Citation, CitationCheck, SourceKind
 from agent.llm.factory import load_pricing
 from agent.llm.pricing import TokenCounts, find_price
 from agent.observability.logs import get_logger, setup_logging
-from agent.runtime.citations.match import check_citation, index_pages
+from agent.tools.study.checks import check_regulatory, corpus_facts
+from agent.tools.study.messages import Verification
 
 logger = get_logger("agent.scripts.run_subagent")
 
@@ -113,7 +114,7 @@ def check_citations(cfg: DictConfig, artifacts: Mapping[str, JsonValue]) -> list
     """Check every regulatory citation of the artifacts against the ingested corpus.
 
     Args:
-        cfg: The composed config (``corpus.dir`` and ``policies.citations``).
+        cfg: The composed config (``corpus.dir``, ``policies.citations`` with ``check_raster``).
         artifacts: Artifacts stored by the run, by name.
 
     Returns:
@@ -127,13 +128,14 @@ def check_citations(cfg: DictConfig, artifacts: Mapping[str, JsonValue]) -> list
     ]
     if not cited:
         return []
-    pages = index_pages(load_corpus(project_path(cfg.corpus.dir)))
+    corpus = corpus_facts(load_corpus(project_path(cfg.corpus.dir)))
     policy = cfg.policies.citations
+    verification = Verification(policy.min_score, policy.neighbour_pages, policy.max_quote_chars)
     return [
         LocatedCheck(
             path=path,
-            **check_citation(
-                citation, pages, min_score=policy.min_score, neighbour_pages=policy.neighbour_pages
+            **check_regulatory(
+                citation, corpus, verification, check_raster=policy.check_raster
             ).model_dump(),
         )
         for path, citation in cited
@@ -184,9 +186,11 @@ def price(cfg: DictConfig, usage: Mapping[str, UsageMetadata]) -> dict[str, Mode
 def log_report(report: Report) -> None:
     """Log the stored artifacts, citation pass rate, failing citations, rejections and cost."""
     logger.info("artifacts stored: %s", sorted(report.artifacts) or "none")
-    checks = report.citation_checks
+    checks = [check for check in report.citation_checks if check.text_verifiable]
     failing = [check for check in checks if not check.verified]
+    raster = len(report.citation_checks) - len(checks)
     logger.info("citations verified: %d/%d", len(checks) - len(failing), len(checks))
+    logger.info("citations not text-verifiable (raster): %d", raster)
     for check in failing:
         cited = check.citation
         where = f"{cited.doc} p.{cited.page}"

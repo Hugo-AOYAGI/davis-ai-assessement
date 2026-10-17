@@ -34,3 +34,4 @@ oap_analyst:
         min_score: ${policies.citations.min_score}
         neighbour_pages: ${policies.citations.neighbour_pages}
         max_quote_chars: ${policies.citations.max_quote_chars}
+        check_raster: ${policies.citations.check_raster}
