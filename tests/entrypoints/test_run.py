@@ -2,6 +2,8 @@ import json
 
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.messages.ai import UsageMetadata
+from langchain_core.outputs import ChatGeneration, LLMResult
 
 from agent.agents.config import load_config
 from agent.contracts.inputs.case import Case
@@ -21,6 +23,7 @@ METRICS = RunMetrics(
     overrides=("case=reference",),
     wall_time_s=12.5,
     usage={},
+    usage_by_node={},
     total_tokens=0,
     cost_usd=0.0,
     rejected_submissions=0,
@@ -44,6 +47,19 @@ MESSAGES = [
     ToolMessage("study accepted.", tool_call_id="c"),
     AIMessage("Study done."),
 ]
+
+
+def llm_result(model, input_tokens, output_tokens):
+    message = AIMessage(
+        "ok",
+        usage_metadata=UsageMetadata(
+            input_tokens=input_tokens,
+            output_tokens=output_tokens,
+            total_tokens=input_tokens + output_tokens,
+        ),
+        response_metadata={"model_name": model},
+    )
+    return LLMResult(generations=[[ChatGeneration(message=message)]])
 
 
 class FakeGraph:
@@ -111,7 +127,13 @@ def test_run_study_offline(monkeypatch, verified):
     cfg = load_config()
     state = {"messages": MESSAGES, "artifacts": {"study": verified.model_dump(mode="json")}}
     fake = FakeGraph(state)
-    monkeypatch.setattr(run, "build", lambda _cfg: fake)
+
+    def fake_build(_cfg, ledger):
+        ledger.logger("orchestrator").on_llm_end(llm_result("claude-sonnet-5-5", 1_000, 100))
+        ledger.logger("surveyor")
+        return fake
+
+    monkeypatch.setattr(run, "build", fake_build)
     case = Case(address="1 rue X", program="Two buildings", corpus_id="c@1", facts=("120 rooms",))
     result, messages, study = run.run_study(cfg, case, ["case=reference"])
     assert study == verified
@@ -119,6 +141,11 @@ def test_run_study_offline(monkeypatch, verified):
     assert result.rejected_submissions == 1
     assert result.overrides == ("case=reference",)
     assert result.cost_usd == 0.0
+    assert result.usage_by_node.keys() == {"orchestrator", "surveyor"}
+    orchestrator = result.usage_by_node["orchestrator"]
+    assert (orchestrator.calls, orchestrator.input, orchestrator.output) == (1, 1_000, 100)
+    assert orchestrator.cost_usd == pytest.approx(0.003)
+    assert result.usage_by_node["surveyor"].calls == 0
     [(payload, config)] = fake.calls
     [request] = payload["messages"]
     assert "1 rue X" in request.text

@@ -35,8 +35,8 @@ uv run python -m agent.entrypoints.run models.nodes.orchestrator.effort=low   # 
 The CLI runs unattended (`ask_user` disabled; program facts come from `case.facts`). Each run
 writes to its Hydra run dir `outputs/<date>/<time>/`:
 
-- `run_summary.json`: cost per model, tokens, wall time, rejected submissions, headline results,
-  citation pass rate;
+- `run_summary.json`: cost per model and per model node (orchestrator, each sub-agent),
+  tokens, wall time, rejected submissions, headline results, citation pass rate;
 - `final_message.md`: the orchestrator's last reply;
 - `agent.log`: the run's log lines;
 - when the gate accepted a study: `verified_study.json` (the study, site, labelled limits, zone,

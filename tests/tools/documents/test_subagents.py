@@ -70,7 +70,7 @@ def notes(quote):
 
 def run(cfg, name, replies, monkeypatch):
     model = ScriptedModel(messages=iter([*replies, AIMessage("done")]))
-    monkeypatch.setattr("agent.agents.subagents.build_model", lambda models, node: model)
+    monkeypatch.setattr("agent.agents.subagents.build_model", lambda models, node, ledger: model)
     state = build_subagent(cfg, name).invoke({"messages": [HumanMessage("task")]})
     return state, [m for m in state["messages"] if isinstance(m, ToolMessage)]
 

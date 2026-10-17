@@ -52,10 +52,20 @@ def test_overrides_apply():
     assert list(cfg.case.facts) == ["a", "b"]
 
 
+def test_default_models():
+    nodes = load_config().models.nodes
+    assert nodes.surveyor.model == nodes.ingest_classifier.model == "claude-haiku-5-5"
+    assert "effort" not in nodes.surveyor
+    assert "effort" not in nodes.ingest_classifier
+    for node in ("orchestrator", "zoning_analyst", "doc_analyst"):
+        assert nodes[node].model == "claude-sonnet-5-5"
+        assert "effort" in nodes[node]
+
+
 def test_node_override_is_isolated():
-    cfg = load_config(["models.nodes.surveyor.model=claude-haiku-5-5"])
+    cfg = load_config(["models.nodes.zoning_analyst.model=claude-haiku-5-5"])
     nodes = cfg.models.nodes
-    assert nodes.surveyor.model == "claude-haiku-5-5"
+    assert nodes.zoning_analyst.model == "claude-haiku-5-5"
     assert nodes.orchestrator.model == "claude-sonnet-5-5"
     assert nodes.doc_analyst.model == "claude-sonnet-5-5"
 

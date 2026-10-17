@@ -171,8 +171,8 @@ All model choices are per node in Hydra (`conf/models/`), enabling ablations.
 
 | Node | Default |
 |---|---|
-| ingestion classifier, page tagging | Haiku |
-| orchestrator, sub-agents (incl. vision on the map) | Sonnet |
+| ingestion classifier, page tagging, `surveyor` | Haiku |
+| orchestrator, `zoning_analyst`, `doc_analyst` (incl. vision on the map) | Sonnet |
 | `envelope_engineer`, `critic` (when split out) | Opus |
 
 All LLM calls go through `src/agent/llm/` (caching, cost tracking, tracing). Budget ≈ $250 total.

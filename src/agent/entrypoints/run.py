@@ -30,6 +30,8 @@ from agent.entrypoints.summary import (
     rejected_submissions,
     run_summary,
 )
+from agent.llm.costs import CostLedger
+from agent.llm.factory import load_pricing
 from agent.llm.usage import price_usage
 from agent.observability.logs import get_logger, log_to_file, setup_logging
 from agent.observability.tracing import setup_tracing
@@ -74,7 +76,8 @@ def run_study(
     Returns:
         The run's metrics, the orchestrator's messages and the accepted study, if any.
     """
-    graph = build(cfg)
+    ledger = CostLedger(load_pricing(cfg.models))
+    graph = build(cfg, ledger)
     message = case_request(case, read_prompt(cfg.agent.request), no_facts=cfg.agent.no_facts)
     usage_handler = UsageMetadataCallbackHandler()
     start = time.perf_counter()
@@ -101,6 +104,7 @@ def run_study(
         overrides=tuple(overrides),
         wall_time_s=wall_time_s,
         usage=usage,
+        usage_by_node=ledger.usage(),
         total_tokens=sum(meta["total_tokens"] for meta in usage_handler.usage_metadata.values()),
         cost_usd=sum(entry.cost_usd for entry in usage.values()),
         rejected_submissions=rejected_submissions(messages, f"submit_{_STUDY_ARTIFACT}"),

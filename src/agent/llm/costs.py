@@ -30,6 +30,13 @@ def _response_message(response: LLMResult) -> AIMessage | None:
     return None
 
 
+class NodeUsage(TokenCounts):
+    """Calls, tokens and cost of one model node over a run."""
+
+    calls: int
+    cost_usd: float
+
+
 class CostLogger(BaseCallbackHandler):
     """Logs tokens and USD cost of every call made by one model node, and keeps running totals.
 
@@ -108,3 +115,51 @@ class CostLogger(BaseCallbackHandler):
             cost,
             total,
         )
+
+
+class CostLedger:
+    """One ``CostLogger`` per model node, shared by every model built for that node.
+
+    Pass one to the model builder for a run to read the run's usage per node afterwards.
+    """
+
+    def __init__(self, pricing: Mapping[str, ModelPrice]) -> None:
+        """Create an empty ledger.
+
+        Args:
+            pricing: Prices keyed by model id, given to every logger.
+        """
+        self._pricing = dict(pricing)
+        self._lock = threading.Lock()
+        self._loggers: dict[str, CostLogger] = {}
+
+    def logger(self, node: str) -> CostLogger:
+        """Return the node's logger, creating it on first use.
+
+        Args:
+            node: Model node name (key in ``models.nodes``).
+
+        Returns:
+            The logger shared by the node's models.
+        """
+        with self._lock:
+            if node not in self._loggers:
+                self._loggers[node] = CostLogger(node, self._pricing)
+            return self._loggers[node]
+
+    def usage(self) -> dict[str, NodeUsage]:
+        """Read the totals of every node with a logger, called or not.
+
+        Returns:
+            Calls, tokens and cost per model node, in creation order.
+        """
+        with self._lock:
+            loggers = list(self._loggers.values())
+        return {
+            cost_logger.node: NodeUsage(
+                **cost_logger.tokens.model_dump(),
+                calls=cost_logger.calls,
+                cost_usd=cost_logger.total_usd,
+            )
+            for cost_logger in loggers
+        }

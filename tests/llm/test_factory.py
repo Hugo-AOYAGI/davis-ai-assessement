@@ -3,7 +3,7 @@ from langchain_anthropic import ChatAnthropic
 from omegaconf import OmegaConf
 
 from agent.agents.config import load_config
-from agent.llm.costs import CostLogger
+from agent.llm.costs import CostLedger, CostLogger
 from agent.llm.factory import build_model, load_pricing
 
 
@@ -22,6 +22,14 @@ def test_builds_configured_model_with_cost_logger():
     [cost_logger] = model.callbacks
     assert isinstance(cost_logger, CostLogger)
     assert cost_logger.node == "orchestrator"
+
+
+def test_ledger_logger_is_shared_by_the_node_models():
+    models = load_config().models
+    ledger = CostLedger(load_pricing(models))
+    first = build_model(models, "surveyor", ledger)
+    second = build_model(models, "surveyor", ledger)
+    assert first.callbacks == second.callbacks == [ledger.logger("surveyor")]
 
 
 def test_unknown_node_raises():

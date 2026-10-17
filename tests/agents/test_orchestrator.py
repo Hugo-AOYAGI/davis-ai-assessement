@@ -20,6 +20,8 @@ from agent.agents.orchestrator import (
 )
 from agent.agents.subagents import build_subagent, build_tools, subagent_specs
 from agent.contracts.findings.notes import DocNotes
+from agent.llm.costs import CostLedger
+from agent.llm.factory import load_pricing
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -90,7 +92,7 @@ def cfg() -> DictConfig:
 
 
 def install_fakes(monkeypatch: pytest.MonkeyPatch, models: dict[str, ScriptedModel]) -> None:
-    def fake_build_model(models_cfg: DictConfig, node: str) -> ScriptedModel:
+    def fake_build_model(models_cfg: DictConfig, node: str, ledger: CostLedger) -> ScriptedModel:
         return models[node]
 
     monkeypatch.setattr("agent.agents.orchestrator.build_model", fake_build_model)
@@ -114,6 +116,15 @@ def test_default_config_builds():
     description = tools["task"].description
     assert all(f"- {name}:" in description for name in SUBAGENTS)
     assert "- general-purpose:" not in description
+
+
+def test_ledger_keeps_one_logger_per_model_node():
+    cfg = load_config()
+    ledger = CostLedger(load_pricing(cfg.models))
+    build(cfg, ledger)
+    usage = ledger.usage()
+    assert usage.keys() == {"orchestrator", *SUBAGENTS}
+    assert all(entry.calls == 0 and entry.cost_usd == 0.0 for entry in usage.values())
 
 
 def test_orchestrator_tools(cfg):

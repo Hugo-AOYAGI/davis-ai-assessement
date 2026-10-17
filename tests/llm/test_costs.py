@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage
 from langchain_core.messages.ai import UsageMetadata
 from langchain_core.outputs import ChatGeneration, Generation, LLMResult
 
-from agent.llm.costs import CostLogger
+from agent.llm.costs import CostLedger, CostLogger, NodeUsage
 from agent.llm.pricing import ModelPrice, TokenCounts
 
 PRICING = {"claude-sonnet-5-5": ModelPrice(input=2.0, output=10.0, cache_read=0.2, cache_write=2.5)}
@@ -69,3 +69,21 @@ def test_concurrent_calls_are_all_counted():
         )
     assert cost_logger.calls == 200
     assert cost_logger.tokens == TokenCounts(input=2_000, output=200)
+
+
+def test_ledger_shares_one_logger_per_node_and_reports_usage():
+    ledger = CostLedger(PRICING)
+    surveyor = ledger.logger("surveyor")
+    assert ledger.logger("surveyor") is surveyor
+    ledger.logger("orchestrator").on_llm_end(result("claude-sonnet-5-5", 1_000_000, 100_000))
+    surveyor.on_llm_end(result("claude-sonnet-5-5", 0, 100_000))
+    surveyor.on_llm_end(result("claude-sonnet-5-5", 0, 100_000))
+    assert ledger.usage() == {
+        "surveyor": NodeUsage(output=200_000, calls=2, cost_usd=2.0),
+        "orchestrator": NodeUsage(input=1_000_000, output=100_000, calls=1, cost_usd=3.0),
+    }
+    assert list(ledger.usage()) == ["surveyor", "orchestrator"]
+
+
+def test_empty_ledger():
+    assert CostLedger(PRICING).usage() == {}

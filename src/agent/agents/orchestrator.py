@@ -14,6 +14,7 @@ from omegaconf import DictConfig
 
 from agent.agents.config import read_prompt
 from agent.agents.subagents import AgentGraph, build_tools, subagent_specs
+from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
 from agent.observability.logs import get_logger
 from agent.tools.interaction.ask import ask_user_tool
@@ -112,7 +113,7 @@ def profile_key(model: BaseChatModel) -> str:
     return provider if identifier is None else f"{provider}:{identifier}"
 
 
-def build(cfg: DictConfig) -> AgentGraph:
+def build(cfg: DictConfig, ledger: CostLedger | None = None) -> AgentGraph:
     """Assemble the deepagents orchestrator entirely from config.
 
     Model from ``models.nodes[agent.model]``, system prompt from ``agent.prompt``, tools from
@@ -124,13 +125,15 @@ def build(cfg: DictConfig) -> AgentGraph:
 
     Args:
         cfg: The full composed config (see ``agent.agents.config.load_config``).
+        ledger: Keeps the cost logger of every model node built, to read a run's usage per
+            node.
 
     Returns:
         The compiled orchestrator graph, whose state carries the ``artifacts`` mapping.
     """
-    model = build_model(cfg.models, cfg.agent.model)
+    model = build_model(cfg.models, cfg.agent.model, ledger)
     tools = orchestrator_tools(cfg)
-    subagents = subagent_specs(cfg)
+    subagents = subagent_specs(cfg, ledger)
     general_purpose = bool(cfg.agent.general_purpose_subagent)
     logger.info(
         "orchestrator: model %s, tools %s, sub-agents %s, general-purpose %s",

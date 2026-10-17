@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 class ModelUsage(TokenCounts):
-    """Tokens of one model over a run, with their cost."""
+    """Tokens of one model id over a run, with their cost."""
 
     cost_usd: float
 

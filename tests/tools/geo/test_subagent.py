@@ -58,7 +58,7 @@ def offline(monkeypatch, transport):
 
 def script(monkeypatch, replies: list[AIMessage]) -> None:
     model = ScriptedModel(messages=iter(replies))
-    monkeypatch.setattr("agent.agents.subagents.build_model", lambda models, node: model)
+    monkeypatch.setattr("agent.agents.subagents.build_model", lambda models, node, ledger: model)
 
 
 def test_subagent_builds_with_its_tools(cfg, monkeypatch):

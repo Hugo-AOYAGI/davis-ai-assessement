@@ -5,6 +5,7 @@ from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 from agent.contracts.base import Contract
 from agent.contracts.evidence import CitationCheck
 from agent.contracts.study import Verdict, VerifiedStudy
+from agent.llm.costs import NodeUsage
 from agent.llm.usage import ModelUsage
 
 
@@ -17,6 +18,8 @@ class RunMetrics(Contract):
     wall_time_s: float
     usage: dict[str, ModelUsage]
     """Tokens and cost per model id."""
+    usage_by_node: dict[str, NodeUsage]
+    """Calls, tokens and cost per model node (orchestrator, each sub-agent)."""
     total_tokens: int
     cost_usd: float
     rejected_submissions: int

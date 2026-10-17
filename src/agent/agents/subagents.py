@@ -9,6 +9,7 @@ from langgraph.graph.state import CompiledStateGraph
 from omegaconf import DictConfig
 
 from agent.agents.config import read_prompt
+from agent.llm.costs import CostLedger
 from agent.llm.factory import build_model
 from agent.observability.logs import get_logger
 from agent.tools.submit.artifacts import ArtifactsMiddleware, ArtifactsState
@@ -47,7 +48,7 @@ def build_tools(nodes: Iterable[DictConfig]) -> list[BaseTool]:
     return tools
 
 
-def build_subagent(cfg: DictConfig, name: str) -> AgentGraph:
+def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None) -> AgentGraph:
     """Build one sub-agent as a standalone graph, from ``conf/subagents/<name>.yaml``.
 
     The same graph is delegated to by the orchestrator's ``task`` tool and invoked directly by
@@ -59,6 +60,7 @@ def build_subagent(cfg: DictConfig, name: str) -> AgentGraph:
     Args:
         cfg: The full composed config.
         name: Sub-agent name, a key of ``cfg.subagents``.
+        ledger: Keeps the cost logger of the sub-agent's model node, if given.
 
     Returns:
         The compiled sub-agent graph.
@@ -75,7 +77,7 @@ def build_subagent(cfg: DictConfig, name: str) -> AgentGraph:
         "sub-agent %s: model node %s, tools %s", name, spec.model, [tool.name for tool in tools]
     )
     return create_agent(
-        model=build_model(cfg.models, spec.model),
+        model=build_model(cfg.models, spec.model, ledger),
         tools=tools,
         system_prompt=read_prompt(spec.prompt),
         middleware=[
@@ -86,11 +88,12 @@ def build_subagent(cfg: DictConfig, name: str) -> AgentGraph:
     )
 
 
-def subagent_specs(cfg: DictConfig) -> list[CompiledSubAgent]:
+def subagent_specs(cfg: DictConfig, ledger: CostLedger | None = None) -> list[CompiledSubAgent]:
     """Build every sub-agent enabled in ``cfg.subagents``, ready for ``create_deep_agent``.
 
     Args:
         cfg: The full composed config.
+        ledger: Keeps the cost loggers of the sub-agents' model nodes, if given.
 
     Returns:
         One spec per sub-agent; its ``description`` is what the orchestrator reads to decide
@@ -100,7 +103,7 @@ def subagent_specs(cfg: DictConfig) -> list[CompiledSubAgent]:
         CompiledSubAgent(
             name=str(name),
             description=spec.description,
-            runnable=build_subagent(cfg, str(name)),
+            runnable=build_subagent(cfg, str(name), ledger),
         )
         for name, spec in cfg.subagents.items()
     ]
