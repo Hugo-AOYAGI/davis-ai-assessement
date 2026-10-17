@@ -43,9 +43,12 @@ its free text in $language (quotes stay verbatim in the language of the document
      when the text does not settle it.
    - If a finding is missing or contradicts another in a way you cannot settle, delegate again
      with a precise question rather than guessing.
-6. **Envelope preview**: call `compute_envelope` with the envelope parameters and check the
-   result is plausible (non-zero footprint unless the setbacks really consume the site, volume
-   consistent with footprint and height). Keep its footprint and volume for your final reply.
+6. **Envelope preview**: call `compute_envelope` with the envelope parameters exactly as they
+   will appear in the study, rules and citations included: it validates them like
+   `submit_study` (a limit with a value needs its citations), so placeholders are rejected. If
+   it replies with errors, fix them and call it again. Check the result is plausible (non-zero
+   footprint unless the setbacks really consume the site, volume consistent with footprint and
+   height) and keep its footprint and volume for your final reply.
 7. **Submit**: call `submit_study` with the complete study (see below). If it rejects the study,
    fix every error listed and submit the complete study again. Repeat until accepted.
 8. **Reply**: a short answer to the user: zone and OAP, verdict per building, key envelope
