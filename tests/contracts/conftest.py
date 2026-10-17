@@ -1,16 +1,17 @@
 import pytest
 
-from agent.contracts.evidence import Citation, Limit, Rule, SourceKind
-from agent.contracts.findings.map import Overlay
-from agent.contracts.findings.regulation import (
+from agent.contracts.evidence import Citation, ImageRegion, Limit, Rule, SourceKind
+from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
+from agent.contracts.findings.zone import LegendItem, ZoneFindings
+from agent.contracts.geometry import EnvelopeParameters, Polygon
+from agent.contracts.study import (
     Admissibility,
     ParkingBasis,
     ParkingRule,
+    Regime,
+    Study,
     Verdict,
 )
-from agent.contracts.findings.site import Parcel, SiteContext
-from agent.contracts.geometry import Boundary, BoundaryKind, EnvelopeParameters, Polygon
-from agent.contracts.study import Regime, Study
 
 SQUARE = ((0.0, 0.0), (40.0, 0.0), (40.0, 30.0), (0.0, 30.0), (0.0, 0.0))
 
@@ -32,22 +33,36 @@ def polygon() -> Polygon:
 
 
 @pytest.fixture
-def site(polygon: Polygon) -> SiteContext:
+def site(polygon: Polygon) -> Site:
     cadastre = Citation(doc="cadastre", quote="91272000AB0123", source_kind=SourceKind.GEOMETRIC)
-    kinds = (BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR, BoundaryKind.SIDE)
-    return SiteContext(
+    sides = (EdgeSide.PUBLIC_LAND, EdgeSide.PARCEL, EdgeSide.PARCEL, EdgeSide.PARCEL)
+    return Site(
         address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
         longitude=2.16,
         latitude=48.71,
+        choice=ParcelChoice(
+            address="4 Rue Joliot Curie 91190 Gif-sur-Yvette",
+            parcel_ids=("91272000AB0123",),
+            rationale="Only parcel at the address.",
+        ),
         parcels=(Parcel(id="91272000AB0123", area_m2=1200, polygon=polygon),),
         polygon=polygon,
         area_m2=1200,
-        boundaries=tuple(
-            Boundary(kind=kind, start=start, end=end)
-            for kind, start, end in zip(kinds, SQUARE[:-1], SQUARE[1:], strict=True)
+        edges=tuple(
+            Edge(start=start, end=end, length_m=1, other_side=side)
+            for side, start, end in zip(sides, SQUARE[:-1], SQUARE[1:], strict=True)
         ),
-        method="geocoded, single parcel",
         citations=(cadastre,),
+    )
+
+
+@pytest.fixture
+def zone() -> ZoneFindings:
+    return ZoneFindings(
+        zone="UMG",
+        overlays=(LegendItem(item="Espace boisé classé", applies=False, note="none drawn"),),
+        rationale="Site found by the road layout.",
+        region=ImageRegion(doc="plu_reglement_graphique", page=1, region=(10, 20, 110, 90)),
     )
 
 
@@ -76,7 +91,7 @@ def study(citation: Citation, parameters: EnvelopeParameters) -> Study:
         program="RSE + RJA, two buildings",
         regime=Regime(
             zone="UMG",
-            overlays=(Overlay(name="Espace boisé classé", applies=False, rationale="none drawn"),),
+            overlays=(LegendItem(item="Périmètre d'OAP", applies=True, note="site inside"),),
             oap_applicable=True,
             citations=(citation,),
         ),

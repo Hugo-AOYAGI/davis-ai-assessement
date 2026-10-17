@@ -8,7 +8,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from pydantic import JsonValue
 
 from agent.contracts.evidence import Ambiguity
-from agent.contracts.findings.oap import OAPFindings
+from agent.contracts.findings.notes import DocNotes
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsMiddleware, read_artifact
 from agent.tools.submit.factory import SubmissionRejected, submit_tool
 
@@ -30,22 +30,22 @@ def call(name: str, args: dict[str, JsonValue], call_id: str) -> AIMessage:
     return AIMessage(content="", tool_calls=[{"name": name, "args": args, "id": call_id}])
 
 
-def test_agent_corrects_rejected_submission(oap_tool, oap_args, bad_oap_args):
+def test_agent_corrects_rejected_submission(notes_tool, notes_args, bad_notes_args):
     model = scripted(
-        call("submit_oap_findings", bad_oap_args, "bad"),
-        call("submit_oap_findings", oap_args, "good"),
+        call("submit_notes", bad_notes_args, "bad"),
+        call("submit_notes", notes_args, "good"),
         AIMessage(content="done"),
     )
-    agent = create_agent(model=model, tools=[oap_tool], middleware=[ArtifactsMiddleware()])
+    agent = create_agent(model=model, tools=[notes_tool], middleware=[ArtifactsMiddleware()])
     state = agent.invoke({"messages": [HumanMessage("analyse the OAP")]})
 
-    stored = state["artifacts"]["oap_findings"]
-    assert OAPFindings.model_validate(stored) == OAPFindings.model_validate(oap_args)
+    stored = state["artifacts"]["notes.oap"]
+    assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
     replies = {m.tool_call_id: m for m in state["messages"] if isinstance(m, ToolMessage)}
     assert replies["bad"].status == "error"
-    assert "rationale: Field required" in replies["bad"].content
-    assert "citations.0: Value error" in replies["bad"].content
-    assert replies["good"].content == "oap_findings accepted."
+    assert "notes.0.text: Field required" in replies["bad"].content
+    assert "notes.0.citations.0: Value error" in replies["bad"].content
+    assert replies["good"].content == "notes.oap accepted."
 
 
 NOTE: dict[str, JsonValue] = {
@@ -57,24 +57,26 @@ NOTE: dict[str, JsonValue] = {
 
 
 def needs_oap(submission: Ambiguity, artifacts: Mapping[str, ArtifactData]) -> Ambiguity:
-    if read_artifact(artifacts, "oap_findings", OAPFindings) is None:
-        raise SubmissionRejected(["oap_findings missing"])
+    if read_artifact(artifacts, "notes.oap", DocNotes) is None:
+        raise SubmissionRejected(["notes.oap missing"])
     return submission
 
 
-def test_subagent_artifact_reaches_parent(oap_args):
+def test_subagent_artifact_reaches_parent(notes_args):
     parent = scripted(
         call("task", {"description": "analyse the OAP", "subagent_type": "worker"}, "t1"),
         call("submit_note", NOTE, "n1"),
         AIMessage(content="parent done"),
     )
     child = scripted(
-        call("submit_oap_findings", oap_args, "s1"),
+        call("submit_notes", notes_args, "s1"),
         AIMessage(content="child done"),
     )
     agent = create_deep_agent(
         model=parent,
-        tools=[submit_tool("note", Ambiguity, finalize=needs_oap)],
+        tools=[
+            submit_tool(name="submit_note", artifact="note", contract=Ambiguity, finalize=needs_oap)
+        ],
         system_prompt="x",
         middleware=[ArtifactsMiddleware()],
         subagents=[
@@ -83,15 +85,17 @@ def test_subagent_artifact_reaches_parent(oap_args):
                 description="d",
                 system_prompt="y",
                 model=child,
-                tools=[submit_tool("oap_findings", OAPFindings)],
+                tools=[
+                    submit_tool(name="submit_notes", artifact="notes.{label}", contract=DocNotes)
+                ],
                 middleware=[ArtifactsMiddleware()],
             )
         ],
     )
     state = agent.invoke({"messages": [HumanMessage("go")]})
 
-    stored = state["artifacts"]["oap_findings"]
-    assert OAPFindings.model_validate(stored) == OAPFindings.model_validate(oap_args)
+    stored = state["artifacts"]["notes.oap"]
+    assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
     assert Ambiguity.model_validate(state["artifacts"]["note"]) == Ambiguity.model_validate(NOTE)
     replies = {m.tool_call_id: m.content for m in state["messages"] if isinstance(m, ToolMessage)}
     assert replies == {"t1": "child done", "n1": "note accepted."}

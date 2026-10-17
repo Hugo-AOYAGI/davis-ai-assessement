@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Mapping
+from collections.abc import Iterable, Mapping, Sequence
 from typing import cast
 
 import shapely
@@ -7,7 +7,6 @@ from shapely import Polygon as ShapelyPolygon
 from shapely.geometry.base import BaseGeometry, BaseMultipartGeometry
 
 from agent.contracts.evidence import Limit
-from agent.contracts.findings.site import SiteContext
 from agent.contracts.geometry import (
     Boundary,
     BoundaryKind,
@@ -19,15 +18,23 @@ from agent.contracts.geometry import (
 
 
 def compute_envelope(
-    site: SiteContext, parameters: EnvelopeParameters, *, quad_segs: int, min_area_m2: float
+    polygon: Polygon,
+    boundaries: Sequence[Boundary],
+    parameters: EnvelopeParameters,
+    *,
+    quad_segs: int,
+    min_area_m2: float,
 ) -> Envelope:
     """Compute the prism envelope: the site minus its setbacks, capped by the ratios and height.
 
-    Each boundary is set back by the distance of its kind (road, side, rear). A limit whose value
-    is ``None`` is treated as absent (no setback, no cap) and recorded in ``assumptions``.
+    Each boundary is set back by the distance of its kind (road, side, rear). The maximum
+    footprint is the smallest of the set-back footprint, the footprint ratio applied to the site
+    area, and the site area minus the minimum green area. A limit whose value is ``None`` is
+    treated as absent (no setback, no cap) and recorded in ``assumptions``.
 
     Args:
-        site: The site, with its polygon and typed boundaries.
+        polygon: The site polygon, in a metric CRS.
+        boundaries: The site's edges labelled road / side / rear.
         parameters: Rule values the envelope is computed from.
         quad_segs: Segments per quarter circle in the round setback buffers.
         min_area_m2: Footprint parts smaller than this are discarded as slivers.
@@ -35,20 +42,20 @@ def compute_envelope(
     Returns:
         The envelope, with every assumption made while computing it.
     """
-    site_shape = _site_shape(site.polygon)
+    site_shape = _site_shape(polygon)
     site_area = float(site_shape.area)
     setbacks, setback_notes = _setbacks(parameters)
-    remaining = _set_back(site_shape, site.boundaries, setbacks, quad_segs)
+    remaining = _set_back(site_shape, boundaries, setbacks, quad_segs)
     footprint, part_notes = _largest_part(remaining, min_area_m2)
     footprint_area = 0.0 if footprint is None else float(footprint.area)
-    max_footprint, ratio_notes = _max_footprint(
-        parameters.max_footprint_ratio, site_area, footprint_area
-    )
-    min_green, green_notes = _min_green(parameters.min_green_ratio, site_area, max_footprint)
+    ratio_cap, ratio_notes = _ratio_cap(parameters.max_footprint_ratio, site_area)
+    min_green, green_notes = _min_green(parameters.min_green_ratio, site_area)
+    green_cap = site_area if min_green is None else site_area - min_green
+    max_footprint = min(footprint_area, ratio_cap, green_cap)
     max_height, max_volume, height_notes = _height(parameters.max_height_m, max_footprint)
     return Envelope(
         site_area_m2=site_area,
-        footprint=None if footprint is None else _to_contract(footprint, site.polygon.crs),
+        footprint=None if footprint is None else _to_contract(footprint, polygon.crs),
         footprint_area_m2=footprint_area,
         max_footprint_area_m2=max_footprint,
         min_green_area_m2=min_green,
@@ -87,7 +94,7 @@ def _setbacks(parameters: EnvelopeParameters) -> tuple[dict[BoundaryKind, float]
 
 def _set_back(
     site_shape: BaseGeometry,
-    boundaries: Iterable[Boundary],
+    boundaries: Sequence[Boundary],
     setbacks: Mapping[BoundaryKind, float],
     quad_segs: int,
 ) -> BaseGeometry:
@@ -138,30 +145,18 @@ def _largest_part(
     return parts[0], [note]
 
 
-def _max_footprint(
-    ratio: Limit, site_area: float, footprint_area: float
-) -> tuple[float, list[str]]:
-    """Cap the footprint area by the footprint ratio, when one is set."""
+def _ratio_cap(ratio: Limit, site_area: float) -> tuple[float, list[str]]:
+    """Return the footprint allowed by the footprint ratio, the whole site when none is set."""
     if ratio.value is None:
-        return footprint_area, ["No footprint ratio set: footprint limited by setbacks only."]
-    return min(footprint_area, ratio.value * site_area), []
+        return site_area, ["No footprint ratio set: footprint not capped by a ratio."]
+    return ratio.value * site_area, []
 
 
-def _min_green(
-    ratio: Limit, site_area: float, max_footprint: float
-) -> tuple[float | None, list[str]]:
-    """Compute the minimum green area, flagging when it leaves less room than the footprint."""
+def _min_green(ratio: Limit, site_area: float) -> tuple[float | None, list[str]]:
+    """Return the minimum green area, ``None`` when no green ratio is set."""
     if ratio.value is None:
         return None, ["No green ratio set: no minimum green area."]
-    green = ratio.value * site_area
-    if site_area - max_footprint >= green:
-        return green, []
-    note = (
-        f"The minimum green area ({green:.1f} m²) leaves at most {site_area - green:.1f} m² "
-        f"unplanted, less than the maximum footprint ({max_footprint:.1f} m²): "
-        "the green requirement further limits the footprint."
-    )
-    return green, [note]
+    return ratio.value * site_area, []
 
 
 def _height(height: Limit, max_footprint: float) -> tuple[float | None, float | None, list[str]]:

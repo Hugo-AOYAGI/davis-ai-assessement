@@ -3,7 +3,6 @@ import math
 import pytest
 
 from agent.contracts.evidence import Citation, Limit, SourceKind
-from agent.contracts.findings.site import Parcel, SiteContext
 from agent.contracts.geometry import Boundary, BoundaryKind, EnvelopeParameters, Polygon
 from agent.runtime.geometry.envelope import compute_envelope
 
@@ -64,17 +63,7 @@ def site(exterior, kinds, holes=()):
         Boundary(kind=kind, start=start, end=end)
         for kind, start, end in zip(kinds, exterior[:-1], exterior[1:], strict=True)
     )
-    return SiteContext(
-        address="1 rue de test",
-        longitude=2.16,
-        latitude=48.71,
-        parcels=(Parcel(id="91272000AB0001", area_m2=1, polygon=polygon),),
-        polygon=polygon,
-        area_m2=1,
-        boundaries=boundaries,
-        method="test",
-        citations=(Citation(doc="cadastre", quote="AB0001", source_kind=SourceKind.GEOMETRIC),),
-    )
+    return polygon, boundaries
 
 
 def rectangle(holes=()):
@@ -82,7 +71,8 @@ def rectangle(holes=()):
 
 
 def envelope(target, params):
-    return compute_envelope(target, params, quad_segs=QUAD_SEGS, min_area_m2=MIN_AREA)
+    polygon, boundaries = target
+    return compute_envelope(polygon, boundaries, params, quad_segs=QUAD_SEGS, min_area_m2=MIN_AREA)
 
 
 def test_rectangle_setbacks_give_inner_rectangle():
@@ -97,7 +87,7 @@ def test_rectangle_setbacks_give_inner_rectangle():
     xs = [x for x, _ in footprint.exterior]
     ys = [y for _, y in footprint.exterior]
     assert (min(xs), max(xs), min(ys), max(ys)) == pytest.approx((3, 37, 5, 26))
-    assert result.assumptions == ("No footprint ratio set: footprint limited by setbacks only.",)
+    assert result.assumptions == ("No footprint ratio set: footprint not capped by a ratio.",)
 
 
 def test_l_shape_rounds_reflex_corner():
@@ -138,7 +128,7 @@ def test_missing_limits_are_assumed_absent():
         "No road setback set: road limits not set back.",
         "No side setback set: side limits not set back.",
         "No rear setback set: rear limits not set back.",
-        "No footprint ratio set: footprint limited by setbacks only.",
+        "No footprint ratio set: footprint not capped by a ratio.",
         "No green ratio set: no minimum green area.",
         "No height limit set: height and volume left open.",
     )
@@ -150,15 +140,25 @@ def test_volume_is_capped_footprint_times_height():
     assert result.max_volume_m3 == pytest.approx(480 * 12)
 
 
-def test_green_requirement_flagged_when_it_limits_footprint():
-    result = envelope(rectangle(), parameters(green=0.5))
+def test_green_requirement_caps_footprint():
+    result = envelope(rectangle(), parameters(green=0.5, height=10))
+    assert result.footprint_area_m2 == pytest.approx(714)
     assert result.min_green_area_m2 == pytest.approx(600)
-    assert any("green requirement further limits" in note for note in result.assumptions)
+    assert result.max_footprint_area_m2 == pytest.approx(600)
+    assert result.max_volume_m3 == pytest.approx(6000)
+    assert not any("green" in note for note in result.assumptions)
 
 
-def test_green_requirement_not_flagged_when_room_left():
+def test_smallest_cap_binds():
+    result = envelope(rectangle(), parameters(ratio=0.4, green=0.5, height=10))
+    assert result.max_footprint_area_m2 == pytest.approx(480)
+    assert result.assumptions == ()
+
+
+def test_green_requirement_left_unbinding_when_room_left():
     result = envelope(rectangle(), parameters(green=0.2))
     assert result.min_green_area_m2 == pytest.approx(240)
+    assert result.max_footprint_area_m2 == pytest.approx(714)
     assert not any("green" in note for note in result.assumptions)
 
 

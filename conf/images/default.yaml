@@ -1,0 +1,14 @@
+# Corpus page images shown to the models (view_image, zoom) and saved as evidence crops.
+pages:
+  _target_: agent.adapters.images.pages.PageImages
+  documents: ${corpus.documents}  # {id, path} of each source PDF, paths relative to root
+  root:
+    _target_: agent.agents.config.project_path
+    relative: .
+  render_dpi: 200          # pages that are not scans are rendered at this resolution
+  scan_min_coverage: 0.8   # a page whose largest image covers this share of it is a scan
+  max_image_px: 2000       # long edge of every returned image, rulers included (API cap: 2000)
+  max_upscale: 2.0         # zooms never enlarge full-resolution pixels more than this
+  ruler_step_px: 100       # ruler tick spacing, in image pixels
+  crop_max_px: 3000        # long edge cap of saved evidence crops
+  cache_size: 2            # decoded full-resolution pages kept in memory

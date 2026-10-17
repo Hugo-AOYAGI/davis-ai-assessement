@@ -34,8 +34,6 @@ class Page(Contract):
     """1-based PDF page index."""
     text: str
     """Extracted text layer; empty for raster pages."""
-    image: Path | None = None
-    """Rendered image, for raster pages and figures."""
 
 
 class Section(Contract):

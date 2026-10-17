@@ -1,5 +1,7 @@
 import inspect
 from collections.abc import Callable, Mapping, Sequence
+from string import Formatter
+from typing import cast
 
 from langchain.tools import ToolRuntime
 from langchain_core.messages import ToolMessage
@@ -10,11 +12,14 @@ from pydantic import JsonValue, ValidationError
 from agent.contracts.base import Contract
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsState
 
-type Finalizer[C: Contract] = Callable[[C, Mapping[str, ArtifactData]], Contract]
+type Finalizer[C: Contract, S: Contract] = Callable[[C, Mapping[str, ArtifactData]], S]
 """Turns a validated submission into the object to store, given the current artifacts.
 
 It may raise ``SubmissionRejected`` to send errors back to the model without storing anything.
 """
+
+type Summarizer[S: Contract] = Callable[[S], str]
+"""Writes what the model should read back about the stored object (e.g. computed figures)."""
 
 
 class SubmissionRejected(Exception):  # noqa: N818
@@ -30,27 +35,39 @@ class SubmissionRejected(Exception):  # noqa: N818
         super().__init__("; ".join(self.errors))
 
 
-def submit_tool[C: Contract](
-    artifact: str, contract: type[C], finalize: Finalizer[C] | None = None
+def submit_tool[C: Contract, S: Contract](
+    *,
+    name: str,
+    artifact: str,
+    contract: type[C],
+    finalize: Finalizer[C, S] | None = None,
+    summarize: Summarizer[S] | None = None,
 ) -> BaseTool:
-    """Build the ``submit_<artifact>`` tool through which an agent delivers its result.
+    """Build the tool through which an agent delivers its result.
 
     The tool's argument schema is the contract's JSON schema, so the model passes the contract
     fields as top-level arguments and reads their docstrings as descriptions. Validation happens
     inside the tool: a rejected submission returns an error ``ToolMessage`` listing every
-    ``field.path: message`` and stores nothing; an accepted one is stored in the ``artifacts``
-    state key as JSON.
+    ``field.path: message`` and stores nothing; an accepted one is stored as JSON in the
+    ``artifacts`` state under its key, and the reply says ``<key> accepted.``.
 
     Args:
-        artifact: Artifact name, used as the state key and in the tool name.
+        name: Tool name, e.g. ``submit_notes``.
+        artifact: State key of the stored result. It may hold ``{field}`` placeholders filled
+            from the submission's top-level fields, e.g. ``notes.{label}``.
         contract: Contract the submission must satisfy.
         finalize: Optional hook turning the validated submission into the stored object
             (e.g. ``Study`` into ``VerifiedStudy``), with access to the current artifacts.
+        summarize: Optional hook whose text, written from the stored object, follows the
+            ``<key> accepted.`` reply.
 
     Returns:
         A tool to add to the agent that produces the artifact.
+
+    Raises:
+        ValueError: If ``artifact`` names a placeholder that is not a field of ``contract``.
     """
-    name = f"submit_{artifact}"
+    _check_placeholders(artifact, contract)
 
     def submit(runtime: ToolRuntime[None, ArtifactsState], **arguments: JsonValue) -> Command[str]:
         """Validate, optionally finalize, and store the submission."""
@@ -59,36 +76,50 @@ def submit_tool[C: Contract](
             submission = contract.model_validate(arguments)
         except ValidationError as error:
             return _reject(name, _format_validation(error), tool_call_id)
-        stored: Contract = submission
-        if finalize is not None:
+        if finalize is None:
+            stored = cast("S", submission)
+        else:
             try:
                 stored = finalize(submission, runtime.state.get("artifacts", {}))
             except SubmissionRejected as rejection:
                 return _reject(name, rejection.errors, tool_call_id)
+        key = artifact.format_map(dict(submission))
+        reply = f"{key} accepted."
+        if summarize is not None:
+            reply = f"{reply}\n\n{summarize(stored)}"
         return Command[str](
             update={
-                "artifacts": {artifact: stored.model_dump(mode="json")},
-                "messages": [ToolMessage(f"{artifact} accepted.", tool_call_id=tool_call_id)],
+                "artifacts": {key: stored.model_dump(mode="json")},
+                "messages": [ToolMessage(reply, tool_call_id=tool_call_id)],
             }
         )
 
     return StructuredTool(
         name=name,
-        description=_describe(name, artifact, contract),
+        description=_describe(name, contract),
         args_schema=contract.model_json_schema(),
         func=submit,
     )
 
 
-def _describe(name: str, artifact: str, contract: type[Contract]) -> str:
+def _check_placeholders(artifact: str, contract: type[Contract]) -> None:
+    """Reject artifact key templates naming anything but a top-level contract field."""
+    fields = {field for _, field, _, _ in Formatter().parse(artifact) if field is not None}
+    unknown = sorted(fields - set(contract.model_fields))
+    if unknown:
+        msg = f"artifact {artifact!r} names {unknown}, not fields of {contract.__name__}"
+        raise ValueError(msg)
+
+
+def _describe(name: str, contract: type[Contract]) -> str:
     """Write the tool description the model reads, from the contract's docstring."""
     summary = inspect.getdoc(contract) or contract.__name__
     return (
-        f"Deliver your final result ({artifact}): {summary}\n\n"
+        f"Deliver your final result: {summary}\n\n"
         "This is the only way to hand your result back. Pass every field of the result as a "
         "top-level argument. The submission is validated: if it is rejected, the reply lists "
         f"each problem as `field.path: message`; fix them and call {name} again with the "
-        f"complete result. Your task is done only once the reply says `{artifact} accepted`."
+        "complete result. Your task is done only once the reply says the result was accepted."
     )
 
 

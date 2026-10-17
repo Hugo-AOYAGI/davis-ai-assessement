@@ -9,8 +9,8 @@ from langchain_core.tools import BaseTool
 from langgraph.types import Command
 from pydantic import JsonValue
 
-from agent.contracts.findings.oap import OAPFindings
-from agent.contracts.findings.site import SiteContext
+from agent.contracts.findings.notes import DocNotes
+from agent.contracts.findings.site import ParcelChoice
 from agent.tools.submit.artifacts import ArtifactData, Artifacts
 from agent.tools.submit.factory import SubmissionRejected, submit_tool
 
@@ -51,51 +51,86 @@ def only_message(command: Command[str]) -> ToolMessage:
     return message
 
 
-def test_schema_and_description_come_from_contract(oap_tool):
-    assert oap_tool.name == "submit_oap_findings"
-    assert "Whether an OAP covers the site" in oap_tool.description
-    schema = oap_tool.tool_call_schema
+def test_schema_and_description_come_from_contract(notes_tool):
+    assert notes_tool.name == "submit_notes"
+    assert "Cited notes on what the documents say" in notes_tool.description
+    assert "submit_notes again" in notes_tool.description
+    schema = notes_tool.tool_call_schema
     assert isinstance(schema, dict)
-    assert set(schema["properties"]) == set(OAPFindings.model_fields)
+    assert set(schema["properties"]) == set(DocNotes.model_fields)
     assert "runtime" not in schema["properties"]
-    assert schema["properties"]["name"]["description"].startswith("Title of the applicable OAP")
+    assert schema["properties"]["topics"]["description"].startswith("The topic checklist")
 
 
-def test_valid_submission_is_stored(oap_tool, oap_args):
-    command = invoke(oap_tool, oap_args)
-    stored = command.update["artifacts"]["oap_findings"]
-    assert OAPFindings.model_validate(stored) == OAPFindings.model_validate(oap_args)
-    assert only_message(command).content == "oap_findings accepted."
+def test_valid_submission_is_stored_under_formatted_key(notes_tool, notes_args):
+    command = invoke(notes_tool, notes_args)
+    stored = command.update["artifacts"]["notes.oap"]
+    assert DocNotes.model_validate(stored) == DocNotes.model_validate(notes_args)
+    assert only_message(command).content == "notes.oap accepted."
 
 
-def test_invalid_submission_returns_field_errors(oap_tool, bad_oap_args):
-    command = invoke(oap_tool, bad_oap_args)
+def test_plain_key_is_used_as_is(notes_args):
+    tool = submit_tool(name="submit_notes", artifact="notes", contract=DocNotes)
+    command = invoke(tool, notes_args)
+    assert set(command.update["artifacts"]) == {"notes"}
+
+
+def test_unknown_placeholder_is_refused():
+    with pytest.raises(ValueError, match=r"names \['kind'\], not fields of DocNotes"):
+        submit_tool(name="submit_notes", artifact="notes.{kind}", contract=DocNotes)
+
+
+def test_invalid_submission_returns_field_errors(notes_tool, bad_notes_args):
+    command = invoke(notes_tool, bad_notes_args)
     assert "artifacts" not in command.update
     message = only_message(command)
     assert message.status == "error"
-    assert "rationale: Field required" in message.content
-    assert "citations.0: Value error, a regulatory citation needs a page" in message.content
+    assert "submit_notes rejected, nothing was stored." in message.content
+    assert "notes.0.text: Field required" in message.content
+    assert "notes.0.citations.0: Value error, a regulatory citation needs a page" in (
+        message.content
+    )
 
 
-def site_name(submission: OAPFindings, artifacts: Mapping[str, ArtifactData]) -> OAPFindings:
+def tag_site(submission: DocNotes, artifacts: Mapping[str, ArtifactData]) -> DocNotes:
     if "site" not in artifacts:
         raise SubmissionRejected(["submit the site first", "then resubmit"])
-    return submission.model_copy(update={"name": f"{submission.name} @ {artifacts['site']['id']}"})
+    return submission.model_copy(update={"label": f"{submission.label}_{artifacts['site']['id']}"})
 
 
-def test_finalize_stores_finalized_object(oap_args):
-    tool = submit_tool("oap_findings", OAPFindings, finalize=site_name)
-    command = invoke(tool, oap_args, artifacts={"site": {"id": "AB0123"}})
-    assert command.update["artifacts"]["oap_findings"]["name"] == "Joliot Curie @ AB0123"
+def count_notes(stored: DocNotes) -> str:
+    return f"{len(stored.notes)} note(s) on {stored.label}"
 
 
-def test_finalize_rejection_returns_errors(oap_args):
-    tool = submit_tool("oap_findings", OAPFindings, finalize=site_name)
-    command = invoke(tool, oap_args)
+def test_finalize_stores_finalized_object(notes_args):
+    tool = submit_tool(
+        name="submit_notes", artifact="notes.{label}", contract=DocNotes, finalize=tag_site
+    )
+    command = invoke(tool, notes_args, artifacts={"site": {"id": "ab0123"}})
+    assert command.update["artifacts"]["notes.oap"]["label"] == "oap_ab0123"
+
+
+def test_finalize_rejection_returns_errors(notes_args):
+    tool = submit_tool(
+        name="submit_notes", artifact="notes.{label}", contract=DocNotes, finalize=tag_site
+    )
+    command = invoke(tool, notes_args)
     assert "artifacts" not in command.update
     message = only_message(command)
     assert message.status == "error"
     assert "- submit the site first\n- then resubmit" in message.content
+
+
+def test_summary_follows_acceptance(notes_args):
+    tool = submit_tool(
+        name="submit_notes",
+        artifact="notes.{label}",
+        contract=DocNotes,
+        finalize=tag_site,
+        summarize=count_notes,
+    )
+    command = invoke(tool, notes_args, artifacts={"site": {"id": "ab0123"}})
+    assert only_message(command).content == "notes.oap accepted.\n\n1 note(s) on oap_ab0123"
 
 
 def test_submission_rejected_keeps_errors():
@@ -108,12 +143,13 @@ def test_hydra_instantiates_tool():
     tool = instantiate(
         {
             "_target_": "agent.tools.submit.factory.submit_tool",
+            "name": "submit_parcel",
             "artifact": "site",
             "contract": {
                 "_target_": "hydra.utils.get_class",
-                "path": "agent.contracts.findings.site.SiteContext",
+                "path": "agent.contracts.findings.site.ParcelChoice",
             },
         }
     )
-    assert tool.name == "submit_site"
-    assert set(tool.tool_call_schema["properties"]) == set(SiteContext.model_fields)
+    assert tool.name == "submit_parcel"
+    assert set(tool.tool_call_schema["properties"]) == set(ParcelChoice.model_fields)

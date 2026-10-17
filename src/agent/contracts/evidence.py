@@ -99,3 +99,54 @@ class Ambiguity(Contract):
     rationale: str = Field(min_length=1)
     resolved_by: Resolution
     citations: tuple[Citation, ...] = ()
+
+
+type PixelBounds = tuple[int, int, int, int]
+"""``(x0, y0, x1, y1)``: columns ``x0`` to ``x1`` and rows ``y0`` to ``y1``, end-exclusive."""
+
+
+def _check_bounds(bounds: PixelBounds) -> None:
+    """Reject boxes that are empty or start at a negative coordinate.
+
+    Raises:
+        ValueError: With a message stating the expected form.
+    """
+    x0, y0, x1, y1 = bounds
+    if not (0 <= x0 < x1 and 0 <= y0 < y1):
+        msg = f"[{x0}, {y0}, {x1}, {y1}] is not a box: it needs x1 > x0 >= 0 and y1 > y0 >= 0"
+        raise ValueError(msg)
+
+
+class ImageRegion(Contract):
+    """A rectangle of a corpus page image, located on the page's view_image overview."""
+
+    doc: str = Field(min_length=1)
+    """Corpus document id, as listed by list_documents."""
+    page: int = Field(ge=1)
+    """1-based PDF page index (not the printed page number)."""
+    region: PixelBounds
+    """[x0, y0, x1, y1] in the pixel coordinates of the view_image overview, as read on its
+    rulers (zoom images carry the same rulers)."""
+
+    @model_validator(mode="after")
+    def _region_is_box(self) -> Self:
+        """Reject empty or negative regions."""
+        _check_bounds(self.region)
+        return self
+
+
+class StoredCrop(Contract):
+    """A page image region saved at full resolution as evidence."""
+
+    region: ImageRegion
+    """The region as given, in overview coordinates."""
+    pixels: PixelBounds
+    """[x0, y0, x1, y1] of the crop in the full-resolution page image."""
+    path: str = Field(min_length=1)
+    """PNG file, POSIX path relative to the project root."""
+
+    @model_validator(mode="after")
+    def _pixels_is_box(self) -> Self:
+        """Reject empty or negative pixel boxes."""
+        _check_bounds(self.pixels)
+        return self

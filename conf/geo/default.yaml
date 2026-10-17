@@ -1,0 +1,5 @@
+# Geographic data and site geometry, shared by the surveyor, site_view and the submit_study gate.
+edges:                     # agent.runtime.geometry.edges: site_edges and label_edges
+  snap_tolerance_m: 0.5    # two limits closer than this are the same limit
+  min_shared_ratio: 0.5    # share of an edge on neighbours' limits for it to face a parcel
+  collinear_angle_deg: 20  # direction change that splits a separating limit

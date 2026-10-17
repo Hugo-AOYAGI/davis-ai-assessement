@@ -84,7 +84,8 @@ class Envelope(Contract):
     footprint_area_m2: float = Field(ge=0)
     """Area of ``footprint``."""
     max_footprint_area_m2: float = Field(ge=0)
-    """Smaller of ``footprint_area_m2`` and the footprint ratio applied to the site area."""
+    """Smallest of ``footprint_area_m2``, the footprint ratio applied to the site area, and the
+    site area minus ``min_green_area_m2``."""
     min_green_area_m2: float | None = Field(ge=0)
     max_height_m: float | None = Field(gt=0)
     max_volume_m3: float | None = Field(ge=0)

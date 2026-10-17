@@ -11,6 +11,8 @@ defaults:
   - case: reference
   - policies: default
   - corpus: default
+  - geo: default
+  - images: default
   - retrieval: navigation
   - subagents: [site_locator, zoning_map_reader, regulation_researcher, oap_analyst]
   - _self_
