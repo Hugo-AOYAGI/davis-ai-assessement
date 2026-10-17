@@ -20,7 +20,7 @@ def load_config(overrides: Sequence[str] = ()) -> DictConfig:
     Hydra's compose API sets process-global state, so calls are serialised.
 
     Args:
-        overrides: Hydra override strings, e.g. ``["models.nodes.orchestrator.effort=low"]``.
+        overrides: Hydra override strings, e.g. ``["models.nodes.orchestrator.max_tokens=8000"]``.
 
     Returns:
         The composed config (without the ``hydra`` node).

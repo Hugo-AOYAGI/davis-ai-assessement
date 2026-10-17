@@ -1,7 +1,7 @@
 """Hydra CLI: run the orchestrator on the configured case and write its outputs.
 
 Usage: ``uv run python -m agent.entrypoints.run [hydra overrides...]``, e.g.
-``case=reference models.nodes.orchestrator.effort=low``. Outputs land in the Hydra run dir
+``case=reference models.nodes.orchestrator.max_tokens=8000``. Outputs land in the Hydra run dir
 (``outputs/<date>/<time>``): ``verified_study.json``, ``report.md``, ``run_summary.json`` and
 ``final_message.md``, the evidence crops linked by the report in ``evidence/``, plus the agent's
 log lines in ``agent.log``.

@@ -1,5 +1,6 @@
 # Per-node chat models. Temperature is left unset: Claude 5.5 models reject non-default values.
-# Override one node from the command line, e.g. `models.nodes.orchestrator.effort=low`.
+# Every node runs on Haiku 5.5. Switch one node back to Sonnet from the command line with
+# `models.nodes.<node>.model=claude-sonnet-5-5 +models.nodes.<node>.effort=medium`.
 
 pricing:  # USD per million tokens; cache_write is the 5-minute TTL rate
   claude-sonnet-5-5:
@@ -14,24 +15,18 @@ pricing:  # USD per million tokens; cache_write is the 5-minute TTL rate
     cache_write: 0.125
 
 nodes:
-  orchestrator: &sonnet_agent
-    _target_: langchain_anthropic.ChatAnthropic
-    model: claude-sonnet-5-5
-    max_tokens: 16000
-    max_retries: 3
-    timeout: 300
-    effort: medium  # low | medium | high | xhigh | max
-  # Haiku nodes set no `effort`: the langchain-anthropic profile for Haiku 5.5 declares no
-  # reasoning-effort levels. Its max output is 128000 tokens.
-  surveyor: &haiku_agent
+  # No `effort`: the langchain-anthropic profile for Haiku 5.5 declares no reasoning-effort
+  # levels. Its max output is 128000 tokens.
+  orchestrator: &agent
     _target_: langchain_anthropic.ChatAnthropic
     model: claude-haiku-5-5
     max_tokens: 16000
     max_retries: 3
     timeout: 300
-  zoning_analyst: *haiku_agent
-  doc_analyst: *sonnet_agent
+  surveyor: *agent
+  zoning_analyst: *agent
+  doc_analyst: *agent
   ingest_classifier:
-    <<: *haiku_agent
+    <<: *agent
     max_tokens: 1024
     timeout: 60

@@ -23,9 +23,11 @@ def test_factory_without_configurable():
 
 
 def test_overrides_select_cached_graph():
-    low: RunnableConfig = {"configurable": {"overrides": ["models.nodes.orchestrator.effort=low"]}}
+    low: RunnableConfig = {
+        "configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}
+    }
     high: RunnableConfig = {
-        "configurable": {"overrides": ["models.nodes.orchestrator.effort=high"]}
+        "configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=12000"]}
     }
     first = asyncio.run(graph(low))
     assert asyncio.run(graph(low)) is first

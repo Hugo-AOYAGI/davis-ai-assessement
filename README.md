@@ -29,7 +29,7 @@ uv run python -m agent.entrypoints.ingest     # once: builds the corpus cache un
 
 ```bash
 uv run python -m agent.entrypoints.run                       # reference case (conf/case/reference.yaml)
-uv run python -m agent.entrypoints.run models.nodes.orchestrator.effort=low   # any Hydra override
+uv run python -m agent.entrypoints.run models.nodes.orchestrator.max_tokens=8000   # any Hydra override
 ```
 
 The CLI runs unattended (`ask_user` disabled; program facts come from `case.facts`). Each run
@@ -59,7 +59,7 @@ buildings."* The orchestrator loads the `study` playbook and delegates to its th
 the chat, `ask_user` is enabled: its questions appear as an interrupt card with one field per
 question, pre-filled with the agent's recommendation (approve, edit, or reject with a free-text
 reply). Per-run Hydra overrides go in the run config:
-`{"configurable": {"overrides": ["models.nodes.orchestrator.effort=low"]}}`.
+`{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}`.
 
 ### Tracing (Phoenix)
 

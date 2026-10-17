@@ -67,7 +67,7 @@ async def graph(config: RunnableConfig) -> AgentGraph:
     The server calls it for every run, and for schema and state endpoints, with the assistant
     config merged with the thread and request ``configurable``. Hydra overrides can therefore
     be set per assistant or per run, e.g.
-    ``{"configurable": {"overrides": ["models.nodes.orchestrator.effort=low"]}}``.
+    ``{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}``.
     One compiled graph is cached per distinct override list (the server attaches its own
     checkpointer and store to a copy), so repeated calls are cheap. The build runs in a worker
     thread because Hydra's compose does blocking file-system calls.

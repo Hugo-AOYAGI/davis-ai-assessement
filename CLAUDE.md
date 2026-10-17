@@ -83,7 +83,7 @@ values elsewhere.
 **Add a config knob**: put the value in the right `conf/<group>/` file, read it from the `cfg`
 passed down to you, and pass it to your factory as an argument. Override it on the CLI
 (`group.key=value`) or per run on the server:
-`{"configurable": {"overrides": ["models.nodes.orchestrator.effort=low"]}}`.
+`{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}`.
 
 **Add a tool**: write a factory function in `src/agent/tools/<area>/` that takes its knobs as
 arguments and returns a `BaseTool`. Keep it thin (logic in `runtime/` or `adapters/`); its
