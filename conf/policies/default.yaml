@@ -3,6 +3,11 @@ ask_user:
 citations:
   policy: reject     # reject | flag
   min_score: 0.9
+  neighbour_pages: 1 # a quote is also searched this many pages before and after the cited one
+  max_quote_chars: 160 # quotes longer than this are truncated in submit_study's error messages
+envelope:
+  quad_segs: 8       # segments per quarter circle in the round setback buffers
+  min_area_m2: 1.0   # footprint parts smaller than this are discarded as slivers
 tracing:
   enabled: false
   project: davis-assessment
@@ -10,3 +15,5 @@ logging:
   level: INFO
 server:
   graph_cache_size: 8  # compiled graphs kept by the Agent Server factory, one per distinct override set
+report:
+  max_quote_chars: 200  # quotes longer than this are truncated in the report's citations table
