@@ -46,6 +46,9 @@ class CitationCheck(Contract):
     """Best similarity between the normalised quote and the page text."""
     matched_page: int | None = None
     """Page holding the best match, when it differs from the cited page."""
+    text_verifiable: bool = True
+    """False for a citation of a document without a text layer (a raster plan): its quote, a
+    legend label, is not checked; ``verified`` is then False and ``score`` 0."""
 
 
 class Rule(Contract):

@@ -25,9 +25,14 @@ def findings(*citations, prescriptions=()):
     )
 
 
-def finalizer(source, policy="reject"):
+def finalizer(source, policy="reject", check_raster=False):
     return citation_finalizer(
-        corpus=source, policy=policy, min_score=0.9, neighbour_pages=1, max_quote_chars=80
+        corpus=source,
+        policy=policy,
+        min_score=0.9,
+        neighbour_pages=1,
+        max_quote_chars=80,
+        check_raster=check_raster,
     )
 
 
@@ -81,5 +86,21 @@ def test_other_geometric_sources_are_not_checked(source):
 
 
 def test_unknown_policy_fails_at_build(source):
-    with pytest.raises(ValueError, match="CitationPolicy"):
+    with pytest.raises(ValueError, match="unknown citation policy 'ignore'"):
         finalizer(source, policy="ignore")
+
+
+def test_raster_plan_citation_is_accepted_without_text_check(source, caplog):
+    plan = cite(1, "UMG", doc="plu_reglement_graphique")
+    submission = findings(cite(3, HEIGHT), plan)
+    with caplog.at_level(logging.INFO, logger="agent"):
+        assert finalizer(source)(submission, {}) is submission
+    assert "OAPFindings: 1/1 citations verified, 1 not text-verifiable (raster)" in caplog.text
+
+
+def test_raster_plan_citation_is_rejected_when_text_checked(source):
+    plan = cite(1, "UMG", doc="plu_reglement_graphique")
+    with pytest.raises(SubmissionRejected) as rejected:
+        finalizer(source, check_raster=True)(findings(plan), {})
+    (error,) = rejected.value.errors
+    assert error.startswith("citations.0 (plu_reglement_graphique p.1): quote not found verbatim")

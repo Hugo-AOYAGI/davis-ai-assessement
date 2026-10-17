@@ -48,5 +48,7 @@ class VerifiedStudy(Contract):
     citation_checks: tuple[CitationCheck, ...]
     """One check per distinct regulatory citation found anywhere in ``study``.
 
-    Geometric citations are not checked against the corpus and have no entry.
+    Geometric citations are not checked against the corpus and have no entry. Citations of a
+    raster document (no text layer) have an entry with ``text_verifiable`` False unless the
+    configuration asks for them to be text-checked.
     """

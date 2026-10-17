@@ -26,6 +26,31 @@ def index_pages(corpus: Corpus) -> dict[tuple[str, int], str]:
     return {(page.doc, page.number): normalise(page.text) for page in corpus.pages}
 
 
+def raster_documents(corpus: Corpus) -> frozenset[str]:
+    """Find the documents without a text layer, whose quotes cannot be checked against text.
+
+    Args:
+        corpus: The ingested corpus.
+
+    Returns:
+        Ids of the documents none of whose pages has non-blank text (scanned or raster plans).
+    """
+    with_text = {page.doc for page in corpus.pages if page.text.strip()}
+    return frozenset(document.id for document in corpus.documents if document.id not in with_text)
+
+
+def unverifiable(citation: Citation) -> CitationCheck:
+    """Record a citation of a raster document without checking its quote.
+
+    Args:
+        citation: A regulatory citation of a document without a text layer.
+
+    Returns:
+        A check marked not text-verifiable, with ``verified`` False and ``score`` 0.
+    """
+    return CitationCheck(citation=citation, verified=False, score=0.0, text_verifiable=False)
+
+
 def check_citation(
     citation: Citation, pages: PageIndex, *, min_score: float, neighbour_pages: int
 ) -> CitationCheck:

@@ -33,8 +33,17 @@ def test_case_validates_against_contract():
     assert "Résidence Jeunes Actifs" in case.program
 
 
-def test_subagents_empty_by_default():
-    assert OmegaConf.to_container(load_config().subagents) == {}
+def test_four_subagents_by_default():
+    assert list(load_config().subagents) == [
+        "site_locator",
+        "zoning_map_reader",
+        "regulation_researcher",
+        "oap_analyst",
+    ]
+
+
+def test_subagents_can_be_emptied():
+    assert OmegaConf.to_container(load_config(["subagents=[]"]).subagents) == {}
 
 
 def test_unknown_subagent_is_rejected():

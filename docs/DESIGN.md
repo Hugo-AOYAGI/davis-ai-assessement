@@ -158,7 +158,10 @@ into the sub-agent context. Both modes are Hydra variants (`retrieval=navigation
 
 `{doc, page, article, quote, source_kind}`. The quote must appear verbatim (after normalisation,
 fuzzy threshold in config) on the cited page. Unverifiable citations are rejected by
-`submit_study` (policy configurable: reject-and-retry or flag).
+`submit_study` (policy configurable: reject-and-retry or flag). Citations of a document without a
+text layer (the raster zoning plan, whose quotes are legend labels) cannot be text-checked: they
+are recorded as `CitationCheck(text_verifiable=False)` and never reject a study
+(`policies.citations.check_raster: false`); pass rates count text-verifiable citations only.
 
 ## 10. Models
 

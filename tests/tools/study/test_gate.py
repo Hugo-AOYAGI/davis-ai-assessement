@@ -151,7 +151,33 @@ def fixture_corpus():
     )
 
 
-def gate(policy="reject", corpus=fixture_corpus):
+def corpus_with_plan():
+    corpus = fixture_corpus()
+    plan = Document(
+        id="plu_reglement_graphique",
+        kind=DocumentKind.ZONING_MAP,
+        title="PLU - Plan de zonage",
+        path=Path("ressources/plu_reglement_graphique_91272_20210706.pdf"),
+        page_count=1,
+    )
+    return corpus.model_copy(
+        update={
+            "documents": (*corpus.documents, plan),
+            "pages": (*corpus.pages, Page(doc=plan.id, number=1, text="")),
+        }
+    )
+
+
+PLAN = Citation(
+    doc="plu_reglement_graphique",
+    page=1,
+    article="Légende",
+    quote="UMG",
+    source_kind=SourceKind.REGULATORY,
+)
+
+
+def gate(policy="reject", corpus=fixture_corpus, check_raster=False):
     return submit_study_tool(
         corpus=corpus,
         artifact="study",
@@ -160,6 +186,7 @@ def gate(policy="reject", corpus=fixture_corpus):
         min_score=0.9,
         neighbour_pages=1,
         max_quote_chars=60,
+        check_raster=check_raster,
         quad_segs=8,
         min_area_m2=1.0,
     )
@@ -279,7 +306,7 @@ def test_unknown_document_lists_known_documents(study, site):
 
 def test_flag_policy_stores_unverified_checks(study, site, caplog):
     fabricated = regulatory(326, "UMG 10", "La hauteur des constructions est limitée à 35 mètres")
-    with caplog.at_level(logging.WARNING, logger="agent.tools.study.gate"):
+    with caplog.at_level(logging.WARNING, logger="agent"):
         verified = stored(invoke(gate(policy="flag"), citing(study, fabricated), site))
     (failed,) = [check for check in verified.citation_checks if not check.verified]
     assert failed.citation == fabricated
@@ -354,6 +381,7 @@ def test_config_node_builds_the_tool(study, site):
             "min_score": "${policies.citations.min_score}",
             "neighbour_pages": "${policies.citations.neighbour_pages}",
             "max_quote_chars": "${policies.citations.max_quote_chars}",
+            "check_raster": "${policies.citations.check_raster}",
             "quad_segs": "${policies.envelope.quad_segs}",
             "min_area_m2": "${policies.envelope.min_area_m2}",
         }
@@ -363,3 +391,29 @@ def test_config_node_builds_the_tool(study, site):
     tool = instantiate(cfg.test_submit_study, _convert_="all")
     assert tool.name == "submit_study"
     stored(invoke(tool, study, site))
+
+
+def test_raster_citation_is_recorded_not_text_verifiable_under_reject(study, site, caplog):
+    with caplog.at_level(logging.INFO, logger="agent"):
+        verified = stored(invoke(gate(corpus=corpus_with_plan), citing(study, PLAN), site))
+    (plan,) = [check for check in verified.citation_checks if check.citation == PLAN]
+    assert not plan.text_verifiable
+    assert not plan.verified
+    assert plan.score == 0.0
+    assert all(c.verified for c in verified.citation_checks if c.text_verifiable)
+    assert "Study: 5/5 citations verified, 1 not text-verifiable (raster)" in caplog.text
+    assert "unverified" not in caplog.text
+
+
+def test_raster_citation_is_not_counted_unverified_under_flag(study, site, caplog):
+    tool = gate(policy="flag", corpus=corpus_with_plan)
+    with caplog.at_level(logging.WARNING, logger="agent"):
+        verified = stored(invoke(tool, citing(study, PLAN), site))
+    assert not caplog.text
+    assert [c.text_verifiable for c in verified.citation_checks].count(False) == 1
+
+
+def test_raster_citation_is_text_checked_and_rejected_when_configured(study, site):
+    tool = gate(corpus=corpus_with_plan, check_raster=True)
+    content = rejection(invoke(tool, citing(study, PLAN), site))
+    assert "- regime.citations.0 (plu_reglement_graphique p.1, Légende): quote not found" in content

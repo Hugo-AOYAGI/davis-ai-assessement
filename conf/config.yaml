@@ -3,7 +3,8 @@
 # `subagents` is a multi-select group: one file per sub-agent in conf/subagents/, whose content
 # is nested under a top-level key equal to the file name (conf/subagents/site_locator.yaml starts
 # with `site_locator:`), so several selected files merge side by side into `subagents.<name>`.
-# Enable them in the list below or on the command line: `subagents=[site_locator,oap_analyst]`.
+# The four v0 sub-agents are enabled below; select others on the command line, e.g.
+# `subagents=[site_locator,zoning_map_reader]`.
 defaults:
   - models: default
   - agent: default
@@ -11,7 +12,7 @@ defaults:
   - policies: default
   - corpus: default
   - retrieval: navigation
-  - subagents: []
+  - subagents: [site_locator, zoning_map_reader, regulation_researcher, oap_analyst]
   - _self_
 
 hydra:
