@@ -54,7 +54,7 @@ cd ui && pnpm install && pnpm dev                            # UI on http://loca
 
 Ask for a study in the chat, e.g. *"Buildability study for 4 rue Joliot Curie, 91190
 Gif-sur-Yvette: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs in two separate
-buildings."* The orchestrator loads the `study` playbook and delegates to its three sub-agents. In
+buildings."* The orchestrator loads the `study` playbook and delegates to its four sub-agents. In
 the chat, `ask_user` is enabled: its questions appear as an interrupt card with one field per
 question, pre-filled with the agent's recommendation (approve, edit, or reject with a free-text
 reply). Per-run Hydra overrides go in the run config:
@@ -80,15 +80,18 @@ as an artifact in the graph state:
 
 | Sub-agent | Job | Tools | Artifact |
 |---|---|---|---|
-| `surveyor` | address → parcels chosen → site (polygon, area, neutral edges) | `geocode`, `find_parcels`, `describe_parcels`, `site_view`, `submit_parcel` | `site` |
+| `surveyor` | address → parcels chosen → site (polygon, area, edges; may declare a neighbouring strip public land, with its evidence) | `geocode`, `find_parcels`, `describe_parcels`, `site_view`, `submit_parcel` | `site` |
 | `zoning_analyst` | finds the site on the raster zoning plan by eye; zone and legend items | `list_documents`, `site_view`, `view_image`, `zoom`, `submit_zone` | `zone` |
-| `doc_analyst` | reads documents for an aim (rules, OAP, a chat question) and returns cited notes and open points; extracts, does not decide | `list_documents`, `list_sections`, `read_section`, `search`, `read_pages`, `view_image`, `zoom`, `site_view`, `submit_notes` | `notes.<label>` |
+| `doc_analyst` | reads documents for an aim (rules, OAP, destinations, a chat question) and returns cited notes and open points; extracts, does not decide | `list_documents`, `list_sections`, `read_section`, `search`, `read_pages`, `view_image`, `zoom`, `site_view`, `submit_notes` | `notes.<label>` |
+| `architect` | turns the cited notes into envelope rules, places the program's buildings on the site, checks them on a plan preview; reads no document, code computes the bounds and the proposal | `read_artifact`, `preview_envelope`, `submit_envelope` | `envelope` |
 
-The study playbook runs `surveyor`, then `zoning_analyst`, then `doc_analyst` twice in parallel
-(`rules` and `oap`). `submit_study` is plain code: it validates the `Study`, checks every quote on
-its page, requires an ambiguity for every open point, labels the site limits (road / side / rear),
-computes the envelope, saves the evidence crops, and returns the envelope figures on acceptance
-(artifact `study`).
+The study playbook runs `surveyor`, then `zoning_analyst`, then `doc_analyst` three times in
+parallel (`rules`, `oap`, `destinations`); the orchestrator decides each building's destination
+and verdict, then runs `architect`. `submit_study` is plain code: it validates the `Study`, checks
+every quote on its page, requires an ambiguity for every open point (notes and envelope), labels
+the site limits (road / side / rear), checks that the envelope cites only the notes and
+recomputes its bounds and proposal, saves the evidence crops, and returns the envelope figures on
+acceptance (artifact `study`).
 
 ## Repository layout
 
@@ -115,10 +118,10 @@ ui/          chat UI (Next.js, adapted from agent-chat-ui)
 
 ## Status
 
-v1 (the [REFINE](docs/REFINE.md) refactor of the working v0): orchestrator (deepagents) with three
-sub-agents (`surveyor`, `zoning_analyst`, `doc_analyst`), on-demand `study` playbook, hard
-`submit_study` gate (schema, verbatim citation check, open points ↔ ambiguities, edge labelling,
-envelope with green cap, evidence crops), `ask_user` interrupt, Hydra CLI and Phoenix tracing.
+Orchestrator (deepagents) with four sub-agents (`surveyor`, `zoning_analyst`, `doc_analyst`,
+`architect`), on-demand `study` playbook, hard `submit_study` gate (schema, verbatim citation
+check, open points ↔ ambiguities, edge labelling, envelope bounds and proposal recomputed with
+footprint and green caps, evidence crops), `ask_user` interrupt, Hydra CLI and Phoenix tracing.
 v0 baseline reference run: accepted at the first submission, 46/46 text-verifiable citations
 verified, 5 ambiguities, $0.71. Next: rerun the reference case against that baseline, then the
 eval set and iteration driven by eval failures.

@@ -1,9 +1,9 @@
 # CLAUDE.md
 
 Regulatory-analysis agent (LangGraph + deepagents, Hydra, Phoenix, Claude models) producing a
-buildability study from planning documents. Read `docs/DESIGN.md` and `docs/REFINE.md` (which
-wins where they differ) before changing architecture, and follow `docs/CODING_STANDARDS.md` for
-every change.
+buildability study from planning documents. Read `docs/DESIGN.md`, `docs/REFINE.md` and
+`docs/REFINE_v2.md` (each later one wins where they differ) before changing architecture, and
+follow `docs/CODING_STANDARDS.md` for every change.
 
 ## Where things go
 
@@ -32,7 +32,8 @@ Layering: `contracts ← runtime ← adapters ← tools ← agents ← entrypoin
 settings · `agent/` orchestrator + playbook · `subagents/` enabled sub-agents and their prompts ·
 `retrieval/` navigation vs full sections, tool limits · `geo/` geographic services, site geometry
 knobs, the shared `site_view` tool node · `images/` corpus page images (render dpi, image sizes) ·
-`policies/` ask_user, citation check, required notes, evidence crops, tracing.
+`policies/` ask_user, citation check, required notes, envelope computation, evidence crops,
+tracing.
 
 ## Resources
 
@@ -45,6 +46,7 @@ knobs, the shared `site_view` tool node · `images/` corpus page images (render 
 | Design decisions | `docs/DESIGN.md` |
 | v1 decisions (supersede DESIGN where they differ) | `docs/REFINE.md` |
 | v1 seams, work packages, as-built deviations | `docs/V1_PLAN.md` |
+| Envelope (bounds + proposal), `architect`, destinations (supersede REFINE where they differ) | `docs/REFINE_v2.md` |
 | Coding standards | `docs/CODING_STANDARDS.md` |
 | v0 work packages, file ownership, acceptance criteria | `docs/V0_PLAN.md` |
 | Deferred decisions, post-v0 improvements, rejected options | `docs/ROADMAP.md` |
@@ -122,8 +124,8 @@ surveyor:
       summarize: {_target_: hydra.utils.get_method, path: agent.tools.geo.site.summarize_site}
 ```
 
-Enable it with `subagents=[surveyor,...]` (default: `surveyor`, `zoning_analyst`, `doc_analyst`
-in `conf/config.yaml`).
+Enable it with `subagents=[surveyor,...]` (default: `surveyor`, `zoning_analyst`, `doc_analyst`,
+`architect` in `conf/config.yaml`).
 `build_subagent(cfg, name)` returns the standalone graph; the orchestrator delegates to that same
 graph, and evals invoke it with `{"messages": [HumanMessage(task)]}`.
 
@@ -133,7 +135,8 @@ summarize=None)` builds the tool `name`; it validates the model's arguments agai
 returns `field.path: message` errors to the model, and stores the result as JSON under
 `artifacts[artifact]`. `artifact` may hold `{field}` placeholders filled from the submission's
 top-level fields (`notes.{label}` gives `notes.rules`, `notes.oap`); `summarize(stored) -> str` is
-appended to the `<key> accepted.` reply. Artifacts written by a sub-agent reach the
+appended to the `<key> accepted.` reply, which always ends with `DONE` (an accepted submission is
+final: "do not submit again"). Artifacts written by a sub-agent reach the
 orchestrator's state. Read one back with `read_artifact(state["artifacts"], key, Contract)`. A
 gate such as `submit_study` passes `finalize(submission, artifacts) -> stored` and raises
 `SubmissionRejected(errors)` to refuse.
