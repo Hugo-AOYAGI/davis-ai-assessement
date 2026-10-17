@@ -122,3 +122,28 @@ def test_labels_read_only_the_other_side():
     ]
     labelled = label_edges(given, snap_tolerance_m=0.5, collinear_angle_deg=20)
     assert [boundary.kind for boundary in labelled] == [ROAD, SIDE, REAR, SIDE]
+
+
+def test_edge_facing_only_declared_public_parcels_is_public_land():
+    around = neighbours("west", "east", "north", "south")
+    result = site_edges(
+        RECTANGLE, around, snap_tolerance_m=0.5, min_shared_ratio=0.5, public={"south"}
+    )
+    assert [edge.other_side for edge in result] == [PUBLIC, PARCEL, PARCEL, PARCEL]
+    assert result[0].neighbours == ("south",)
+
+
+def test_edge_with_a_private_neighbour_stays_parcel():
+    around = {"a": shapely.box(20, -5, 35, 20), "b": shapely.box(20, 20, 35, 45)}
+    result = site_edges(RECTANGLE, around, snap_tolerance_m=0.5, min_shared_ratio=0.5, public={"a"})
+    assert result[1].other_side is PARCEL
+    assert result[1].neighbours == ("a", "b")
+
+
+def test_declared_public_edge_is_labelled_road():
+    around = neighbours("west", "east", "north", "south")
+    result = site_edges(
+        RECTANGLE, around, snap_tolerance_m=0.5, min_shared_ratio=0.5, public={"south"}
+    )
+    labelled = label_edges(result, snap_tolerance_m=0.5, collinear_angle_deg=20)
+    assert [boundary.kind for boundary in labelled] == [ROAD, SIDE, REAR, SIDE]

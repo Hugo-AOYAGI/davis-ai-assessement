@@ -1,5 +1,5 @@
 import math
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, Sequence, Set
 from itertools import pairwise
 from typing import cast
 
@@ -18,12 +18,13 @@ def site_edges(
     *,
     snap_tolerance_m: float,
     min_shared_ratio: float,
+    public: Set[str] = frozenset(),
 ) -> tuple[Edge, ...]:
     """Describe each edge of the site's exterior ring by what lies across it.
 
     An edge lying on the neighbours' limits over at least ``min_shared_ratio`` of its length
-    faces a parcel; every other edge faces public land. A neighbour lying mostly inside the site
-    is ignored.
+    faces a parcel, unless every neighbour listed along it is declared public; every other edge
+    faces public land. A neighbour lying mostly inside the site is ignored.
 
     Args:
         polygon: Site polygon, in the same metric CRS as ``neighbours``.
@@ -31,11 +32,12 @@ def site_edges(
         snap_tolerance_m: Distance within which an edge counts as lying on a neighbour's limit.
         min_shared_ratio: Share of an edge's length that must lie on neighbours' limits for the
             edge to face a parcel.
+        public: Ids of neighbours the surveyor declared public land.
 
     Returns:
-        One edge per segment of the exterior ring, in ring order. A parcel edge lists the
-        neighbours whose limit runs along it away from its ends (a neighbour only touching a
-        corner is not listed).
+        One edge per segment of the exterior ring, in ring order. An edge lying on neighbours'
+        limits lists the neighbours whose limit runs along it away from its ends (a neighbour
+        only touching a corner is not listed), declared public ones included.
     """
     site = to_shape(polygon)
     zones = {
@@ -49,12 +51,13 @@ def site_edges(
         line = shapely.LineString([start, end])
         shared = union is not None and _shared_ratio(line, union) >= min_shared_ratio
         across = _across(line, zones, snap_tolerance_m) if shared else ()
+        facing_parcel = shared and not (across and set(across) <= public)
         edges.append(
             Edge(
                 start=start,
                 end=end,
                 length_m=float(line.length),
-                other_side=EdgeSide.PARCEL if shared else EdgeSide.PUBLIC_LAND,
+                other_side=EdgeSide.PARCEL if facing_parcel else EdgeSide.PUBLIC_LAND,
                 neighbours=across,
             )
         )
