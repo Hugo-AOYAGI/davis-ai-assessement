@@ -97,43 +97,145 @@ export interface Boundary {
   end: Point;
 }
 
-/** Distances in metres, ratios in [0, 1]. */
-export interface EnvelopeParameters {
-  setback_road_m: Limit;
-  setback_side_m: Limit;
-  setback_rear_m: Limit;
+// --- envelope.py: what the architect submits -------------------------------
+
+/** `max(min_m, height_ratio × H)`, metres; at least one of the two is set. */
+export interface Distance {
+  min_m: number | null;
+  /** `H/2` → 0.5. */
+  height_ratio: number | null;
+  rule: string;
+  citations: Citation[];
+}
+
+/** One per edge kind. */
+export interface SetbackRule {
+  kind: BoundaryKind;
+  /** May build right on the edge. */
+  on_limit_allowed: boolean;
+  with_windows: Distance | null;
+  without_windows: Distance | null;
+}
+
+/** One per building of the program. */
+export interface BuildingLimits {
+  /** Same label as in `Study.admissibility`. */
+  building: string;
   max_height_m: Limit;
-  /** Storeys above ground, ground floor included (R+5 = 6). */
+  /** Storeys above ground, ground floor included (R+5 = 6); reported only. */
   max_storeys: Limit;
+}
+
+/** Ratios in [0, 1]. */
+export interface EnvelopeRules {
+  setbacks: SetbackRule[];
+  buildings: BuildingLimits[];
+  /** Between buildings on one plot. */
+  spacing_with_windows: Distance | null;
+  spacing_without_windows: Distance | null;
   max_footprint_ratio: Limit;
   min_green_ratio: Limit;
 }
 
-export interface Envelope {
-  site_area_m2: number;
-  /** Site polygon minus setbacks; `null` when nothing remains. */
+export interface OapChoice {
+  /** Cited from `notes.oap`. */
+  prescription: Rule;
+  how: string;
+}
+
+export type LayoutCut = "across_long_axis" | "along_long_axis";
+
+/** The architect's design choices (none dictated by the PLU). */
+export interface Layout {
+  cut: LayoutCut;
+  /** (0, 1): share of the usable area given to the first part. */
+  first_share: number;
+  /** Building labels, first part (nearer the road) first. */
+  order: string[];
+  /** A facing facade has windows: `spacing_with_windows` applies. */
+  facing_windows: boolean;
+  /** Per building in `order`; empty = each building's maximum. */
+  heights_m: number[];
+  oap: OapChoice[];
+  reasons: string;
+}
+
+// --- envelope.py: what code computes ----------------------------------------
+
+/** One horizontal slice of a massing. */
+export interface Level {
+  from_m: number;
+  to_m: number;
+  area_m2: number;
+}
+
+export interface BuildingMassing {
+  /** A building label, or several joined when a bound groups a height band. */
+  building: string;
+  /** Its ground part. */
+  footprint: Polygon | null;
+  /**
+   * May be below the polygon's area when a footprint or green-space cap
+   * scales the buildings down: the polygon is not shrunk, only the areas.
+   */
+  footprint_area_m2: number;
+  max_height_m: number;
+  /** One slice for a prism, several when setbacks grow with height. */
+  levels: Level[];
+  volume_m3: number;
+}
+
+export type ScenarioName = "largest" | "windows" | "proposal";
+
+export interface Scenario {
+  name: ScenarioName | (string & {});
+  /** Plot minus setbacks at ground level; `null` when nothing remains. */
   footprint: Polygon | null;
   footprint_area_m2: number;
-  /**
-   * Smallest of the footprint area, the footprint ratio applied to the site
-   * area and the site area minus the green area. `footprint` is not shrunk
-   * to it: only the area is capped.
-   */
-  max_footprint_area_m2: number;
-  min_green_area_m2: number | null;
-  max_height_m: number | null;
-  /** `max_footprint_area_m2 * max_height_m`; `null` without a height limit. */
-  max_volume_m3: number | null;
+  buildings: BuildingMassing[];
+  /** Every building fits with the required spacing. */
+  fits: boolean;
+  total_volume_m3: number;
   assumptions: string[];
 }
 
+/** The `envelope` artifact. */
+export interface EnvelopeStudy {
+  rules: EnvelopeRules;
+  layout: Layout;
+  site_area_m2: number;
+  min_green_area_m2: number | null;
+  /** `largest` and `windows`: from the rules alone. */
+  bounds: Scenario[];
+  /** From the rules and the layout. */
+  proposal: Scenario;
+  open_points: OpenPoint[];
+}
+
+// --- findings/notes.py -----------------------------------------------------
+
+export interface OpenPoint {
+  question: string;
+  options: string[];
+  why: string;
+  citations: Citation[];
+}
+
 // --- findings/site.py ------------------------------------------------------
+
+/** A neighbouring parcel the surveyor declared to be public land. */
+export interface PublicParcel {
+  id: string;
+  /** The evidence: shape, size, position, what the aerial photo shows. */
+  reason: string;
+}
 
 export interface ParcelChoice {
   address: string;
   parcel_ids: string[];
   rationale: string;
   assumptions: string[];
+  public_parcels?: PublicParcel[];
 }
 
 export type EdgeSide = "parcel" | "public_land";
@@ -221,7 +323,6 @@ export interface Study {
   program: string;
   regime: Regime;
   admissibility: Admissibility[];
-  envelope: EnvelopeParameters;
   parking: ParkingRule[];
   conditions: Rule[];
   ambiguities: Ambiguity[];
@@ -234,7 +335,8 @@ export interface VerifiedStudy {
   site: Site;
   boundaries: Boundary[];
   zone: ZoneFindings;
-  envelope: Envelope;
+  /** Studies stored before this shape hold a prism here: read it with `readEnvelope`. */
+  envelope: EnvelopeStudy;
   /** One per distinct regulatory citation in `study`. */
   citation_checks: CitationCheck[];
   evidence: StoredCrop[];

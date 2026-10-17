@@ -16,6 +16,12 @@ export function signedArea(ring: Point[]): number {
   return sum / 2;
 }
 
+/** Unsigned area of a polygon, holes removed. */
+export function polygonArea(polygon: Polygon): number {
+  const holes = polygon.holes.reduce((s, h) => s + Math.abs(signedArea(h)), 0);
+  return Math.abs(signedArea(polygon.exterior)) - holes;
+}
+
 /** Area centroid of a closed ring (vertex mean if degenerate). */
 export function centroid(ring: Point[]): Point {
   const area = signedArea(ring);
