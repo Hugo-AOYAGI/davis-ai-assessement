@@ -1,0 +1,51 @@
+# Regulation researcher: zone chapter of the PLU regulation -> RegulationFindings
+# (artifact `regulation_findings`). Tool knobs come from the `retrieval` group.
+regulation_researcher:
+  description: >-
+    Reads the PLU regulation for a zone and a program: classifies each building's use into a PLU
+    destination with its admissibility, extracts the envelope parameters (setbacks, height,
+    storeys, footprint, green space) and the car parking rules, and lists the other applicable
+    rules, all with verbatim citations; records the ambiguities it had to settle. Give it the
+    address, the program (buildings and their stated uses, with any known facts) and the zone
+    with its sector (e.g. zone UMG, sector Moulon).
+  prompt: prompts/subagents/regulation_researcher.md
+  model: regulation_researcher  # key in models.nodes
+  tools:
+    - _target_: agent.tools.regulation.navigate.read_zone_tool
+      corpus: ${retrieval.corpus}
+      mode: ${retrieval.mode}
+      general_sections: ${retrieval.general_sections}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.regulation.navigate.read_article_tool
+      corpus: ${retrieval.corpus}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.regulation.navigate.read_section_tool
+      corpus: ${retrieval.corpus}
+      mode: ${retrieval.mode}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.regulation.navigate.list_sections_tool
+      corpus: ${retrieval.corpus}
+    - _target_: agent.tools.regulation.navigate.read_pages_tool
+      corpus: ${retrieval.corpus}
+      max_pages: ${retrieval.max_pages}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.regulation.lookup.get_definition_tool
+      corpus: ${retrieval.corpus}
+      max_results: ${retrieval.max_definitions}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.regulation.lookup.search_tool
+      corpus: ${retrieval.corpus}
+      k: ${retrieval.search_k}
+      snippet_chars: ${retrieval.snippet_chars}
+    - _target_: agent.tools.submit.factory.submit_tool
+      artifact: regulation_findings  # tool is named submit_regulation_findings
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.findings.regulation.RegulationFindings
+      finalize:                    # checks every quote on its page, as submit_study will
+        _target_: agent.tools.regulation.citations.citation_finalizer
+        corpus: ${retrieval.corpus}
+        policy: ${policies.citations.policy}
+        min_score: ${policies.citations.min_score}
+        neighbour_pages: ${policies.citations.neighbour_pages}
+        max_quote_chars: ${policies.citations.max_quote_chars}
