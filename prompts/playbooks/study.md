@@ -43,9 +43,9 @@ its free text in $language (quotes stay verbatim in the language of the document
      when the text does not settle it.
    - If a finding is missing or contradicts another in a way you cannot settle, delegate again
      with a precise question rather than guessing.
-6. **Envelope preview** (recommended): call `compute_envelope` with the envelope parameters and
-   check the result is plausible (footprint inside the site, non-zero area unless the setbacks
-   really consume the site). Keep its footprint and volume for your final reply.
+6. **Envelope preview**: call `compute_envelope` with the envelope parameters and check the
+   result is plausible (non-zero footprint unless the setbacks really consume the site, volume
+   consistent with footprint and height). Keep its footprint and volume for your final reply.
 7. **Submit**: call `submit_study` with the complete study (see below). If it rejects the study,
    fix every error listed and submit the complete study again. Repeat until accepted.
 8. **Reply**: a short answer to the user: zone and OAP, verdict per building, key envelope
@@ -64,7 +64,8 @@ its free text in $language (quotes stay verbatim in the language of the document
 - `ambiguities`: every ambiguity of the map, regulation and OAP findings, plus those you
   recorded while reconciling. `resolved_by` is `user` only for answers given through `ask_user`.
 - `summary`: a Markdown narrative for an architect: site, regime, admissibility, envelope,
-  parking, conditions, and the caveats that matter most.
+  parking, conditions, and the caveats that matter most. It is inserted under a level-2
+  heading of the report: use bold lead-ins or `###` headings, never `#` or `##`.
 
 Write every free-text field (rules, rationales, ambiguities, summary) in $language.
 

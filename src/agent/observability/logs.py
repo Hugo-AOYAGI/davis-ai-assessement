@@ -1,5 +1,6 @@
 import logging
 import sys
+from pathlib import Path
 from typing import TextIO
 
 _ROOT_LOGGER = "agent"
@@ -9,6 +10,10 @@ _DATE_FORMAT = "%H:%M:%S"
 
 class _AgentHandler(logging.StreamHandler[TextIO]):
     """Stderr handler marking the one installed by ``setup_logging``."""
+
+
+class _AgentFileHandler(logging.FileHandler):
+    """File handler marking the one installed by ``log_to_file``."""
 
 
 def setup_logging(level: str) -> None:
@@ -26,6 +31,23 @@ def setup_logging(level: str) -> None:
         handler.setFormatter(logging.Formatter(_FORMAT, datefmt=_DATE_FORMAT))
         logger.addHandler(handler)
     logger.propagate = False
+
+
+def log_to_file(path: Path) -> None:
+    """Also write the ``agent`` log lines to a file, e.g. a run's own log.
+
+    Replaces the file installed by a previous call, so one process writes one file at a time.
+
+    Args:
+        path: Log file, appended to (its directory must exist).
+    """
+    logger = logging.getLogger(_ROOT_LOGGER)
+    for handler in [h for h in logger.handlers if isinstance(h, _AgentFileHandler)]:
+        logger.removeHandler(handler)
+        handler.close()
+    handler = _AgentFileHandler(path, encoding="utf-8")
+    handler.setFormatter(logging.Formatter(_FORMAT, datefmt=_DATE_FORMAT))
+    logger.addHandler(handler)
 
 
 def get_logger(name: str) -> logging.Logger:

@@ -3,7 +3,7 @@
 Usage: ``uv run python -m agent.entrypoints.run [hydra overrides...]``, e.g.
 ``case=reference models.nodes.orchestrator.effort=low``. Outputs land in the Hydra run dir
 (``outputs/<date>/<time>``): ``verified_study.json``, ``report.md``, ``run_summary.json`` and
-``final_message.md``.
+``final_message.md``, plus the agent's log lines in ``agent.log``.
 """
 
 import time
@@ -29,12 +29,13 @@ from agent.entrypoints.summary import (
     run_summary,
 )
 from agent.llm.usage import price_usage
-from agent.observability.logs import get_logger, setup_logging
+from agent.observability.logs import get_logger, log_to_file, setup_logging
 from agent.observability.tracing import setup_tracing
 from agent.runtime.report.render import render_report
 from agent.tools.submit.artifacts import read_artifact
 
-logger = get_logger(__name__)
+# Run as ``python -m``, ``__name__`` is ``__main__``, outside the ``agent`` hierarchy.
+logger = get_logger("agent.entrypoints.run")
 
 _CONFIG_DIR = str(PROJECT_ROOT / "conf")
 _CONFIG_NAME = "config"
@@ -142,6 +143,7 @@ def main(cfg: DictConfig) -> None:
     make_unattended(cfg)
     hydra_cfg = HydraConfig.get()
     run_dir = Path(hydra_cfg.runtime.output_dir)
+    log_to_file(run_dir / "agent.log")
     overrides = list(hydra_cfg.overrides.task)
     case = Case.model_validate(OmegaConf.to_container(cfg.case, resolve=True))
     metrics, messages, verified = run_study(cfg, case, overrides)
