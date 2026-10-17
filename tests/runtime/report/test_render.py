@@ -59,41 +59,56 @@ def test_regime_and_admissibility(verified):
     assert "| permitted | none | [3] |" in line_with(report, "| A |")
 
 
-def test_envelope_parameters(verified):
+def test_envelope_rules(verified):
     report = render(verified)
-    assert "| Setback from road limits | 5 m | see article | [2] |" in report
-    assert "| Maximum height | 20 m | see article | [1] |" in report
-    assert "| Maximum storeys | 6 | see article | [1] |" in report
-    assert "| Maximum footprint ratio | not set | see article |  |" in report
-    assert "| Minimum green ratio | 20% | see article | [1] |" in report
+    assert "Site area: 1200 m². Minimum green area: 240 m²." in report
+    assert "| road | not allowed | 5 m: see article | — | [2] |" in report
+    assert "| rear | allowed | — | 4 m: see article | [1] |" in report
+    assert "| A | 20 m | 6 | see article | [1] |" in report
+    assert "| B | 18 m | not set | see article | [1] |" in report
+    assert "| Spacing, no facing window | 6 m: see article | [1] |" in report
+    assert "| Maximum footprint ratio | not set: see article |  |" in report
+    assert "| Minimum green ratio | 20%: see article | [1] |" in report
 
 
-def test_computed_envelope(verified):
+def test_bounds(verified):
     report = render(verified)
-    assert "| Buildable footprint after setbacks | 651 m² |" in report
-    assert "| Minimum green area | 240 m² |" in report
-    assert "| Maximum volume | 13020 m³ |" in report
-    assert "- Setbacks applied as straight offsets." in report
+    largest = report.split("### Bound: largest", 1)[1].split("### Bound: windows", 1)[0]
+    assert "Ground footprint after setbacks: 800 m². Total volume: 16000 m³." in largest
+    assert "| A | 800 m² | 20 m | 16000 m³ | 0-20 m: 800 m² | yes |" in largest
+    assert "| B | 800 m² | 18 m | 14400 m³ | 0-18 m: 800 m² | yes |" in largest
+    windows = report.split("### Bound: windows", 1)[1].split("### Proposal", 1)[0]
+    assert "| A | 672 m² | 20 m | 13440 m³ |" in windows
 
 
-def test_missing_computed_values_render_as_dash(verified):
-    envelope = verified.envelope.model_copy(
-        update={
-            "footprint": None,
-            "footprint_area_m2": 0,
-            "max_footprint_area_m2": 0,
-            "min_green_area_m2": None,
-            "max_height_m": None,
-            "max_volume_m3": None,
-        }
+def test_proposal(verified):
+    report = render(verified)
+    proposal = report.split("### Proposal", 1)[1].split("### Envelope assumptions", 1)[0]
+    assert proposal.startswith(
+        "\n\nCut along long axis, first share 50%, order A, B, facing facades without windows."
     )
-    report = render(verified.model_copy(update={"envelope": envelope}))
+    row = line_with(proposal, "| A |")
+    assert "| 20 m |" in row
+    assert row.endswith("| yes |")
+    assert "| 18 m |" in line_with(proposal, "| B |")
+    assert "**Reasons**: A on the street, B at the back." in proposal
     assert (
-        "| Buildable footprint after setbacks | 0 m² (nothing remains after setbacks) |" in report
+        "- **landscape**: Keep a planted strip. Followed by: B set back behind the strip. [5]"
+        in (proposal)
     )
-    assert "| Minimum green area | — |" in report
-    assert "| Maximum height | — |" in report
-    assert "| Maximum volume | — |" in report
+    assumptions = report.split("### Envelope assumptions", 1)[1].split("## Parking", 1)[0]
+    assert "- Every facade facing a limit has windows" in assumptions
+
+
+def test_proposal_that_does_not_fit(verified):
+    proposal = verified.envelope.proposal.model_copy(
+        update={"fits": False, "warnings": ("The spacing does not fit.",)}
+    )
+    envelope = verified.envelope.model_copy(update={"proposal": proposal})
+    report = render(verified.model_copy(update={"envelope": envelope}))
+    section = report.split("### Proposal", 1)[1]
+    assert "- **Warning**: The spacing does not fit." in section
+    assert line_with(section, "| A |").endswith("| no |")
 
 
 def test_parking_conditions_and_ambiguities(verified):
@@ -160,18 +175,21 @@ def test_uncited_and_unchecked_citations(verified):
     study = verified.study.model_copy(update={"regime": regime, "ambiguities": ()})
     report = render(verified.model_copy(update={"study": study, "citation_checks": ()}))
     assert "Zone: **UMG** (cadastre)" in report
-    assert "| Maximum height | 20 m | see article | (plu_reglement, p.327) |" in report
+    assert "| A | 20 m | 6 | see article | (plu_reglement, p.327) |" in report
     assert "No regulatory citation was checked." in report
     assert "## Ambiguities\n\nNone recorded." in report
 
 
 def test_table_cells_escape_newlines(verified):
-    parameters = verified.study.envelope.model_copy(
-        update={"max_storeys": Limit(value=None, rule="R+5\nplus attic | roof")}
+    rules = verified.envelope.rules
+    height = Limit(
+        value=20, rule="R+5\nplus attic | roof", citations=rules.buildings[0].max_height_m.citations
     )
-    study = verified.study.model_copy(update={"envelope": parameters})
-    report = render(verified.model_copy(update={"study": study}))
-    assert "| Maximum storeys | not set | R+5<br>plus attic \\| roof |  |" in report
+    first = rules.buildings[0].model_copy(update={"max_height_m": height})
+    rules = rules.model_copy(update={"buildings": (first, rules.buildings[1])})
+    envelope = verified.envelope.model_copy(update={"rules": rules})
+    report = render(verified.model_copy(update={"envelope": envelope}))
+    assert "| A | 20 m | 6 | R+5<br>plus attic \\| roof | [1] |" in report
 
 
 def test_deterministic(verified):

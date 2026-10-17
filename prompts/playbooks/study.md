@@ -78,15 +78,8 @@ Work through this checklist, in order:
    reading best supported by citations); the OAP prescriptions from the `oap` notes.
 2. **Admissibility per building**: its destination and sub-destination, and the verdict, from
    the `uses` and `definitions` notes.
-3. **The 7 limits as numbers**: setbacks from road, side and rear limits, maximum height,
-   maximum storeys, maximum footprint ratio, minimum green ratio. Resolve every formula at the
-   maximum height (e.g. "H/2, min 4 m" with H = 20 m gives 10 m) and state the formula in the
-   limit's `rule`. If the OAP sets a stricter figure, say in the `rule` which applies. A limit
-   the documents do not set has `value: null`. `submit_study` labels the site edges by a fixed
-   rule: public land → road limit; a limit between parcels touching a road edge → side limit;
-   otherwise → rear limit. Check that rule against the `definitions` notes (voie, emprise
-   publique, limite séparative) and cite them in the setback limits; if the PLU defines them
-   otherwise (e.g. private roads counted as voies), record an ambiguity.
+3. **Envelope**: not part of the study. `submit_study` reads the `envelope` artifact delivered
+   by the `architect` and recomputes its bounds and proposal.
 4. **Parking** per use, from the `parking` notes (with any cap or exemption they cite).
 5. **Conditions**: the other rules that bear on the program (access, networks, appearance,
    distance between buildings...), and the OAP prescriptions that are not limits.
@@ -111,9 +104,9 @@ error listed and submit the complete study again, until it is accepted:
 - a missing artifact, an open point without its ambiguity, or an evidence region that cannot be
   saved: do what the error says.
 
-On acceptance, `submit_study` replies with the envelope it computed (site area, buildable
-footprint after setbacks, maximum footprint, minimum green area, maximum height, maximum volume,
-the site limits by kind, assumptions). Reply to the user, briefly: site (parcels, area), zone,
+On acceptance, `submit_study` replies with the envelope it recomputed (the site limits by kind,
+then each bound and the proposal: ground area, height and volume per building, whether the
+buildings fit, warnings and assumptions). Reply to the user, briefly: site (parcels, area), zone,
 applying legend items and OAP, verdict per building, the envelope figures exactly as the gate
 returned them, parking, and the main ambiguities with your choices.
 
@@ -124,11 +117,6 @@ returned them, parking, and the main ambiguities with your choices.
   true), copied as they are; `oap_applicable` and `oap_prescriptions` from the `oap` notes;
   `citations` for the zone, from the `rules` notes citing the zone chapter.
 - `admissibility`: one entry per building of the program.
-- `envelope`: the 7 limits (`setback_road_m`, `setback_side_m`, `setback_rear_m`,
-  `max_height_m`, `max_storeys`, `max_footprint_ratio`, `min_green_ratio`), each with its
-  `value`, its `rule` and the citations of the notes it comes from; ratios are fractions
-  (20 % → 0.2). The site, its labelled edges and the envelope figures are not part of the
-  study: `submit_study` computes them.
 - `parking` and `conditions`: as decided in step 4.
 - `ambiguities`: every open point of the notes (question copied verbatim), the ambiguities of
   `zone`, and those you recorded. `resolved_by` is `user` only for answers given through

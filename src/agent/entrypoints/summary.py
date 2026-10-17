@@ -4,6 +4,7 @@ from langchain_core.messages import AIMessage, BaseMessage, ToolMessage
 
 from agent.contracts.base import Contract
 from agent.contracts.evidence import CitationCheck
+from agent.contracts.geometry import Scenario
 from agent.contracts.study import Verdict, VerifiedStudy
 from agent.llm.costs import NodeUsage
 from agent.llm.usage import ModelUsage
@@ -33,18 +34,35 @@ class BuildingVerdict(Contract):
     verdict: Verdict
 
 
+class MassingNumbers(Contract):
+    """Key figures of one building of a scenario."""
+
+    building: str
+    footprint_area_m2: float
+    max_height_m: float
+    volume_m3: float
+
+
+class ScenarioNumbers(Contract):
+    """Key figures of one envelope scenario (a bound or the proposal)."""
+
+    name: str
+    footprint_area_m2: float
+    """Ground footprint after setbacks, before any cap."""
+    fits: bool
+    total_volume_m3: float
+    buildings: tuple[MassingNumbers, ...]
+
+
 class EnvelopeNumbers(Contract):
     """Key envelope figures; ``None`` where the documents set no limit."""
 
     site_area_m2: float
-    max_height_m: float | None
-    max_storeys: float | None
     max_footprint_ratio: float | None
     min_green_ratio: float | None
-    footprint_area_m2: float
-    max_footprint_area_m2: float
     min_green_area_m2: float | None
-    max_volume_m3: float | None
+    bounds: tuple[ScenarioNumbers, ...]
+    proposal: ScenarioNumbers
 
 
 class CitationStats(Contract):
@@ -101,6 +119,25 @@ def citation_stats(checks: Sequence[CitationCheck]) -> CitationStats:
     )
 
 
+def _scenario_numbers(scenario: Scenario) -> ScenarioNumbers:
+    """Extract the key figures of one envelope scenario."""
+    return ScenarioNumbers(
+        name=scenario.name,
+        footprint_area_m2=scenario.footprint_area_m2,
+        fits=scenario.fits,
+        total_volume_m3=scenario.total_volume_m3,
+        buildings=tuple(
+            MassingNumbers(
+                building=massing.building,
+                footprint_area_m2=massing.footprint_area_m2,
+                max_height_m=massing.max_height_m,
+                volume_m3=massing.volume_m3,
+            )
+            for massing in scenario.buildings
+        ),
+    )
+
+
 def study_digest(verified: VerifiedStudy) -> StudyDigest:
     """Extract the headline results of a verified study.
 
@@ -111,6 +148,7 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
         The digest.
     """
     study, envelope = verified.study, verified.envelope
+    rules = envelope.rules
     return StudyDigest(
         parcel_ids=verified.site.choice.parcel_ids,
         zone=study.regime.zone,
@@ -122,14 +160,11 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
         ),
         envelope=EnvelopeNumbers(
             site_area_m2=envelope.site_area_m2,
-            max_height_m=envelope.max_height_m,
-            max_storeys=study.envelope.max_storeys.value,
-            max_footprint_ratio=study.envelope.max_footprint_ratio.value,
-            min_green_ratio=study.envelope.min_green_ratio.value,
-            footprint_area_m2=envelope.footprint_area_m2,
-            max_footprint_area_m2=envelope.max_footprint_area_m2,
+            max_footprint_ratio=rules.max_footprint_ratio.value,
+            min_green_ratio=rules.min_green_ratio.value,
             min_green_area_m2=envelope.min_green_area_m2,
-            max_volume_m3=envelope.max_volume_m3,
+            bounds=tuple(_scenario_numbers(bound) for bound in envelope.bounds),
+            proposal=_scenario_numbers(envelope.proposal),
         ),
         ambiguities=len(study.ambiguities),
         evidence_crops=len(verified.evidence),
