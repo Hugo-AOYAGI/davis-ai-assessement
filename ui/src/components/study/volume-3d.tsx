@@ -5,17 +5,29 @@ import { Canvas } from "@react-three/fiber";
 import { Edges, Grid, Line, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { RotateCcw } from "lucide-react";
-import type { Boundary, BoundaryKind, Point, Polygon } from "@/lib/study-types";
+import type {
+  Boundary,
+  BoundaryKind,
+  Level,
+  Point,
+  Polygon,
+} from "@/lib/study-types";
 import { BOUNDARY_COLORS, FOOTPRINT_COLOR } from "./colors";
-import { formatLength, formatStoreys } from "./format";
-import { bounds, centroid, polygonToLocal, ringToLocal } from "./geometry";
+import { formatLength } from "./format";
+import {
+  bounds,
+  centroid,
+  polygonArea,
+  polygonToLocal,
+  ringToLocal,
+} from "./geometry";
 import { type SceneColors, useSceneColors, toRgb } from "./theme-colors";
 
 /**
  * Scene axes: Lambert x (east) → three x, Lambert y (north) → three −z,
  * height → three y; all relative to the site centroid. Shapes are drawn in
  * the XY plane with local (x, y) and rotated −90° about X, which maps
- * (x, y, z) to (x, z, −y).
+ * (x, y, z) to (x, z, −y): an extrusion along z rises along three y.
  */
 type Vec3 = [number, number, number];
 const at = ([x, y]: Point, height = 0): Vec3 => [x, height, -y];
@@ -33,16 +45,58 @@ function toShape(polygon: Polygon): THREE.Shape {
   return shape;
 }
 
+function scaleAbout(polygon: Polygon, [cx, cy]: Point, k: number): Polygon {
+  const scale = (ring: Point[]) =>
+    ring.map(([x, y]): Point => [cx + (x - cx) * k, cy + (y - cy) * k]);
+  return {
+    ...polygon,
+    exterior: scale(polygon.exterior),
+    holes: polygon.holes.map(scale),
+  };
+}
+
+/** One building's massing to draw. */
+export interface Massing3D {
+  id: string;
+  /** Badge text above the massing, e.g. `RSE`. */
+  tag: string;
+  /** Ground part, EPSG:2154. */
+  footprint: Polygon;
+  levels: Level[];
+  /** CSS colour. */
+  color: string;
+  /** Spacing of the horizontal floor lines, metres. */
+  storeyHeight: number;
+}
+
 export interface Volume3DProps {
   /** Site polygon, EPSG:2154. */
   site: Polygon;
-  /** Site minus setbacks, EPSG:2154. */
-  footprint: Polygon;
   boundaries: Boundary[];
-  maxHeight: number;
-  maxStoreys: number | null;
-  /** Spacing of the horizontal floor lines, metres. */
-  storeyHeight: number;
+  massings: Massing3D[];
+  /** The scenario's setback footprint, outlined on the ground. */
+  outline: Polygon | null;
+  /** Accessible description of what is drawn. */
+  label: string;
+}
+
+/**
+ * The backend gives each level's area, not its outline: a level smaller than
+ * the ground (setbacks growing with height) is drawn as the ground polygon
+ * scaled about its centroid to that area.
+ */
+function slicesOf(massing: Massing3D, origin: Point) {
+  const ground = polygonToLocal(massing.footprint, origin);
+  const groundArea = polygonArea(ground);
+  const center = centroid(ground.exterior);
+  return massing.levels.map((level) => {
+    const ratio = groundArea > 0 ? level.area_m2 / groundArea : 1;
+    const k = Math.min(Math.max(Math.sqrt(Math.max(ratio, 0)), 0.05), 1);
+    return {
+      level,
+      polygon: k > 0.999 ? ground : scaleAbout(ground, center, k),
+    };
+  });
 }
 
 /** A screen-sized text badge (canvas texture sprite), drawn above `position`. */
@@ -104,47 +158,127 @@ function Label({
   );
 }
 
-function Scene({
-  site,
-  footprint,
-  boundaries,
-  maxHeight,
-  maxStoreys,
-  storeyHeight,
-}: Volume3DProps) {
+function Slice({
+  polygon,
+  level,
+  color,
+}: {
+  polygon: Polygon;
+  level: Level;
+  color: string;
+}) {
+  const geometry = useMemo(
+    () =>
+      new THREE.ExtrudeGeometry(toShape(polygon), {
+        depth: level.to_m - level.from_m,
+        bevelEnabled: false,
+      }),
+    [polygon, level],
+  );
+  useEffect(() => () => geometry.dispose(), [geometry]);
+  return (
+    <mesh
+      geometry={geometry}
+      rotation={FLAT}
+      position={[0, level.from_m, 0]}
+    >
+      <meshStandardMaterial
+        color={color}
+        transparent
+        opacity={0.38}
+        depthWrite={false}
+        side={THREE.DoubleSide}
+      />
+      <Edges
+        threshold={20}
+        color={color}
+      />
+    </mesh>
+  );
+}
+
+function MassingView({
+  massing,
+  origin,
+  colors,
+}: {
+  massing: Massing3D;
+  origin: Point;
+  colors: SceneColors;
+}) {
+  const color = useMemo(() => toRgb(massing.color), [massing.color]);
+  const { slices, floors, marker, top } = useMemo(() => {
+    const slices = slicesOf(massing, origin);
+    const floors: { h: number; ring: Point[] }[] = [];
+    for (const { level, polygon } of slices) {
+      const first = Math.floor(level.from_m / massing.storeyHeight + 1e-6) + 1;
+      for (let i = first; i * massing.storeyHeight < level.to_m - 1e-3; i++) {
+        floors.push({ h: i * massing.storeyHeight, ring: polygon.exterior });
+      }
+    }
+    const last = slices[slices.length - 1];
+    // Height marker on the top's south-east-most vertex, nearest the camera.
+    const marker = last.polygon.exterior.reduce((best, p) =>
+      p[0] - p[1] > best[0] - best[1] ? p : best,
+    );
+    return { slices, floors, marker, top: last.level.to_m };
+  }, [massing, origin]);
+
+  return (
+    <>
+      {slices.map(({ level, polygon }) => (
+        <Slice
+          key={`${level.from_m}-${level.to_m}`}
+          level={level}
+          polygon={polygon}
+          color={color}
+        />
+      ))}
+      {floors.map(({ h, ring }) => (
+        <Line
+          key={h}
+          points={ring.map((p) => at(p, h))}
+          color={color}
+          lineWidth={1}
+          transparent
+          opacity={0.55}
+        />
+      ))}
+      <Line
+        points={[at(marker, 0), at(marker, top)]}
+        color={colors.foreground}
+        lineWidth={1.5}
+        dashed
+        dashSize={1}
+        gapSize={0.6}
+      />
+      <Label
+        text={`${massing.tag} · ${formatLength(top, 0)}`}
+        position={at(marker, top)}
+        colors={colors}
+      />
+    </>
+  );
+}
+
+function Scene({ site, boundaries, massings, outline }: Volume3DProps) {
   const colors = useSceneColors();
   const data = useMemo(() => {
     const origin = centroid(site.exterior);
     const localSite = polygonToLocal(site, origin);
-    const localFootprint = polygonToLocal(footprint, origin);
     const edges = boundaries.map((b) => ({
       kind: b.kind,
       points: ringToLocal([b.start, b.end], origin),
     }));
-    const box = bounds(localSite.exterior);
-    // Height marker on the footprint's south-east-most vertex, nearest the camera.
-    const marker = localFootprint.exterior.reduce((best, p) =>
-      p[0] - p[1] > best[0] - best[1] ? p : best,
-    );
-    const levels: number[] = [];
-    for (let h = storeyHeight; h < maxHeight - 1e-3; h += storeyHeight) {
-      levels.push(h);
-    }
-    return { localSite, localFootprint, edges, box, marker, levels };
-  }, [site, footprint, boundaries, maxHeight, storeyHeight]);
+    const localOutline = outline ? polygonToLocal(outline, origin) : null;
+    return { origin, localSite, edges, localOutline };
+  }, [site, boundaries, outline]);
 
-  const volume = useMemo(
-    () =>
-      new THREE.ExtrudeGeometry(toShape(data.localFootprint), {
-        depth: maxHeight,
-        bevelEnabled: false,
-      }),
-    [data.localFootprint, maxHeight],
-  );
   const ground = useMemo(
     () => new THREE.ShapeGeometry(toShape(data.localSite)),
     [data.localSite],
   );
+  useEffect(() => () => ground.dispose(), [ground]);
   const dataColors = useMemo(
     () => ({
       footprint: toRgb(FOOTPRINT_COLOR),
@@ -155,12 +289,8 @@ function Scene({
     [],
   );
 
-  const { box, marker } = data;
+  const box = bounds(data.localSite.exterior);
   const extent = Math.max(box.maxX - box.minX, box.maxY - box.minY);
-  const label =
-    maxStoreys === null
-      ? formatLength(maxHeight, 0)
-      : `${formatLength(maxHeight, 0)} · ${formatStoreys(maxStoreys)}`;
 
   return (
     <>
@@ -204,54 +334,37 @@ function Scene({
           lineWidth={3}
         />
       ))}
-      <mesh
-        geometry={volume}
-        rotation={FLAT}
-      >
-        <meshStandardMaterial
-          color={dataColors.footprint}
-          transparent
-          opacity={0.32}
-          depthWrite={false}
-          side={THREE.DoubleSide}
-        />
-        <Edges
-          threshold={20}
-          color={dataColors.footprint}
-        />
-      </mesh>
-      {data.levels.map((h) => (
+      {data.localOutline && (
         <Line
-          key={h}
-          points={data.localFootprint.exterior.map((p) => at(p, h))}
+          points={data.localOutline.exterior.map((p) => at(p, 0.04))}
           color={dataColors.footprint}
-          lineWidth={1}
-          transparent
-          opacity={0.55}
+          lineWidth={1.5}
+          dashed
+          dashSize={1.2}
+          gapSize={0.8}
+        />
+      )}
+      {massings.map((m) => (
+        <MassingView
+          key={m.id}
+          massing={m}
+          origin={data.origin}
+          colors={colors}
         />
       ))}
-      <Line
-        points={[at(marker, 0), at(marker, maxHeight)]}
-        color={colors.foreground}
-        lineWidth={1.5}
-        dashed
-        dashSize={1}
-        gapSize={0.6}
-      />
-      <Label
-        text={label}
-        position={at(marker, maxHeight)}
-        colors={colors}
-      />
     </>
   );
 }
 
-function cameraFor({ site, maxHeight }: Volume3DProps) {
+function cameraFor({ site, massings }: Volume3DProps) {
   const box = bounds(site.exterior);
   const w = box.maxX - box.minX;
   const d = box.maxY - box.minY;
-  const radius = Math.hypot(w / 2, d / 2, maxHeight / 2);
+  const height = Math.max(
+    0,
+    ...massings.flatMap((m) => m.levels.map((l) => l.to_m)),
+  );
+  const radius = Math.hypot(w / 2, d / 2, height / 2);
   const fov = 35;
   const distance = (radius / Math.sin(((fov / 2) * Math.PI) / 180)) * 0.78;
   // From the south-east, above: +x east, +z south.
@@ -261,7 +374,7 @@ function cameraFor({ site, maxHeight }: Volume3DProps) {
     near: Math.max(radius / 100, 0.1),
     far: radius * 60,
     position: dir.multiplyScalar(distance).toArray() as Vec3,
-    target: [0, maxHeight * 0.3, 0] as Vec3,
+    target: [0, height * 0.3, 0] as Vec3,
     radius,
   };
 }
@@ -282,7 +395,7 @@ export function Volume3D(props: Volume3DProps) {
         dpr={[1, 2]}
         frameloop="demand"
         gl={{ antialias: true, alpha: true }}
-        aria-label="3D view of the maximum buildable volume on the site"
+        aria-label={props.label}
         role="img"
         fallback={
           <p className="text-muted-foreground p-4 text-sm">
