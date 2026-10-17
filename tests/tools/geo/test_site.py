@@ -16,6 +16,7 @@ from agent.tools.submit.factory import submit_tool
 
 LABEL = "4 Rue Joliot-curie 91190 Gif-sur-Yvette"
 PLOT, STRIP = "91272000CR0247", "91272000CR0249"
+STREET_M = 91
 CHOICE: dict[str, JsonValue] = {
     "address": LABEL,
     "parcel_ids": [PLOT],
@@ -64,7 +65,13 @@ def reply(command: Command[str]) -> ToolMessage:
 def test_submit_schema(surveyor):
     submit = make_submit(surveyor)
     assert submit.name == "submit_parcel"
-    assert set(submit.args) == {"address", "parcel_ids", "rationale", "assumptions"}
+    assert set(submit.args) == {
+        "address",
+        "parcel_ids",
+        "rationale",
+        "assumptions",
+        "public_parcels",
+    }
 
 
 def test_submit_stores_the_site(surveyor):
@@ -95,6 +102,15 @@ def test_submit_reply_summarises_the_site(surveyor):
     ]
     assert summary["edges"]["public_land"]["length_m"] == pytest.approx(91, abs=2)
     assert summary["neighbours"] == ["91272000CR0227", "91272000CR0256"]
+    assert summary["public_parcels"] == []
+
+
+def test_submit_with_a_declared_public_strip(surveyor):
+    declared: list[JsonValue] = [{"id": STRIP, "reason": "116 m2 strip; aerial shows pavement."}]
+    message = reply(invoke(make_submit(surveyor), {**CHOICE, "public_parcels": declared}))
+    summary = json.loads(str(message.content).split("\n\n", 1)[1])
+    assert summary["public_parcels"] == declared
+    assert summary["edges"]["public_land"]["length_m"] == pytest.approx(STREET_M, abs=2)
 
 
 @pytest.mark.parametrize(
@@ -103,6 +119,14 @@ def test_submit_reply_summarises_the_site(surveyor):
         ({"address": "4 rue Joliot Curie"}, "exactly as geocode returned it"),
         ({"parcel_ids": ["91272000CR9999"]}, "not in the cadastre"),
         ({"parcel_ids": [PLOT, "91272000CR0215"]}, "separate parts"),
+        (
+            {"parcel_ids": [PLOT, STRIP], "public_parcels": [{"id": STRIP, "reason": "verge"}]},
+            f"public_parcels.0.id: {STRIP} is in parcel_ids",
+        ),
+        (
+            {"public_parcels": [{"id": "91272000CR0215", "reason": "verge"}]},
+            "public_parcels.0.id: 91272000CR0215 does not lie along an edge of the site",
+        ),
     ],
 )
 def test_submit_rejections(surveyor, changes, message):

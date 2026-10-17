@@ -1,4 +1,5 @@
 from agent.contracts.evidence import Citation, CitationCheck, Limit, SourceKind
+from agent.contracts.findings.site import PublicParcel
 from agent.runtime.report.render import render_report
 
 
@@ -44,6 +45,18 @@ def test_header_summary_and_site(verified):
     assert "| rear | 1 | 40 m |" in report
     assert "- (cadastre): 91272000AB0123" in report
     assert "- (ban): 4 Rue Joliot Curie" in report
+
+
+def test_declared_public_land(verified):
+    assert "### Public land" not in render(verified)
+    strip = PublicParcel(id="91272000AB0124", reason="116 m² strip;\naerial shows pavement.")
+    choice = verified.site.choice.model_copy(update={"public_parcels": (strip,)})
+    site = verified.site.model_copy(update={"choice": choice})
+    report = render(verified.model_copy(update={"site": site}))
+    assert (
+        "### Public land\n\n- 91272000AB0124 (declared by the surveyor): 116 m² strip; "
+        "aerial shows pavement.\n\n### Assumptions"
+    ) in report
 
 
 def test_regime_and_admissibility(verified):

@@ -26,8 +26,15 @@ def _limits(boundaries: Sequence[Boundary]) -> str:
     return table(("Kind", "Edges", "Total length"), rows)
 
 
+def _public_land(site: Site) -> str:
+    """Render the neighbouring parcels the surveyor declared public land, if any."""
+    declared = site.choice.public_parcels
+    items = (f"{p.id} (declared by the surveyor): {one_line(p.reason)}" for p in declared)
+    return f"\n\n### Public land\n\n{bullets(items, empty='')}" if declared else ""
+
+
 def site_section(site: Site, boundaries: Sequence[Boundary], index: CitationIndex) -> str:
-    """Render the site: parcels, the surveyor's choice, limits by kind and geometric sources.
+    """Render the site: parcels, the surveyor's choice, public land, limits and sources.
 
     Args:
         site: Site built from the surveyor's parcel choice.
@@ -51,7 +58,7 @@ def site_section(site: Site, boundaries: Sequence[Boundary], index: CitationInde
     )
     return (
         f"## Site\n\n{facts}\n\n### Parcels\n\n{parcels}"
-        f"\n\n### Parcel choice\n\n{site.choice.rationale.strip()}"
+        f"\n\n### Parcel choice\n\n{site.choice.rationale.strip()}{_public_land(site)}"
         f"\n\n### Assumptions\n\n{assumptions}"
         f"\n\n### Limits\n\n{_limits(boundaries)}"
         f"\n\n### Geometric sources\n\n{sources}"

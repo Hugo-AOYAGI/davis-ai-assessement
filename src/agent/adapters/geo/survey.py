@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence, Set
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -104,7 +104,7 @@ class SiteSurveyor:
             one_piece=True,
             area_m2=float(site.area),
             distance_m=float(site.distance(point)),
-            edges=edge_totals(self._edges(site, neighbours)),
+            edges=edge_totals(self._edges(site, neighbours, frozenset())),
             neighbours=neighbour_facts(neighbours, site, self._settings.snap_tolerance_m),
         )
 
@@ -112,10 +112,10 @@ class SiteSurveyor:
         """Build the site from a parcel choice, checking the address label against the geocoder.
 
         Args:
-            choice: The agent's choice: address label, parcel ids, rationale, assumptions.
+            choice: The agent's choice, including the neighbours it declared public land.
 
         Returns:
-            The site: parcels, union polygon, area, neutral edges and geometric citations.
+            The site: parcels, union polygon, area, edges and geometric citations.
 
         Raises:
             SiteError: If the label, an id or the selection is wrong (message for the model).
@@ -137,7 +137,7 @@ class SiteSurveyor:
             parcels=tuple(self._parcel(parcel, shape) for parcel, shape in located.values()),
             polygon=to_contract(site, settings.crs, settings.decimals),
             area_m2=float(site.area),
-            edges=self._edges(site, neighbours),
+            edges=self._edges(site, neighbours, {p.id for p in choice.public_parcels}),
             citations=(
                 address_citation(candidate, settings.geocoder_source),
                 *(parcel_citation(p, settings.cadastre_source) for p, _ in located.values()),
@@ -214,14 +214,17 @@ class SiteSurveyor:
             if parcel.id not in selected
         }
 
-    def _edges(self, site: shapely.Polygon, neighbours: Mapping[str, Located]) -> tuple[Edge, ...]:
-        """Describe each exterior edge of the site by what lies across it."""
+    def _edges(
+        self, site: shapely.Polygon, neighbours: Mapping[str, Located], public: Set[str]
+    ) -> tuple[Edge, ...]:
+        """Describe each exterior edge of the site by what lies across it, given public ids."""
         settings = self._settings
         return site_edges(
             to_contract(site, settings.crs, settings.decimals),
             {pid: shape for pid, (_, shape) in neighbours.items()},
             snap_tolerance_m=settings.snap_tolerance_m,
             min_shared_ratio=settings.min_shared_ratio,
+            public=public,
         )
 
     def _parcel(self, parcel: CadastralParcel, shape: BaseGeometry) -> Parcel:

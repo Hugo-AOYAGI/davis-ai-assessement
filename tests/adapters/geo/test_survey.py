@@ -3,7 +3,9 @@ import pytest
 from agent.adapters.geo.records import SiteError
 from agent.adapters.http import ServiceError
 from agent.contracts.evidence import SourceKind
-from agent.contracts.findings.site import EdgeSide, ParcelChoice
+from agent.contracts.findings.site import EdgeSide, ParcelChoice, PublicParcel
+from agent.contracts.geometry import BoundaryKind
+from agent.runtime.geometry.edges import label_edges
 
 LON, LAT = 2.165254, 48.709836
 LABEL = "4 Rue Joliot-curie 91190 Gif-sur-Yvette"
@@ -91,6 +93,38 @@ def test_site_with_the_strip_has_street_edges(surveyor):
     assert totals[EdgeSide.PARCEL] == pytest.approx(219, abs=2)
     public = [edge for edge in site.edges if edge.other_side is EdgeSide.PUBLIC_LAND]
     assert all(edge.neighbours == () for edge in public)
+
+
+def with_public_strip() -> ParcelChoice:
+    return choice(PLOT).model_copy(
+        update={"public_parcels": (PublicParcel(id=STRIP, reason="pavement"),)}
+    )
+
+
+def kinds(edges) -> list[BoundaryKind]:
+    labelled = label_edges(edges, snap_tolerance_m=0.5, collinear_angle_deg=20)
+    return [boundary.kind for boundary in labelled]
+
+
+def test_strip_declared_public_turns_the_street_edges_to_public_land(surveyor):
+    site = surveyor.site(with_public_strip())
+    assert site.choice == with_public_strip()
+    assert [p.id for p in site.parcels] == [PLOT]
+    assert lengths(site.edges)[EdgeSide.PUBLIC_LAND] == pytest.approx(91, abs=2)
+    public = [edge for edge in site.edges if edge.other_side is EdgeSide.PUBLIC_LAND]
+    assert all(edge.neighbours == (STRIP,) for edge in public)
+    mixed = [edge for edge in site.edges if len(edge.neighbours) > 1]
+    assert mixed
+    assert all(edge.other_side is EdgeSide.PARCEL for edge in mixed)
+
+
+def test_gate_labels_the_declared_strip_road_and_the_limits_meeting_it_side(surveyor):
+    road, side, rear = BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR
+    assert set(kinds(surveyor.site(choice(PLOT)).edges)) == {rear}
+    edges = surveyor.site(with_public_strip()).edges
+    assert kinds(edges) == [side, *[road] * 8, side, *[rear] * 6]
+    assert edges[0].neighbours == (WEST, STRIP)
+    assert edges[9].neighbours == (EAST,)
 
 
 def test_site_citations(surveyor):
