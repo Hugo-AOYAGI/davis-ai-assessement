@@ -12,7 +12,7 @@ from agent.contracts.evidence import SourceKind
 from agent.contracts.findings.site import EdgeSide, ParcelChoice, Site
 from agent.tools.geo.site import parcel_finalizer, summarize_site
 from agent.tools.submit.artifacts import read_artifact
-from agent.tools.submit.factory import submit_tool
+from agent.tools.submit.factory import DONE, submit_tool
 
 LABEL = "4 Rue Joliot-curie 91190 Gif-sur-Yvette"
 PLOT, STRIP = "91272000CR0247", "91272000CR0249"
@@ -91,8 +91,9 @@ def test_submit_stores_the_site(surveyor):
 
 def test_submit_reply_summarises_the_site(surveyor):
     message = reply(invoke(make_submit(surveyor), {**CHOICE, "parcel_ids": [PLOT, STRIP]}))
-    head, body = str(message.content).split("\n\n", 1)
+    head, body, done = str(message.content).split("\n\n")
     assert head == "site accepted."
+    assert done == DONE
     summary = json.loads(body)
     assert summary["address"] == LABEL
     assert summary["area_m2"] == pytest.approx(6071, abs=2)
@@ -108,7 +109,7 @@ def test_submit_reply_summarises_the_site(surveyor):
 def test_submit_with_a_declared_public_strip(surveyor):
     declared: list[JsonValue] = [{"id": STRIP, "reason": "116 m2 strip; aerial shows pavement."}]
     message = reply(invoke(make_submit(surveyor), {**CHOICE, "public_parcels": declared}))
-    summary = json.loads(str(message.content).split("\n\n", 1)[1])
+    summary = json.loads(str(message.content).split("\n\n")[1])
     assert summary["public_parcels"] == declared
     assert summary["edges"]["public_land"]["length_m"] == pytest.approx(STREET_M, abs=2)
 

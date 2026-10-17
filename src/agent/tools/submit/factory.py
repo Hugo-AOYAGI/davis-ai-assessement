@@ -21,6 +21,9 @@ It may raise ``SubmissionRejected`` to send errors back to the model without sto
 type Summarizer[S: Contract] = Callable[[S], str]
 """Writes what the model should read back about the stored object (e.g. computed figures)."""
 
+DONE = "You are done, do not submit again: reply with a short summary and stop."
+"""Last line of every acceptance reply: an accepted submission is final."""
+
 
 class SubmissionRejected(Exception):  # noqa: N818
     """A finalizer refused a valid submission; its errors are sent back to the model."""
@@ -49,7 +52,8 @@ def submit_tool[C: Contract, S: Contract](
     fields as top-level arguments and reads their docstrings as descriptions. Validation happens
     inside the tool: a rejected submission returns an error ``ToolMessage`` listing every
     ``field.path: message`` and stores nothing; an accepted one is stored as JSON in the
-    ``artifacts`` state under its key, and the reply says ``<key> accepted.``.
+    ``artifacts`` state under its key, and the reply says ``<key> accepted.``, then the summary
+    if any, then ``DONE``: an accepted submission is final.
 
     Args:
         name: Tool name, e.g. ``submit_notes``.
@@ -87,6 +91,7 @@ def submit_tool[C: Contract, S: Contract](
         reply = f"{key} accepted."
         if summarize is not None:
             reply = f"{reply}\n\n{summarize(stored)}"
+        reply = f"{reply}\n\n{DONE}"
         return Command[str](
             update={
                 "artifacts": {key: stored.model_dump(mode="json")},
