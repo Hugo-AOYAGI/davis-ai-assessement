@@ -29,7 +29,7 @@ nodes:
     max_tokens: 16000
     max_retries: 3
     timeout: 300
-  zoning_analyst: *sonnet_agent
+  zoning_analyst: *haiku_agent
   doc_analyst: *sonnet_agent
   ingest_classifier:
     <<: *haiku_agent

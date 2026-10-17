@@ -54,20 +54,19 @@ def test_overrides_apply():
 
 def test_default_models():
     nodes = load_config().models.nodes
-    assert nodes.surveyor.model == nodes.ingest_classifier.model == "claude-haiku-5-5"
-    assert "effort" not in nodes.surveyor
-    assert "effort" not in nodes.ingest_classifier
-    for node in ("orchestrator", "zoning_analyst", "doc_analyst"):
+    for node in ("surveyor", "zoning_analyst", "ingest_classifier"):
+        assert nodes[node].model == "claude-haiku-5-5"
+        assert "effort" not in nodes[node]
+    for node in ("orchestrator", "doc_analyst"):
         assert nodes[node].model == "claude-sonnet-5-5"
         assert "effort" in nodes[node]
 
 
 def test_node_override_is_isolated():
-    cfg = load_config(["models.nodes.zoning_analyst.model=claude-haiku-5-5"])
+    cfg = load_config(["models.nodes.doc_analyst.model=claude-haiku-5-5"])
     nodes = cfg.models.nodes
-    assert nodes.zoning_analyst.model == "claude-haiku-5-5"
+    assert nodes.doc_analyst.model == "claude-haiku-5-5"
     assert nodes.orchestrator.model == "claude-sonnet-5-5"
-    assert nodes.doc_analyst.model == "claude-sonnet-5-5"
 
 
 def test_every_node_instantiates_offline(monkeypatch: pytest.MonkeyPatch):
