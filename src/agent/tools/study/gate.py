@@ -10,21 +10,23 @@ from pathlib import Path
 from typing import Protocol
 
 from langchain_core.tools import BaseTool
-from pydantic import Field, NonNegativeFloat, PositiveInt
+from pydantic import NonNegativeFloat
 
 from agent.adapters.images.pages import RegionError
 from agent.contracts.base import Contract
-from agent.contracts.evidence import CitationCheck, ImageRegion, StoredCrop
+from agent.contracts.evidence import Citation, CitationCheck, ImageRegion, StoredCrop
 from agent.contracts.inputs.corpus import Corpus
 from agent.contracts.study import Study, VerifiedStudy
 from agent.runtime.geometry.edges import label_edges
-from agent.runtime.geometry.envelope import compute_envelope
+from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
 from agent.tools.study.checks import CitationRules, CorpusFacts, check_submission, corpus_facts
+from agent.tools.study.envelope import EnvelopeCitations, envelope_errors
 from agent.tools.study.inputs import (
     Delivery,
     Findings,
     StudyInputs,
     evidence_regions,
+    open_points,
     read_findings,
     unmatched_open_points,
 )
@@ -46,16 +48,12 @@ class CropStore(Protocol):
 
 
 class GeometrySettings(Contract):
-    """Knobs of the edge labelling and of the envelope computation."""
+    """Knobs of the edge labelling."""
 
     snap_tolerance_m: NonNegativeFloat
     """Edges shorter than this never split a limit."""
     collinear_angle_deg: NonNegativeFloat
     """Largest direction change between parcel edges of one limit."""
-    quad_segs: PositiveInt
-    """Segments per quarter circle in the round setback buffers."""
-    min_area_m2: float = Field(ge=0)
-    """Footprint parts smaller than this are discarded as slivers."""
 
 
 def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
@@ -66,19 +64,23 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
     citations: CitationRules,
     inputs: StudyInputs,
     geometry: GeometrySettings,
+    envelope: EnvelopeSettings,
     images: CropStore,
     crops_dir: Path,
 ) -> BaseTool:
     """Build the tool that turns a ``Study`` into a ``VerifiedStudy``.
 
-    On each submission the gate reads the site, the zone and the required document notes
-    delivered by the sub-agents (a missing one refuses the study, naming the sub-agent to
-    delegate to); checks that every open point of the notes has an ambiguity with the same
-    question (case and whitespace aside); checks every distinct regulatory citation of the study
-    against the corpus, as ``check_submission`` describes; labels the site edges road / side /
-    rear; computes the envelope; and saves the zoning plan region and every note view as
-    evidence crops. All open point and citation errors are reported together. On acceptance the
-    reply gives the envelope figures for the orchestrator's answer.
+    On each submission the gate reads the site, the zone, the required document notes and the
+    architect's envelope delivered by the sub-agents (a missing one refuses the study, naming the
+    sub-agent to delegate to); checks that every open point of every notes artifact and of the
+    envelope has an ambiguity with the same question (case and whitespace aside); checks the
+    envelope against the notes and the study (``envelope_errors``); checks every distinct
+    regulatory citation of the study and the envelope against the corpus, as
+    ``check_submission`` describes; labels the site edges road / side / rear; recomputes the
+    envelope's bounds and proposal from its rules and layout; and saves the zoning plan region
+    and every note view as evidence crops. All open point, envelope and citation errors are
+    reported together. On acceptance the reply gives the envelope figures for the
+    orchestrator's answer.
 
     Args:
         name: Tool name (``submit_study``).
@@ -86,7 +88,8 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
         corpus: Provider of the corpus, called on the first submission; its index is cached.
         citations: Citation policy and match settings.
         inputs: Where the site, the zone and the notes are read, and who delivers them.
-        geometry: Edge labelling and envelope knobs.
+        geometry: Edge labelling knobs.
+        envelope: Envelope computation knobs.
         images: Saves the evidence crops.
         crops_dir: Directory the crops are written to.
 
@@ -108,19 +111,20 @@ def submit_study_tool(  # noqa: PLR0913 - one argument per configured bundle
             snap_tolerance_m=geometry.snap_tolerance_m,
             collinear_angle_deg=geometry.collinear_angle_deg,
         )
-        envelope = compute_envelope(
-            findings.site.polygon,
-            boundaries,
-            study.envelope,
-            quad_segs=geometry.quad_segs,
-            min_area_m2=geometry.min_area_m2,
-        )
+        delivered = findings.envelope
         return VerifiedStudy(
             study=study,
             site=findings.site,
             boundaries=boundaries,
             zone=findings.zone,
-            envelope=envelope,
+            envelope=compute_envelope_study(
+                findings.site.polygon,
+                boundaries,
+                delivered.rules,
+                delivered.layout,
+                settings=envelope,
+                open_points=delivered.open_points,
+            ),
             citation_checks=checks,
             evidence=_save_crops(evidence_regions(findings, inputs), images, crops_dir),
         )
@@ -141,18 +145,25 @@ def _check(
     corpus: CorpusFacts,
     rules: CitationRules,
 ) -> tuple[CitationCheck, ...]:
-    """Check the open points and the citations, rejecting with every error of both."""
+    """Check the open points, the envelope and the citations, rejecting with every error."""
     errors = [
-        describe_open_point(inputs.notes_key(label), point.question)
-        for label, point in unmatched_open_points(study, findings.notes)
+        describe_open_point(key, point.question)
+        for key, point in unmatched_open_points(study, open_points(findings, inputs))
     ]
-    try:
-        checks = check_submission(type(study).__name__, study, corpus, rules)
-    except SubmissionRejected as rejection:
-        raise SubmissionRejected([*errors, *rejection.errors]) from rejection
+    errors += envelope_errors(study, findings, inputs)
+    checks: dict[Citation, CitationCheck] = {}
+    submissions = (study, EnvelopeCitations(envelope=findings.envelope))
+    for submission in submissions:
+        try:
+            found = check_submission(type(submission).__name__, submission, corpus, rules)
+        except SubmissionRejected as rejection:
+            errors += rejection.errors
+            continue
+        for check in found:
+            checks.setdefault(check.citation, check)
     if errors:
         raise SubmissionRejected(errors)
-    return checks
+    return tuple(checks.values())
 
 
 def _save_crops(

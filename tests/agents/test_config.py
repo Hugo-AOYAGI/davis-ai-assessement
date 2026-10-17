@@ -20,7 +20,7 @@ def test_groups_compose():
     assert cfg.agent.model in cfg.models.nodes
     assert cfg.policies.ask_user.mode == "interactive"
     assert cfg.retrieval.mode == "full_sections"
-    assert list(cfg.policies.study.required_notes) == ["rules", "oap"]
+    assert list(cfg.policies.study.required_notes) == ["rules", "oap", "destinations"]
     assert cfg.policies.evidence.crops_dir == "data/crops"
 
 

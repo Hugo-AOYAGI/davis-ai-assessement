@@ -12,6 +12,15 @@ from omegaconf import open_dict
 
 from agent.adapters.images.pages import RegionError
 from agent.agents.config import PROJECT_ROOT, load_config
+from agent.contracts.envelope import (
+    BuildingLimits,
+    Distance,
+    EnvelopeRules,
+    EnvelopeStudy,
+    Layout,
+    OapChoice,
+    SetbackRule,
+)
 from agent.contracts.evidence import (
     Ambiguity,
     Citation,
@@ -25,9 +34,10 @@ from agent.contracts.evidence import (
 from agent.contracts.findings.notes import DocNotes, Note, OpenPoint
 from agent.contracts.findings.site import Edge, EdgeSide, Parcel, ParcelChoice, Site
 from agent.contracts.findings.zone import LegendItem, ZoneFindings
-from agent.contracts.geometry import BoundaryKind, EnvelopeParameters, Polygon
+from agent.contracts.geometry import Boundary, BoundaryKind, Polygon
 from agent.contracts.inputs.corpus import Corpus, Document, DocumentKind, Page
 from agent.contracts.study import Admissibility, Regime, Study, Verdict, VerifiedStudy
+from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_envelope_study
 from agent.tools.study.checks import citation_rules
 from agent.tools.study.gate import GeometrySettings, submit_study_tool
 from agent.tools.study.inputs import Delivery, StudyInputs
@@ -75,6 +85,9 @@ PLAN_REGION = ImageRegion(doc="plu_reglement_graphique", page=1, region=(10, 20,
 OAP_VIEW = ImageRegion(doc="oap", page=34, region=(120, 400, 900, 1100))
 RJA_QUESTION = "Which destination covers a Résidence Jeunes Actifs?"
 OAP_QUESTION = "Does the OAP perimeter cover the whole parcel?"
+SPACING_QUESTION = "Does UMG 8 apply to two buildings joined by a podium?"
+OAP_ALIGNMENT = regulatory(34, None, "alignement", doc="oap")
+KINDS = (BoundaryKind.ROAD, BoundaryKind.SIDE, BoundaryKind.REAR, BoundaryKind.SIDE)
 
 
 @pytest.fixture
@@ -117,7 +130,11 @@ def zone():
 def rules():
     return DocNotes(
         label="rules",
-        notes=(Note(topic="height", text="20 m, R+5.", citations=(HEIGHT,)),),
+        notes=(
+            Note(topic="height", text="20 m, R+5.", citations=(HEIGHT,)),
+            Note(topic="setbacks", text="6 m without windows.", citations=(DISTANCE,)),
+            Note(topic="footprint", text="Not regulated.", citations=(FOOTPRINT,)),
+        ),
         open_points=(OpenPoint(question=RJA_QUESTION, options=("habitation",), why="Not in PLU."),),
     )
 
@@ -127,7 +144,7 @@ def oap():
     note = Note(
         topic="building_form",
         text="Aligned on the street.",
-        citations=(regulatory(34, None, "alignement", doc="oap"),),
+        citations=(OAP_ALIGNMENT,),
         views=(OAP_VIEW, PLAN_REGION, OAP_VIEW),
     )
     return DocNotes(
@@ -135,6 +152,76 @@ def oap():
         notes=(note,),
         open_points=(OpenPoint(question=OAP_QUESTION, why="The diagram is schematic."),),
     )
+
+
+@pytest.fixture
+def destinations():
+    return DocNotes(
+        label="destinations",
+        notes=(Note(topic="housing", text="Hébergement.", citations=(HOUSING,)),),
+    )
+
+
+def distance(min_m):
+    return Distance(min_m=min_m, rule="see article", citations=(DISTANCE,))
+
+
+def limit(value, *citations):
+    return Limit(value=value, rule="see article", citations=citations)
+
+
+@pytest.fixture
+def envelope_rules():
+    return EnvelopeRules(
+        setbacks=(
+            SetbackRule(kind=BoundaryKind.ROAD, on_limit_allowed=False, with_windows=distance(5)),
+            SetbackRule(kind=BoundaryKind.SIDE, on_limit_allowed=False, with_windows=distance(4)),
+            SetbackRule(kind=BoundaryKind.REAR, on_limit_allowed=False, with_windows=distance(4)),
+        ),
+        buildings=(
+            BuildingLimits(
+                building="A", max_height_m=limit(20, HEIGHT), max_storeys=limit(6, HEIGHT)
+            ),
+        ),
+        spacing_with_windows=distance(10),
+        spacing_without_windows=distance(6),
+        max_footprint_ratio=limit(None, FOOTPRINT),
+        min_green_ratio=limit(0.5, DISTANCE),
+    )
+
+
+@pytest.fixture
+def layout():
+    return Layout(
+        cut="along_long_axis",
+        first_share=0.5,
+        order=("A",),
+        facing_windows=False,
+        reasons="One building on the whole footprint.",
+    )
+
+
+def boundaries():
+    return tuple(
+        Boundary(kind=kind, start=start, end=end)
+        for kind, start, end in zip(KINDS, RECTANGLE[:-1], RECTANGLE[1:], strict=True)
+    )
+
+
+def compute(rules, layout, open_points=()):
+    return compute_envelope_study(
+        Polygon(crs="EPSG:2154", exterior=RECTANGLE),
+        boundaries(),
+        rules,
+        layout,
+        settings=ENVELOPE,
+        open_points=open_points,
+    )
+
+
+@pytest.fixture
+def envelope(envelope_rules, layout):
+    return compute(envelope_rules, layout)
 
 
 def ambiguity(question):
@@ -148,9 +235,6 @@ def ambiguity(question):
 
 @pytest.fixture
 def study():
-    def limit(value, *citations):
-        return Limit(value=value, rule="see article", citations=citations)
-
     return Study(
         address="4 rue Joliot Curie, 91190 Gif-sur-Yvette",
         program="RSE + RJA, two buildings",
@@ -168,15 +252,6 @@ def study():
                 verdict=Verdict.PERMITTED,
                 citations=(HOUSING,),
             ),
-        ),
-        envelope=EnvelopeParameters(
-            setback_road_m=limit(5, DISTANCE),
-            setback_side_m=limit(4, DISTANCE),
-            setback_rear_m=limit(4, DISTANCE),
-            max_height_m=limit(20, HEIGHT),
-            max_storeys=limit(6, HEIGHT),
-            max_footprint_ratio=limit(None, FOOTPRINT),
-            min_green_ratio=limit(0.5, DISTANCE),
         ),
         parking=(),
         conditions=(Rule(topic="access", text="Road at least 5 m wide.", citations=(ACCESS,)),),
@@ -236,11 +311,13 @@ INPUTS = StudyInputs(
     site=Delivery(artifact="site", producer="surveyor"),
     zone=Delivery(artifact="zone", producer="zoning_analyst"),
     notes=Delivery(artifact="notes.{label}", producer="doc_analyst"),
-    labels=("rules", "oap"),
+    envelope=Delivery(artifact="envelope", producer="architect"),
+    labels=("rules", "oap", "destinations"),
+    rules_label="rules",
+    oap_label="oap",
 )
-GEOMETRY = GeometrySettings(
-    snap_tolerance_m=0.5, collinear_angle_deg=20, quad_segs=8, min_area_m2=1.0
-)
+GEOMETRY = GeometrySettings(snap_tolerance_m=0.5, collinear_angle_deg=20)
+ENVELOPE = EnvelopeSettings(level_step_m=1, quad_segs=8, min_area_m2=1, cut_tolerance_m=0.01)
 
 
 @pytest.fixture
@@ -264,6 +341,7 @@ def make_gate(tmp_path, images):
             ),
             inputs=INPUTS,
             geometry=GEOMETRY,
+            envelope=ENVELOPE,
             images=store or images,
             crops_dir=tmp_path / "crops",
         )
@@ -272,12 +350,20 @@ def make_gate(tmp_path, images):
 
 
 @pytest.fixture
-def findings(site, zone, rules, oap):
+def notes(rules, oap, destinations):
+    return {
+        f"notes.{doc_notes.label}": doc_notes.model_dump(mode="json")
+        for doc_notes in (rules, oap, destinations)
+    }
+
+
+@pytest.fixture
+def findings(site, zone, notes, envelope):
     return {
         "site": site.model_dump(mode="json"),
         "zone": zone.model_dump(mode="json"),
-        "notes.rules": rules.model_dump(mode="json"),
-        "notes.oap": oap.model_dump(mode="json"),
+        **notes,
+        "envelope": envelope.model_dump(mode="json"),
     }
 
 
@@ -346,25 +432,33 @@ def test_edges_are_labelled(make_gate, study, findings):
 
 def test_envelope_applies_setbacks_and_green_cap(make_gate, study, findings):
     envelope = stored(invoke(make_gate(), study, findings)).envelope
-    assert envelope.footprint_area_m2 == pytest.approx((40 - 4 - 4) * (30 - 5 - 4))
+    windows = envelope.bounds[1]
+    assert windows.footprint_area_m2 == pytest.approx((40 - 4 - 4) * (30 - 5 - 4))
     assert envelope.min_green_area_m2 == pytest.approx(600)
-    assert envelope.max_footprint_area_m2 == pytest.approx(600)
-    assert envelope.max_volume_m3 == pytest.approx(600 * 20)
+    assert windows.buildings[0].footprint_area_m2 == pytest.approx(600)
+    assert envelope.proposal.total_volume_m3 == pytest.approx(600 * 20)
+
+
+def test_envelope_is_recomputed(make_gate, study, findings, envelope):
+    proposal = envelope.proposal.model_copy(update={"total_volume_m3": 1.0})
+    findings["envelope"] = envelope.model_copy(update={"proposal": proposal}).model_dump(
+        mode="json"
+    )
+    verified = stored(invoke(make_gate(), study, findings))
+    assert verified.envelope == envelope
 
 
 def test_reply_gives_the_envelope_figures(make_gate, study, findings):
     reply = message(invoke(make_gate(), study, findings)).content
-    assert reply.startswith("study accepted.\n\nEnvelope computed by the gate")
+    assert reply.startswith("study accepted.\n\nEnvelope recomputed by the gate")
     for line in (
-        "- Site area: 1200 m²",
-        "- Buildable footprint after setbacks: 672 m²",
-        "- Maximum footprint: 600 m²",
-        "- Minimum green area: 600 m²",
-        "- Maximum height: 20 m",
-        "- Maximum volume: 12000 m³",
         "- Site limits (edges by kind): 1 road, 2 side, 1 rear",
         "- Evidence crops saved: 2",
-        "- No footprint ratio set: footprint not capped by a ratio.",
+        "Site area: 1200 m²; minimum green area: 600 m²",
+        "Bound largest",
+        "Bound windows",
+        "Proposal (cut along_long_axis",
+        "- A: ground 600 m², height 20 m, volume 12000 m³",
     ):
         assert line in reply
 
@@ -397,6 +491,8 @@ def test_unsaved_crop_names_its_producer(make_gate, study, findings, tmp_path):
         ("zone", "no `zone` artifact in state. Delegate to zoning_analyst"),
         ("notes.rules", "no `notes.rules` artifact in state. Delegate to doc_analyst with the"),
         ("notes.oap", "`oap` task of the playbook (label `oap`)"),
+        ("notes.destinations", "(label `destinations`)"),
+        ("envelope", "no `envelope` artifact in state. Delegate to architect"),
     ],
 )
 def test_missing_artifact_names_the_subagent(make_gate, study, findings, missing, expected):
@@ -408,7 +504,7 @@ def test_missing_artifact_names_the_subagent(make_gate, study, findings, missing
 
 def test_every_missing_artifact_is_listed(make_gate, study):
     content = rejection(invoke(make_gate(), study, {}))
-    assert content.count("artifact in state") == 4
+    assert content.count("artifact in state") == 6
 
 
 def test_unmatched_open_points_are_listed(make_gate, study, findings):
@@ -489,18 +585,20 @@ def test_corpus_is_loaded_once(make_gate, study, findings):
 
 def test_notes_key_needs_a_label_placeholder():
     with pytest.raises(ValueError, match="placeholder"):
-        StudyInputs(
-            site=Delivery(artifact="site", producer="surveyor"),
-            zone=Delivery(artifact="zone", producer="zoning_analyst"),
-            notes=Delivery(artifact="notes", producer="doc_analyst"),
-            labels=("rules",),
+        StudyInputs.model_validate(
+            {**INPUTS.model_dump(), "notes": {"artifact": "notes", "producer": "doc_analyst"}}
         )
+
+
+def test_notes_labels_are_read_from_the_keys():
+    keys = ("site", "notes.rules", "notes.rules_parking", "notes.", "envelope")
+    assert INPUTS.notes_labels(keys) == ["rules", "rules_parking"]
 
 
 def test_config_node_builds_the_tool(study, findings, tmp_path):
     cfg = load_config()
     node = cfg.agent.tools[1]
-    assert node.inputs.labels == ["rules", "oap"]
+    assert node.inputs.labels == ["rules", "oap", "destinations"]
     with open_dict(cfg):
         node.corpus = {"_target_": f"{__name__}.fixture_corpus", "_partial_": True}
         node.images = {"_target_": f"{FakeImages.__module__}.FakeImages", "root": str(tmp_path)}
@@ -514,3 +612,99 @@ def test_default_crops_dir_is_under_the_project_root():
     cfg = load_config()
     crops_dir = instantiate(cfg.agent.tools[1].crops_dir)
     assert crops_dir == PROJECT_ROOT / cfg.policies.evidence.crops_dir
+
+
+def store_envelope(findings, envelope):
+    findings["envelope"] = envelope.model_dump(mode="json")
+
+
+def test_envelope_citation_outside_the_rules_notes_is_rejected(
+    make_gate, study, findings, envelope_rules, layout
+):
+    foreign = Distance(min_m=4, rule="see article", citations=(ACCESS,))
+    side = envelope_rules.setbacks[1].model_copy(update={"with_windows": foreign})
+    rules = envelope_rules.model_copy(
+        update={"setbacks": (envelope_rules.setbacks[0], side, envelope_rules.setbacks[2])}
+    )
+    store_envelope(findings, compute(rules, layout))
+    content = rejection(invoke(make_gate(), study, findings))
+    assert (
+        "envelope.rules.setbacks.1.with_windows.citations.0 (plu_reglement p.322, UMG 3.2): "
+        "not a citation of `notes.rules`. Delegate to architect again" in content
+    )
+
+
+def test_layout_oap_citation_must_come_from_the_oap_notes(
+    make_gate, study, findings, envelope_rules, layout
+):
+    def choice(citation):
+        prescription = Rule(topic="alignment", text="On the street.", citations=(citation,))
+        return OapChoice(prescription=prescription, how="A on the alignment.")
+
+    store_envelope(
+        findings, compute(envelope_rules, layout.model_copy(update={"oap": (choice(HEIGHT),)}))
+    )
+    content = rejection(invoke(make_gate(), study, findings))
+    path = "envelope.layout.oap.0.prescription.citations.0"
+    assert f"{path} (plu_reglement p.326, UMG 10): not a citation of `notes.oap`" in content
+    store_envelope(
+        findings,
+        compute(envelope_rules, layout.model_copy(update={"oap": (choice(OAP_ALIGNMENT),)})),
+    )
+    content = rejection(invoke(make_gate(), study, findings))
+    assert "not a citation of `notes.oap`" not in content
+    assert f"{path} (oap p.34): unknown document 'oap'" in content
+
+
+def test_layout_height_above_the_maximum_is_rejected(make_gate, study, findings, envelope):
+    taller = envelope.layout.model_copy(update={"heights_m": (25.0,)})
+    store_envelope(findings, envelope.model_copy(update={"layout": taller}))
+    content = rejection(invoke(make_gate(), study, findings))
+    assert "envelope.layout.heights_m.0: 25 m is above the maximum height of 'A' (20 m)" in content
+
+
+def test_buildings_must_match_admissibility(make_gate, study, findings, envelope_rules, layout):
+    limits = envelope_rules.buildings[0]
+    rules = envelope_rules.model_copy(
+        update={"buildings": (limits, limits.model_copy(update={"building": "B"}))}
+    )
+    store_envelope(findings, compute(rules, layout.model_copy(update={"order": ("A", "B")})))
+    content = rejection(invoke(make_gate(), study, findings))
+    assert (
+        "envelope.rules.buildings: buildings 'A', 'B' do not match admissibility buildings 'A'"
+        in content
+    )
+
+
+def test_envelope_open_points_need_an_ambiguity(make_gate, study, findings, envelope_rules, layout):
+    point = OpenPoint(question=SPACING_QUESTION, why="UMG 8 is silent.")
+    store_envelope(findings, compute(envelope_rules, layout, open_points=(point,)))
+    content = rejection(invoke(make_gate(), study, findings))
+    assert f'the open point "{SPACING_QUESTION}" of `envelope` has no ambiguity' in content
+    answered = study.model_copy(
+        update={"ambiguities": (*study.ambiguities, ambiguity(SPACING_QUESTION))}
+    )
+    stored(invoke(make_gate(), answered, findings))
+
+
+def test_open_points_of_every_notes_artifact_are_checked(make_gate, study, findings):
+    extra = DocNotes(
+        label="rules_parking",
+        notes=(Note(topic="parking", text="1 space.", citations=(HEIGHT,)),),
+        open_points=(OpenPoint(question="Is the cap per unit?", why="Unclear."),),
+    )
+    findings["notes.rules_parking"] = extra.model_dump(mode="json")
+    content = rejection(invoke(make_gate(), study, findings))
+    assert (
+        'the open point "Is the cap per unit?" of `notes.rules_parking` has no ambiguity' in content
+    )
+
+
+def test_envelope_citations_are_checked_and_numbered(make_gate, study, findings):
+    verified = stored(invoke(make_gate(), study, findings))
+    cited = [check.citation for check in verified.citation_checks]
+    assert cited == [ZONE, HOUSING, ACCESS, DISTANCE, HEIGHT, FOOTPRINT]
+
+
+def test_accepted_envelope_is_typed(make_gate, study, findings):
+    assert isinstance(stored(invoke(make_gate(), study, findings)).envelope, EnvelopeStudy)

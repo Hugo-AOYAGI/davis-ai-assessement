@@ -9,8 +9,17 @@ citations:
 envelope:
   quad_segs: 8       # segments per quarter circle in the round setback buffers
   min_area_m2: 1.0   # footprint parts smaller than this are discarded as slivers
+  level_step_m: 1.0  # massings are sliced this thick; equal consecutive slices merge
+  cut_tolerance_m: 0.01  # precision of the cut positions splitting the footprint between buildings
+  # Ready settings node for every caller of compute_envelope_study (submit_study, the architect's tools).
+  settings:
+    _target_: agent.runtime.geometry.envelope.study.EnvelopeSettings
+    level_step_m: ${policies.envelope.level_step_m}
+    quad_segs: ${policies.envelope.quad_segs}
+    min_area_m2: ${policies.envelope.min_area_m2}
+    cut_tolerance_m: ${policies.envelope.cut_tolerance_m}
 study:
-  required_notes: [rules, oap]  # doc_analyst labels submit_study requires, read from notes.<label>
+  required_notes: [rules, oap, destinations]  # doc_analyst labels submit_study requires, read from notes.<label>
 evidence:
   crops_dir: data/crops  # where submit_study saves the evidence crops, relative to the project root
 tracing:
