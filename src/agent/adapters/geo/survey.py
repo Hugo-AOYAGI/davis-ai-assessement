@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -8,77 +8,43 @@ from agent.adapters.geo.geocoder import AddressCandidate, AddressGeocoder
 from agent.adapters.geo.records import (
     Located,
     ParcelCandidate,
-    SiteDraft,
+    ParcelsDescription,
     SiteError,
+    SurveySettings,
     address_citation,
-    adjacent_ids,
-    mean_width,
-    nearest_boundary,
-    neighbour_records,
+    edge_totals,
+    neighbour_facts,
     parcel_citation,
+    parcel_facts,
+    unique_ids,
 )
-from agent.contracts.findings.site import Parcel
-from agent.runtime.geometry.boundaries import classify_boundaries
+from agent.contracts.findings.site import Edge, Parcel, ParcelChoice, Site
+from agent.runtime.geometry.edges import site_edges
 from agent.runtime.geometry.parcels import (
     DisjointParcelsError,
     polygon_from_rings,
     to_contract,
-    to_shape,
     union_parcels,
 )
 from agent.runtime.geometry.projection import to_crs
 
 
 class SiteSurveyor:
-    """Turns an address and a parcel selection into a site, from the geocoder and the cadastre."""
+    """Describes parcels and builds the site from a parcel choice (geocoder and cadastre)."""
 
-    def __init__(  # noqa: PLR0913
-        self,
-        *,
-        geocoder: AddressGeocoder,
-        cadastre: CadastreClient,
-        crs: str,
-        geographic_crs: str,
-        decimals: int,
-        grid_size_m: float,
-        max_sliver_area_m2: float,
-        neighbour_buffer_m: float,
-        snap_tolerance_m: float,
-        min_shared_ratio: float,
-        collinear_angle_deg: float,
-        geocoder_source: str,
-        cadastre_source: str,
+    def __init__(
+        self, *, geocoder: AddressGeocoder, cadastre: CadastreClient, settings: SurveySettings
     ) -> None:
         """Create the surveyor.
 
         Args:
             geocoder: Address geocoder client.
             cadastre: Cadastre client.
-            crs: Metric CRS of the site geometry, e.g. ``EPSG:2154``.
-            geographic_crs: CRS of the services' coordinates, e.g. ``EPSG:4326``.
-            decimals: Decimals kept on the site's coordinates.
-            grid_size_m: Precision grid of the parcel union, in metres.
-            max_sliver_area_m2: Holes and parts below this area are dropped from the union.
-            neighbour_buffer_m: Distance around the site within which parcels are neighbours.
-            snap_tolerance_m: Distance within which two limits count as shared.
-            min_shared_ratio: Share of an edge that must lie on a neighbour to be separating.
-            collinear_angle_deg: Largest direction change within one separating limit.
-            geocoder_source: Source name cited for the geocoder record.
-            cadastre_source: Source name cited for the cadastre records.
+            settings: CRSs, union and edge tolerances, cited source names.
         """
         self._geocoder = geocoder
         self._cadastre = cadastre
-        self._crs = crs
-        self._geographic_crs = geographic_crs
-        self._decimals = decimals
-        self._grid_size_m = grid_size_m
-        self._max_sliver_area_m2 = max_sliver_area_m2
-        self._neighbour_buffer_m = neighbour_buffer_m
-        self._snap_tolerance_m = snap_tolerance_m
-        self._min_shared_ratio = min_shared_ratio
-        self._collinear_angle_deg = collinear_angle_deg
-        self._geocoder_source = geocoder_source
-        self._cadastre_source = cadastre_source
+        self._settings = settings
 
     def candidates(
         self, longitude: float, latitude: float, radius_m: float
@@ -94,87 +60,105 @@ class SiteSurveyor:
             The candidates sorted by distance, then id.
 
         Raises:
-            GeoServiceError: If the cadastre service fails.
+            ServiceError: If the cadastre service fails.
         """
         point = self._point(longitude, latitude)
-        area = to_crs(point.buffer(radius_m), self._crs, self._geographic_crs)
-        located = {p.id: (p, self._shape(p)) for p in self._cadastre.intersecting(area)}
+        located = {p.id: (p, self._shape(p)) for p in self._intersecting(point.buffer(radius_m))}
         candidates = [
             ParcelCandidate(
-                id=parcel_id,
-                contenance_m2=parcel.contenance_m2,
-                distance_m=float(shape.distance(point)),
-                contains_point=bool(shape.contains(point)),
-                mean_width_m=mean_width(shape),
-                touches=adjacent_ids(parcel_id, located, self._snap_tolerance_m),
+                **facts.model_dump(), contains_point=bool(located[facts.id][1].contains(point))
             )
-            for parcel_id, (parcel, shape) in located.items()
+            for facts in parcel_facts(located, point, self._settings.snap_tolerance_m)
         ]
         return tuple(sorted(candidates, key=lambda c: (c.distance_m, c.id)))
 
-    def draft(
-        self, address: str, parcel_ids: Sequence[str], public_parcel_ids: Sequence[str]
-    ) -> SiteDraft:
-        """Compute the site formed by parcels, with boundaries typed against their neighbours.
+    def describe(
+        self, longitude: float, latitude: float, parcel_ids: Sequence[str]
+    ) -> ParcelsDescription:
+        """Describe a parcel selection: each parcel, and the site their union would form.
 
         Args:
-            address: Geocoder label of the address, exactly as the geocoder returns it.
-            parcel_ids: Cadastral ids of the parcels forming the site.
-            public_parcel_ids: Neighbouring parcels to treat as public space: they are left out
-                of the neighbours used to type boundaries, so limits along them face the road.
+            longitude: WGS84 longitude of the address point.
+            latitude: WGS84 latitude of the address point.
+            parcel_ids: Cadastral ids of the selection.
 
         Returns:
-            The site draft.
+            The description; the union's facts are left empty when the parcels are not one piece.
 
         Raises:
-            SiteError: If the label, a parcel id or the selection is wrong (message for the model).
-            GeoServiceError: If a service fails.
+            SiteError: If an id is wrong or the selection is empty (message for the model).
+            ServiceError: If the cadastre service fails.
         """
-        selected, public = dict.fromkeys(parcel_ids), dict.fromkeys(public_parcel_ids)
-        if not selected:
-            msg = "parcel_ids is empty: give at least one cadastral id from find_parcels"
-            raise SiteError(msg)
-        if overlap := [pid for pid in public if pid in selected]:
-            msg = f"{overlap} are both in parcel_ids and public_parcel_ids; keep each in one list"
-            raise SiteError(msg)
-        candidate = self._geocode(address)
-        parcels = [self._fetch(pid) for pid in selected]
-        site = self._union([shape for _, shape in parcels], "the selected parcels")
-        polygon = to_contract(site, self._crs, self._decimals)
-        neighbours = self._neighbours(site, selected)
-        if unknown := [pid for pid in public if pid not in neighbours]:
-            msg = (
-                f"public_parcel_ids {unknown} are not neighbours of the site; the neighbours are "
-                f"{sorted(neighbours)}"
+        point = self._point(longitude, latitude)
+        located = {pid: self._fetch(pid) for pid in unique_ids(parcel_ids)}
+        parcels = parcel_facts(located, point, self._settings.snap_tolerance_m)
+        try:
+            site = self._union(shape for _, shape in located.values())
+        except DisjointParcelsError as error:
+            return ParcelsDescription(
+                parcels=parcels, one_piece=False, part_areas_m2=error.part_areas_m2
             )
-            raise SiteError(msg)
-        boundaries = classify_boundaries(
-            polygon,
-            [shape for pid, (_, shape) in neighbours.items() if pid not in public],
-            self._snap_tolerance_m,
-            self._min_shared_ratio,
-            self._collinear_angle_deg,
+        neighbours = self._neighbours(site, located)
+        return ParcelsDescription(
+            parcels=parcels,
+            one_piece=True,
+            area_m2=float(site.area),
+            distance_m=float(site.distance(point)),
+            edges=edge_totals(self._edges(site, neighbours)),
+            neighbours=neighbour_facts(neighbours, site, self._settings.snap_tolerance_m),
         )
-        point = self._point(candidate.longitude, candidate.latitude)
-        nearest, distance = nearest_boundary(boundaries, point)
-        shape = to_shape(polygon)
-        return SiteDraft(
-            address=candidate,
-            parcels=tuple(self._parcel(parcel, shape) for parcel, shape in parcels),
-            polygon=polygon,
-            area_m2=float(shape.area),
-            boundaries=boundaries,
-            nearest_boundary=nearest,
-            nearest_distance_m=distance,
-            neighbours=neighbour_records(
-                neighbours, shape.exterior, public, self._snap_tolerance_m
-            ),
+
+    def site(self, choice: ParcelChoice) -> Site:
+        """Build the site from a parcel choice, checking the address label against the geocoder.
+
+        Args:
+            choice: The agent's choice: address label, parcel ids, rationale, assumptions.
+
+        Returns:
+            The site: parcels, union polygon, area, neutral edges and geometric citations.
+
+        Raises:
+            SiteError: If the label, an id or the selection is wrong (message for the model).
+            ServiceError: If a service fails.
+        """
+        candidate = self._geocode(choice.address)
+        located = {pid: self._fetch(pid) for pid in unique_ids(choice.parcel_ids)}
+        try:
+            site = self._union(shape for _, shape in located.values())
+        except DisjointParcelsError as error:
+            raise SiteError(str(error)) from error
+        neighbours = self._neighbours(site, located)
+        settings = self._settings
+        return Site(
+            address=candidate.label,
+            longitude=candidate.longitude,
+            latitude=candidate.latitude,
+            choice=choice,
+            parcels=tuple(self._parcel(parcel, shape) for parcel, shape in located.values()),
+            polygon=to_contract(site, settings.crs, settings.decimals),
+            area_m2=float(site.area),
+            edges=self._edges(site, neighbours),
             citations=(
-                address_citation(candidate, self._geocoder_source),
-                *(parcel_citation(parcel, self._cadastre_source) for parcel, _ in parcels),
-                *(parcel_citation(neighbours[pid][0], self._cadastre_source) for pid in public),
+                address_citation(candidate, settings.geocoder_source),
+                *(parcel_citation(p, settings.cadastre_source) for p, _ in located.values()),
             ),
         )
+
+    def parcels(self, parcel_ids: Sequence[str]) -> tuple[Parcel, ...]:
+        """Return parcels with their polygons in the metric CRS.
+
+        Args:
+            parcel_ids: Cadastral ids.
+
+        Returns:
+            The parcels, in the given order without duplicates.
+
+        Raises:
+            SiteError: If an id is wrong or none is given (message for the model).
+            ServiceError: If the cadastre service fails.
+        """
+        located = [self._fetch(pid) for pid in unique_ids(parcel_ids)]
+        return tuple(self._parcel(parcel, shape) for parcel, shape in located)
 
     def _geocode(self, address: str) -> AddressCandidate:
         """Geocode the label again and check that the top match carries the same label."""
@@ -183,7 +167,7 @@ class SiteSurveyor:
             found = repr(matches[0].label) if matches else "no match"
             msg = (
                 f"address {address!r} is not a geocoder label (the geocoder returns {found} for "
-                "it); pass the label exactly as geocode_address returned it"
+                "it); pass the label exactly as geocode returned it"
             )
             raise SiteError(msg)
         return matches[0]
@@ -199,42 +183,63 @@ class SiteSurveyor:
             raise SiteError(msg)
         return parcel, self._shape(parcel)
 
-    def _union(self, shapes: Sequence[BaseGeometry], what: str) -> shapely.Polygon:
-        """Merge parcel geometries into one polygon, reporting disjoint parts as a site error."""
+    def _union(self, shapes: Iterable[BaseGeometry]) -> shapely.Polygon:
+        """Merge parcel geometries into one polygon.
+
+        Raises:
+            DisjointParcelsError: If the parcels form several parts.
+            SiteError: If nothing with an area remains.
+        """
+        settings = self._settings
         try:
-            return union_parcels(shapes, self._grid_size_m, self._max_sliver_area_m2)
-        except DisjointParcelsError as error:
-            raise SiteError(str(error)) from error
+            return union_parcels(list(shapes), settings.grid_size_m, settings.max_sliver_area_m2)
+        except DisjointParcelsError:
+            raise
         except ValueError as error:
-            msg = f"{what} have no usable geometry ({error})"
+            msg = f"the selected parcels have no usable geometry ({error})"
             raise SiteError(msg) from error
 
+    def _intersecting(self, area: BaseGeometry) -> tuple[CadastralParcel, ...]:
+        """Return the parcels intersecting a metric area."""
+        settings = self._settings
+        return self._cadastre.intersecting(to_crs(area, settings.crs, settings.geographic_crs))
+
     def _neighbours(
-        self, site: shapely.Polygon, selected: Mapping[str, None]
+        self, site: shapely.Polygon, selected: Mapping[str, Located]
     ) -> dict[str, Located]:
         """Return the parcels within the neighbour buffer of the site, selected ones excluded."""
-        area = to_crs(site.buffer(self._neighbour_buffer_m), self._crs, self._geographic_crs)
         return {
             parcel.id: (parcel, self._shape(parcel))
-            for parcel in self._cadastre.intersecting(area)
+            for parcel in self._intersecting(site.buffer(self._settings.neighbour_buffer_m))
             if parcel.id not in selected
         }
 
+    def _edges(self, site: shapely.Polygon, neighbours: Mapping[str, Located]) -> tuple[Edge, ...]:
+        """Describe each exterior edge of the site by what lies across it."""
+        settings = self._settings
+        return site_edges(
+            to_contract(site, settings.crs, settings.decimals),
+            {pid: shape for pid, (_, shape) in neighbours.items()},
+            snap_tolerance_m=settings.snap_tolerance_m,
+            min_shared_ratio=settings.min_shared_ratio,
+        )
+
     def _parcel(self, parcel: CadastralParcel, shape: BaseGeometry) -> Parcel:
         """Build the parcel contract: cadastral contenance, else the projected area."""
-        polygon = self._union([shape], f"parcel {parcel.id}")
+        polygon = self._union([shape])
         area = parcel.contenance_m2 or float(polygon.area)
-        return Parcel(
-            id=parcel.id, area_m2=area, polygon=to_contract(polygon, self._crs, self._decimals)
-        )
+        contract = to_contract(polygon, self._settings.crs, self._settings.decimals)
+        return Parcel(id=parcel.id, area_m2=area, polygon=contract)
 
     def _point(self, longitude: float, latitude: float) -> shapely.Point:
         """Project a WGS84 point to the metric CRS."""
-        return to_crs(shapely.Point(longitude, latitude), self._geographic_crs, self._crs)
+        point = shapely.Point(longitude, latitude)
+        return to_crs(point, self._settings.geographic_crs, self._settings.crs)
 
     def _shape(self, parcel: CadastralParcel) -> BaseGeometry:
         """Return a parcel's geometry in the metric CRS."""
-        return to_crs(polygon_from_rings(parcel.polygons), self._geographic_crs, self._crs)
+        shape = polygon_from_rings(parcel.polygons)
+        return to_crs(shape, self._settings.geographic_crs, self._settings.crs)
 
 
 def _normalise(label: str) -> str:

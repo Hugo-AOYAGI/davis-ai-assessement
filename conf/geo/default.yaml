@@ -1,5 +1,78 @@
 # Geographic data and site geometry, shared by the surveyor, site_view and the submit_study gate.
+# Every knob lives once here; tools and sub-agents reference it by absolute interpolation, and
+# Hydra builds a separate (identically configured) client for each reference.
+crs: EPSG:2154             # metric CRS of the site geometry and of the imagery (Lambert-93)
+geographic_crs: EPSG:4326  # CRS of the geocoder and cadastre coordinates (WGS84)
+decimals: 2                # decimals kept on site coordinates
+max_results: 5             # geocoder candidates shown to the model
+search_radius_m: 50        # find_parcels radius around the address point
+
 edges:                     # agent.runtime.geometry.edges: site_edges and label_edges
   snap_tolerance_m: 0.5    # two limits closer than this are the same limit
   min_shared_ratio: 0.5    # share of an edge on neighbours' limits for it to face a parcel
   collinear_angle_deg: 20  # direction change that splits a separating limit
+
+http:
+  _target_: agent.adapters.http.CachedHttp
+  cache_dir:
+    _target_: agent.agents.config.project_path
+    relative: data/cache/geo
+  timeout_s: 30
+
+geocoder:
+  _target_: agent.adapters.geo.geocoder.AddressGeocoder
+  url: https://data.geopf.fr/geocodage/search  # Base Adresse Nationale, served by the Géoplateforme
+  http: ${geo.http}
+
+cadastre:
+  _target_: agent.adapters.geo.cadastre.CadastreClient
+  url: https://apicarto.ign.fr/api/cadastre/parcelle
+  http: ${geo.http}
+  page_size: 500
+
+imagery:
+  _target_: agent.adapters.geo.imagery.ImageryClient
+  url: https://data.geopf.fr/wms-r/wms  # IGN Géoplateforme WMS (raster)
+  http: ${geo.http}
+  version: "1.3.0"
+  crs: ${geo.crs}
+  media_type: image/png
+  layers:                                  # one WMS layer per site_view kind
+    map: GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2
+    aerial: ORTHOIMAGERY.ORTHOPHOTOS
+  source: IGN Géoplateforme WMS
+
+surveyor:
+  _target_: agent.adapters.geo.survey.SiteSurveyor
+  geocoder: ${geo.geocoder}
+  cadastre: ${geo.cadastre}
+  settings:
+    _target_: agent.adapters.geo.records.SurveySettings
+    crs: ${geo.crs}
+    geographic_crs: ${geo.geographic_crs}
+    decimals: ${geo.decimals}
+    grid_size_m: 0.05          # union precision; closes digitising gaps below 10 cm
+    max_sliver_area_m2: 1.0    # holes and parts smaller than this are noise
+    neighbour_buffer_m: 2.0    # parcels within this distance of the site are neighbours
+    snap_tolerance_m: ${geo.edges.snap_tolerance_m}
+    min_shared_ratio: ${geo.edges.min_shared_ratio}
+    geocoder_source: geoplateforme-geocodage
+    cadastre_source: apicarto-cadastre
+
+# Ready tool node: sub-agents list it as `- ${geo.site_view}` in their `tools`.
+site_view:
+  _target_: agent.tools.geo.view.site_view_tool
+  surveyor: ${geo.surveyor}
+  imagery: ${geo.imagery}
+  half_widths_m:             # half the side of the square view per fixed scale
+    town: 1500
+    neighbourhood: 250
+  parcel_margin_ratio: 0.3   # `parcel` scale: margin around the parcels, share of their extent
+  min_half_width_m: 40       # `parcel` scale: smallest half-side
+  image_px: 1024             # side of the square image (API cap: 2000)
+  style:
+    _target_: agent.adapters.geo.imagery.OutlineStyle
+    rgb: [230, 0, 0]
+    width_px: 3
+    font_px: 14
+    label_background_rgb: [255, 255, 255]

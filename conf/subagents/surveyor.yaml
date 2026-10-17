@@ -1,0 +1,33 @@
+# Surveyor: address -> parcel choice -> site with neutral edges (artifact `site`).
+surveyor:
+  description: >-
+    Turns the case address into the site under study. Give it the address and the program (only
+    context to judge which parcels plausibly form the plot). It geocodes the address, inspects
+    the nearby cadastral parcels and chooses one parcel or several adjacent ones; code then
+    builds the `site` artifact: parcels, union polygon (Lambert-93), area, and every edge with
+    what lies across it (another parcel or public land), with geometric citations. It reports
+    the choice, its rationale and assumptions. Facts only: no zone, no legal labelling of limits.
+  prompt: prompts/subagents/surveyor.md
+  model: surveyor
+  tools:
+    - _target_: agent.tools.geo.geocode.geocode_tool
+      geocoder: ${geo.geocoder}
+      max_results: ${geo.max_results}
+    - _target_: agent.tools.geo.parcels.find_parcels_tool
+      surveyor: ${geo.surveyor}
+      radius_m: ${geo.search_radius_m}
+    - _target_: agent.tools.geo.parcels.describe_parcels_tool
+      surveyor: ${geo.surveyor}
+    - ${geo.site_view}
+    - _target_: agent.tools.submit.factory.submit_tool
+      name: submit_parcel
+      artifact: site
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.findings.site.ParcelChoice
+      finalize:
+        _target_: agent.tools.geo.site.parcel_finalizer
+        surveyor: ${geo.surveyor}
+      summarize:
+        _target_: hydra.utils.get_method
+        path: agent.tools.geo.site.summarize_site

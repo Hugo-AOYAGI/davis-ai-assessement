@@ -1,4 +1,4 @@
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from typing import cast
 
 import shapely
@@ -105,6 +105,47 @@ def to_contract(polygon: shapely.Polygon, crs: str, decimals: int) -> Polygon:
 def to_shape(polygon: Polygon) -> shapely.Polygon:
     """Convert a ``Polygon`` contract to a shapely polygon."""
     return shapely.Polygon(polygon.exterior, polygon.holes)
+
+
+def mean_width(shape: BaseGeometry) -> float:
+    """Return twice the area over the perimeter: about the width of a long thin shape."""
+    return 2 * float(shape.area) / float(shape.length) if shape.length else 0.0
+
+
+def touching(shapes: Mapping[str, BaseGeometry], tolerance_m: float) -> dict[str, tuple[str, ...]]:
+    """Return, for each shape, the ids of the other shapes within ``tolerance_m`` of it.
+
+    Args:
+        shapes: Shapes by id, in a metric CRS.
+        tolerance_m: Largest gap between shapes that touch.
+
+    Returns:
+        The sorted ids each shape touches, keyed like ``shapes``.
+    """
+    return {
+        shape_id: tuple(
+            sorted(
+                other_id
+                for other_id, other in shapes.items()
+                if other_id != shape_id and shape.distance(other) <= tolerance_m
+            )
+        )
+        for shape_id, shape in shapes.items()
+    }
+
+
+def shared_length(site: shapely.Polygon, neighbour: BaseGeometry, tolerance_m: float) -> float:
+    """Return the length of the site's exterior lying along a neighbour's limit.
+
+    Args:
+        site: Site polygon, in a metric CRS.
+        neighbour: Neighbouring parcel, in the same CRS.
+        tolerance_m: Distance within which the exterior counts as lying on the limit.
+
+    Returns:
+        The shared length, in metres.
+    """
+    return float(site.exterior.intersection(neighbour.boundary.buffer(tolerance_m)).length)
 
 
 def _close_gaps(geometry: BaseGeometry, grid_size_m: float) -> BaseGeometry:

@@ -2,7 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, JsonValue, ValidationError
 
-from agent.adapters.geo.http import CachedHttp, GeoServiceError
+from agent.adapters.http import CachedHttp, ServiceError
 from agent.contracts.base import Contract
 from agent.contracts.geometry import Point
 from agent.observability.logs import get_logger
@@ -89,7 +89,7 @@ class AddressGeocoder:
             Candidates in the service's ranking order; empty when nothing matches.
 
         Raises:
-            GeoServiceError: If the service fails or answers an unexpected payload.
+            ServiceError: If the service fails or answers an unexpected payload.
         """
         payload = self._http.get_json(self._url, {"q": query, "limit": str(limit)})
         candidates = tuple(_candidate(feature) for feature in _parse(self._url, payload).features)
@@ -108,13 +108,13 @@ def _parse(url: str, payload: JsonValue) -> _Collection:
         The parsed collection.
 
     Raises:
-        GeoServiceError: If the payload is not a FeatureCollection of points.
+        ServiceError: If the payload is not a FeatureCollection of points.
     """
     try:
         return _Collection.model_validate(payload)
     except ValidationError as error:
         msg = f"{url} answered an unexpected geocoding payload: {error.errors()[:3]}"
-        raise GeoServiceError(msg) from error
+        raise ServiceError(msg) from error
 
 
 def _candidate(feature: _Feature) -> AddressCandidate:

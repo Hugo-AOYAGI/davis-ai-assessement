@@ -7,7 +7,7 @@ from pydantic import JsonValue
 from shapely.geometry import Polygon, box
 
 from agent.adapters.geo.cadastre import CadastreClient
-from agent.adapters.geo.http import CachedHttp, GeoServiceError
+from agent.adapters.http import CachedHttp, ServiceError
 
 URL = "https://apicarto.ign.fr/api/cadastre/parcelle"
 LON, LAT = 2.165254, 48.709836
@@ -127,5 +127,5 @@ def test_unexpected_payload_raises(tmp_path):
         "0": {"features": [{"geometry": {"type": "Point", "coordinates": [0, 0]}}]}
     }
     client, _ = paged_client(tmp_path, bad, 10)
-    with pytest.raises(GeoServiceError, match="unexpected cadastre payload"):
+    with pytest.raises(ServiceError, match="unexpected cadastre payload"):
         client.intersecting(AROUND)

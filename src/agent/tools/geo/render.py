@@ -1,12 +1,10 @@
 import json
-import math
 from collections.abc import Sequence
 
 from pydantic import JsonValue
 
 from agent.adapters.geo.geocoder import AddressCandidate
-from agent.adapters.geo.records import ParcelCandidate, SiteDraft
-from agent.contracts.geometry import BoundaryKind
+from agent.adapters.geo.records import EdgeTotal, ParcelCandidate, ParcelsDescription
 
 _METRE_DECIMALS = 1
 _SCORE_DECIMALS = 2
@@ -68,37 +66,50 @@ def parcel_rows(candidates: Sequence[ParcelCandidate]) -> list[JsonValue]:
     ]
 
 
-def site_summary(draft: SiteDraft) -> dict[str, JsonValue]:
-    """Summarise a site draft for the model, without its coordinates.
+def edge_rows(totals: Sequence[EdgeTotal]) -> dict[str, JsonValue]:
+    """Render edge totals keyed by the kind of land across the edges."""
+    return {
+        total.other_side.value: {"count": total.count, "length_m": metres(total.length_m)}
+        for total in totals
+    }
+
+
+def description_rows(description: ParcelsDescription) -> dict[str, JsonValue]:
+    """Render a parcel selection's description for the model, without coordinates.
 
     Args:
-        draft: The computed site.
+        description: The described selection.
 
     Returns:
-        Area, parcels, boundary length and edge count per type, the boundary nearest to the
-        address point, and the neighbours.
+        The parcels and whether they form one piece; the union's facts when they do.
     """
-    boundaries: dict[str, JsonValue] = {}
-    for kind in BoundaryKind:
-        edges = [b for b in draft.boundaries if b.kind is kind]
-        length = sum(math.dist(b.start, b.end) for b in edges)
-        boundaries[kind.value] = {"length_m": metres(length), "edges": len(edges)}
+    rows: dict[str, JsonValue] = {
+        "parcels": [
+            {
+                "id": p.id,
+                "contenance_m2": p.contenance_m2,
+                "mean_width_m": metres(p.mean_width_m),
+                "distance_m": metres(p.distance_m),
+                "touches": list(p.touches),
+            }
+            for p in description.parcels
+        ],
+        "one_piece": description.one_piece,
+    }
+    if not description.one_piece:
+        return {**rows, "part_areas_m2": [metres(a) for a in description.part_areas_m2]}
     return {
-        "area_m2": metres(draft.area_m2),
-        "parcels": [{"id": p.id, "contenance_m2": p.area_m2} for p in draft.parcels],
-        "boundaries": boundaries,
-        "nearest_boundary": {
-            "kind": draft.nearest_boundary.kind.value,
-            "distance_m": metres(draft.nearest_distance_m),
-        },
+        **rows,
+        "area_m2": metres(description.area_m2 or 0),
+        "distance_m": metres(description.distance_m or 0),
+        "edges": edge_rows(description.edges),
         "neighbours": [
             {
                 "id": n.id,
                 "contenance_m2": n.contenance_m2,
                 "shared_length_m": metres(n.shared_length_m),
                 "mean_width_m": metres(n.mean_width_m),
-                "public": n.public,
             }
-            for n in draft.neighbours
+            for n in description.neighbours
         ],
     }

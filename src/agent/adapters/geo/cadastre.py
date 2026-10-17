@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, JsonValue, ValidationError
 from shapely.geometry import mapping
 from shapely.geometry.base import BaseGeometry
 
-from agent.adapters.geo.http import CachedHttp, GeoServiceError
+from agent.adapters.http import CachedHttp, ServiceError
 from agent.contracts.base import Contract
 from agent.contracts.geometry import Point
 from agent.observability.logs import get_logger
@@ -88,7 +88,7 @@ class CadastreClient:
             The parcels, in the service's order.
 
         Raises:
-            GeoServiceError: If the service fails or answers an unexpected payload.
+            ServiceError: If the service fails or answers an unexpected payload.
         """
         geom = json.dumps(mapping(geometry), separators=(",", ":"))
         features: list[_Feature] = []
@@ -113,7 +113,7 @@ class CadastreClient:
 
         Raises:
             ValueError: If ``parcel_id`` is not 14 characters long.
-            GeoServiceError: If the service fails or answers an unexpected payload.
+            ServiceError: If the service fails or answers an unexpected payload.
         """
         if len(parcel_id) != _IDU_LENGTH:
             msg = (
@@ -163,13 +163,13 @@ def _parse(url: str, payload: JsonValue) -> _Collection:
         The parsed page.
 
     Raises:
-        GeoServiceError: If the payload is not a FeatureCollection of (multi)polygons.
+        ServiceError: If the payload is not a FeatureCollection of (multi)polygons.
     """
     try:
         return _Collection.model_validate(payload)
     except ValidationError as error:
         msg = f"{url} answered an unexpected cadastre payload: {error.errors()[:3]}"
-        raise GeoServiceError(msg) from error
+        raise ServiceError(msg) from error
 
 
 def _parcel(feature: _Feature) -> CadastralParcel:
