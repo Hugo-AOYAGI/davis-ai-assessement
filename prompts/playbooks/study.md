@@ -147,6 +147,9 @@ The study holds no envelope figures: the `architect` delivers the `envelope` art
      your choice and its rationale, `resolved_by: agent` (`submit_study` rejects the study
      otherwise).
 
+   If it delivered no `envelope` because a value it requires is missing from the notes (a
+   setback for a limit kind, a building's maximum height), only the first way applies.
+
 ## 6. Submit and reply
 
 Call `submit_study` with the complete study (see below). If it rejects the study, fix every

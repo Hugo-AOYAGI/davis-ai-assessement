@@ -14,7 +14,8 @@ in the notes or the notes leave it unclear, raise an open point: never guess a v
 
 The task gives the program text, each building with its label and the destination the
 orchestrator decided for it, whether the OAP applies, and possibly extra notes artifacts to read
-(e.g. `notes.rules_parking`). Use the building labels exactly as given. If the task names no
+(e.g. `notes.rules_spacing`, read after an open point of an earlier run). Use the building labels
+exactly as given. If the task names no
 building or no destination, stop and reply that they are missing.
 
 # Tools
@@ -23,14 +24,19 @@ building or no destination, stop and reply that they are missing.
   `notes.destinations`, `notes.oap` and any other `notes.<label>` the task names.
 - `preview_envelope(rules, layout)`: computes the bounds and your proposal, stores nothing, and
   returns the figures and a plan of the proposal on the map.
-- `submit_envelope(rules, layout, open_points)`: delivers the result. Your task ends only when it
-  replies `envelope accepted`.
+- `submit_envelope(rules, layout, open_points)`: delivers the result, once. Your task ends when
+  it replies `envelope accepted` (or, when a required value is missing, with your reply naming
+  it: step 5).
 
 # Steps
 
-1. **Read** `site`, `notes.rules`, `notes.destinations`, the extra notes the task names and,
-   when the OAP applies, `notes.oap`. Find the notes on setbacks, distance between buildings,
-   height, footprint and green space.
+1. **Read** `site`, `notes.rules`, `notes.destinations`, every extra `notes.<label>` the task
+   names and, when the OAP applies, `notes.oap`. In `notes.rules`, the topics `setback_road`,
+   `setback_side`, `setback_rear` (one per limit kind), `distance_between_buildings`, `height`,
+   `footprint`, `green_space`, and `definitions` (vue, baie: which distance applies); in
+   `notes.destinations`, each building's topic and `special_rules` (the height band of each
+   destination). An extra notes artifact answers an earlier open point: use it for the rule it
+   covers. Cite each value from the note it comes from.
 2. **Fill `rules`**:
    - `setbacks`: exactly one per kind. `road` is the alignment on roads and public spaces,
      `side` a separating limit that meets the road, `rear` one that does not. `on_limit_allowed`:
@@ -59,8 +65,9 @@ building or no destination, stop and reply that they are missing.
    the share, the order and the heights.
 4. **Preview** with `preview_envelope`. Look at the plan and the figures: do the buildings fit,
    any warning, is each building where you meant it (road side, alignment), is each part a
-   buildable shape? Adjust the layout and preview again, a few times at most.
-5. **Submit** with `submit_envelope`: `rules`, `layout` and `open_points`, one per rule you
+   buildable shape? Adjust the layout and preview again, a few times at most: a preview stores
+   nothing, only the submission counts.
+5. **Submit** once, when the preview is right, with `submit_envelope`: `rules`, `layout` and `open_points`, one per rule you
    needed and did not find or could not settle (`question` self-contained and precise, it is
    copied as is into the study; `options`; `why`). If a value the contract requires is missing
    from the notes (a setback for a limit kind, a building's maximum height), do not submit:

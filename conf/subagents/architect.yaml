@@ -9,7 +9,7 @@ architect:
     Needs the `site` and the notes first (`notes.rules`, `notes.oap`, `notes.destinations`).
     Give it the program text; each building with the label you use in admissibility and the
     destination you decided for it; whether the OAP applies; and any extra notes artifact to
-    read (e.g. `notes.rules_parking`). Rules missing from the notes come back as open points.
+    read (e.g. `notes.rules_spacing`, after an open point). Rules missing from the notes come back as open points.
     Delivers the artifact `envelope`.
   prompt: prompts/subagents/architect.md
   model: architect  # key in models.nodes

@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Archive,
   BookOpen,
+  Box,
   ClipboardCheck,
   Compass,
   FilePen,
@@ -17,6 +18,7 @@ import {
   Map,
   MapPin,
   MessageCircleQuestionMark,
+  Ruler,
   Search,
   Send,
   TextSearch,
@@ -40,6 +42,7 @@ export const SUBAGENTS: Record<string, { name: string; icon: LucideIcon }> = {
   surveyor: { name: "Surveyor", icon: Compass },
   zoning_analyst: { name: "Zoning analyst", icon: Map },
   doc_analyst: { name: "Document analyst", icon: BookOpen },
+  architect: { name: "Architect", icon: Ruler },
 };
 
 const str = (value: unknown): string | undefined =>
@@ -125,6 +128,8 @@ const TOOLS: Record<string, ToolLabel> = {
   },
   view_image: { label: "View page", icon: Image, summary: page },
   zoom: { label: "Zoom into page", icon: ZoomIn, summary: page },
+  // Envelope
+  preview_envelope: { label: "Preview envelope", icon: Box },
   // Orchestration
   load_playbook: {
     label: "Load playbook",
@@ -168,6 +173,7 @@ const TOOLS: Record<string, ToolLabel> = {
     icon: Send,
     summary: (a) => str(a.label),
   },
+  submit_envelope: { label: "Submit envelope", icon: Send },
   submit_study: { label: "Submit study", icon: ClipboardCheck },
   // Scratch filesystem
   ls: { label: "List files", icon: Folder, summary: (a) => str(a.path) },
