@@ -49,8 +49,7 @@ The command exits with code 1 when no study was accepted.
 
 ```bash
 uv run langgraph dev                                         # Agent Server on http://localhost:2024
-git clone https://github.com/langchain-ai/agent-chat-ui tools/agent-chat-ui   # first time only
-cd tools/agent-chat-ui && pnpm install && pnpm dev           # UI on http://localhost:3000 (graph id: agent)
+cd ui && pnpm install && pnpm dev                            # UI on http://localhost:3000 (graph id: agent)
 ```
 
 Ask for a study in the chat, e.g. *"Buildability study for 4 rue Joliot Curie, 91190
@@ -101,7 +100,7 @@ tests/       unit tests mirroring src/agent/
 evals/       eval sets and scorers
 ressources/  input planning documents (PDF)
 docs/        design, v1 refinements, coding standards, plans, roadmap
-tools/       external tools (agent-chat-ui)
+ui/          chat UI (Next.js, adapted from agent-chat-ui)
 ```
 
 ## Documentation

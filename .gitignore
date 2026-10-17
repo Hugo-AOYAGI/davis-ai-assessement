@@ -9,5 +9,5 @@ data/
 outputs/
 multirun/
 
-# External clone (langchain-ai/agent-chat-ui), not our code
+# Old external clone of agent-chat-ui, superseded by ui/
 tools/agent-chat-ui/

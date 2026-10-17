@@ -95,12 +95,7 @@ Proposed but not adopted yet:
 - Thin tools: ≤20 lines, delegating to `runtime/` or `adapters/`.
 - Ban on dumping-ground modules (`utils.py`, `helpers.py`, `common.py`).
 
-## 4. Housekeeping
-
-- `tools/agent-chat-ui` is gitignored (external clone of `langchain-ai/agent-chat-ui`). Fork or
-  vendor it if the UI gets customised.
-
-## 5. Considered and rejected
+## 4. Considered and rejected
 
 | Option | Why rejected |
 |---|---|

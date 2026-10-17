@@ -22,6 +22,7 @@ every change.
 | A system prompt, sub-agent prompt or playbook | `prompts/{orchestrator,subagents,playbooks}/` |
 | Eval sets, scorers, experiment runners | `evals/` |
 | Unit tests | `tests/`, mirroring `src/agent/` |
+| Chat UI components (tool calls, sub-agents, ask_user, study view) | `ui/src/` |
 
 Layering: `contracts ← runtime ← adapters ← tools ← agents ← entrypoints`. Never import to the right.
 
@@ -47,7 +48,7 @@ knobs, the shared `site_view` tool node · `images/` corpus page images (render 
 | Coding standards | `docs/CODING_STANDARDS.md` |
 | v0 work packages, file ownership, acceptance criteria | `docs/V0_PLAN.md` |
 | Deferred decisions, post-v0 improvements, rejected options | `docs/ROADMAP.md` |
-| Chat UI (external clone, gitignored: `git clone https://github.com/langchain-ai/agent-chat-ui tools/agent-chat-ui`) | `tools/agent-chat-ui/` |
+| Chat UI (Next.js, adapted from langchain-ai/agent-chat-ui) | `ui/` |
 | Ingested corpus cache, run outputs (gitignored) | `data/`, `outputs/` |
 
 ## Dev workflow
@@ -67,7 +68,7 @@ Running the agent:
 
 ```bash
 uv run langgraph dev                         # Agent Server on http://localhost:2024 (graph: src/agent/entrypoints/graph.py)
-cd tools/agent-chat-ui && pnpm install && pnpm dev   # chat UI on http://localhost:3000
+cd ui && pnpm install && pnpm dev                     # chat UI on http://localhost:3000
 ```
 
 Smoke checks: `uv run pytest tests/entrypoints` (offline graph build) and
