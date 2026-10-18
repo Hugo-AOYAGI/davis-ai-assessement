@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z20_uec.oracle.json
+id: z20_uec
+level: zoning
+tests: UEc sector in Chevry
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 7 Allee de la Mare l’Oiseau, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000AI0109
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UEc
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

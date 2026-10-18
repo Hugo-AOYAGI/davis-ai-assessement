@@ -1,0 +1,18 @@
+# Oracle provenance: evals/fixtures/surveyor/s13_salmouille.sources.json
+id: s13_salmouille
+level: surveyor
+tests: commune-certified BAN single-parcel link; address point inside cadastral polygon
+status: verified
+built_by: codex; independent BAN export and API Carto verification
+input:
+  address: 60 All Graviers de la Salmouille, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000AC0353
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 788
+  tolerance: 0.02
+  source: cadastre

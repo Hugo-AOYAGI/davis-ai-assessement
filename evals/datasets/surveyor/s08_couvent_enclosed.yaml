@@ -1,0 +1,21 @@
+id: s08_couvent_enclosed
+level: surveyor
+tests: Site boundary is fully surrounded by other registered parcels; distinguish
+  the selected site from its surrounding cadastral features.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 23 Chemin du Couvent, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000BK0239
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 674.67
+  tolerance: 0.02
+  source: cadastre
+- key: edges[neighbours~"91272000BK0236"]
+  at_least: 1
+  source: cadastre

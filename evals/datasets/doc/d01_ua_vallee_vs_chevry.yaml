@@ -1,0 +1,97 @@
+id: d01_ua_vallee_vs_chevry
+level: doc
+tests: two zones are both called UA (Vallée and Chevry) with different values; only the Vallée chapter applies
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The zone is UA of the Vallée chapter of the regulation.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UA
+    legend_items: []
+    program: new housing (ordinary dwellings)
+facts:
+  - statement: In zone UA (Vallée), the footprint of constructions, annexes included, must not exceed 60 percent of the site area.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 22
+        quote: "L’emprise au sol des constructions, y compris les annexes, ne pourra excéder 60% de la superficie du terrain dans la zone."
+  - statement: In zone UA (Vallée), the maximum height of a main building is 9 metres at the eaves or at the acroterion.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 23
+        quote: "9 mètres à l’égout du toit ou à l’acrotère."
+  - statement: In zone UA (Vallée), the maximum height of a main building is 12 metres at the ridge.
+    evidence:
+      - doc: plu_reglement
+        page: 23
+        quote: "12 mètres au faîtage, faîte ou hauteur plafond."
+  - statement: In zone UA (Vallée), the number of levels is limited to R+2+combles.
+    evidence:
+      - doc: plu_reglement
+        page: 23
+        quote: "Le nombre de niveaux est limité à R+2+combles."
+  - statement: In zone UA (Vallée), constructions must be set at the current or projected alignment, with no road setback.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 18
+        quote: "Les constructions ou parties de constructions seront implantées à l’alignement actuel ou projeté"
+  - statement: In zone UA (Vallée), within a band of 30 metres from the alignment, constructions may be built on the side boundaries.
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "Dans une bande à compter de 30 mètres de l’alignement, les constructions pourront être implantées sur les limites séparatives."
+  - statement: In zone UA (Vallée), beyond the 30 metre band only annexes and the fitting out of buildings within their existing volumes are allowed.
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "Au-delà de la bande de 30 m, seuls sont autorisés les annexes et l’aménagement des bâtiments dans les volumes existants."
+  - statement: In zone UA (Vallée), a side setback from a boundary must be at least 8 metres where the facade or facade part has views (vues).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - statement: In zone UA (Vallée), a side setback from a boundary must be at least half the facade height (L=H/2), with a minimum of 2 metres, where the facade has no views.
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "la moitié de la hauteur de la façade ou partie de façade intéressée de la construction (L=H/2) avec un minimum de 2 mètres si celle-ci ne comporte pas de vues"
+  - statement: Housing in zone UA (Vallée) requires 2 parking spaces per dwelling.
+    evidence:
+      - doc: plu_reglement
+        page: 27
+        quote: "2 places par logement"
+  - statement: In zone UA (Vallée), 40 percent of the parking spaces must be covered or built underground, except in flood-prone zones.
+    evidence:
+      - doc: plu_reglement
+        page: 28
+        quote: "40% des places de stationnement doivent être couvertes ou réalisées en sous-sol"
+must_not:
+  - States that the maximum footprint in UA is 50 percent of the site area (Chevry UA value).
+  - States that the maximum height in UA is 12 metres at the eaves, 15 metres at the ridge or R+3 (Chevry UA values).
+  - States that constructions in UA may be set at the alignment or freely set back (Chevry rule); the Vallée rule imposes the alignment.
+  - States that the side setback in UA is equal to the eaves height of the construction (Chevry rule) instead of 8 m with views and H/2 with a 2 m minimum without views.
+  - Applies the Chevry requirement that at least 50 percent of the housing parking be in basement or ground floor, instead of the Vallée rule of 40 percent covered or underground.
+  - Cites the Chevry - UA chapter (PDF pages 210 to 221) as the source of the applicable UA rules.
+must_flag: []

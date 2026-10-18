@@ -1,0 +1,89 @@
+id: d05_umg_public_interest
+level: doc
+tests: UMG gives public-interest facilities their own height (article 10) and exempts them from the quantitative green-space rules of article 13; footprint is not regulated
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: the regulatory rules for the program in the zone, plus the provisions of every applying legend item.
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UMG
+    legend_items: ["Secteur à Orientation d'Aménagement et de Programmation"]
+    parcel_ids: [91272000CR0247]
+    program: public-interest facility (équipement d'intérêt collectif)
+facts:
+  - statement: In zone UMG, the maximum height of constructions whose main destination is a public service or collective interest (service public ou d'intérêt collectif) is 25 metres.
+    critical: true
+    evidence:
+      # Printed p325. No strike-through on the rendered page (see page326.png).
+      - doc: plu_reglement
+        page: 326
+        quote: "Pour les constructions à destination principale d’un service public ou d’intérêt collectif : 25 mètres ;"
+  - statement: In zone UMG, the quantitative green-space provisions of article 13 (20 percent green space, 10 percent open ground, tree planting) do not apply to constructions and installations necessary to public services or collective interest.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 331
+        quote: "Les dispositions quantitatives fixées ci-dessus ne sont pas applicables aux constructions et installations nécessaires aux services publics ou d’intérêt collectif."
+  - statement: In zone UMG, construction footprint (emprise au sol) is not regulated by the zone article 9.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "L’emprise au sol des constructions n’est pas réglementée"
+  - statement: In zone UMG, the quantitative green-space requirements that the public-interest exemption lifts are 20 percent of the site area as green space and 10 percent as open ground (pleine terre) for new construction.
+    evidence:
+      - doc: plu_reglement
+        page: 331
+        quote: "En espace vert 20% au moins de la superficie du terrain."
+      - doc: plu_reglement
+        page: 331
+        quote: "En espace de pleine terre 10% au moins de la superficie du terrain."
+  - statement: In zone UMG, the maximum height for constructions whose main destination is housing is 20 metres, limited to R+5 levels.
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5."
+  - statement: In zone UMG, the maximum height for constructions with any other destination (for example offices) is 18 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "Pour les constructions ayant une autre destination : la hauteur maximale des constructions est limitée à 18 mètres."
+  - statement: In zone UMG, the number of car parking spaces for a public service or collective-interest construction is set case by case from its nature, its grouping, its public-transport access and nearby public car parks, with no fixed ratio (except higher education and research).
+    evidence:
+      - doc: plu_reglement
+        page: 328
+        quote: "Le nombre de places de stationnement nécessaire à leur fonctionnement et à leur fréquentation est déterminé en fonction"
+  - statement: In zone UMG, buildings may stand on the alignment of the road or set back by at least 1 metre.
+    evidence:
+      - doc: plu_reglement
+        page: 324
+        quote: "peuvent être implantées à l’alignement ou en recul"
+      - doc: plu_reglement
+        page: 324
+        quote: "En cas de recul, ce dernier doit être au moins égal à 1 mètre."
+  - statement: In zone UMG, the setback from a side or rear boundary is at least 6 metres for facades with windows (vues) and at least 3 metres for facades without; building on the boundary is also allowed.
+    evidence:
+      - doc: plu_reglement
+        page: 325
+        quote: "soit sur une ou plusieurs limites séparatives, soit en retrait"
+      - doc: plu_reglement
+        page: 325
+        quote: "à 6 mètres pour les façades ou parties de façade comportant des vues"
+      - doc: plu_reglement
+        page: 325
+        quote: "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue"
+  - statement: In zone UMG, two buildings on the same plot must be at least 10 metres apart if one of the facing facades has windows (vues), and at least 6 metres if neither has.
+    evidence:
+      - doc: plu_reglement
+        page: 325
+        quote: "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comporte des vues"
+      - doc: plu_reglement
+        page: 326
+        quote: "6 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vues"
+must_not:
+  - States that the maximum height of a public-interest facility in UMG is 20 metres (the housing limit or the limit of another Moulon sector) or 18 metres (the limit for other destinations).
+  - Applies the UMG article 13 ratios (20 percent green space, 10 percent open ground, one tree per 300 m2) to the public-interest facility as requirements.
+  - States that UMG caps the construction footprint of the facility at a percentage of the site area.

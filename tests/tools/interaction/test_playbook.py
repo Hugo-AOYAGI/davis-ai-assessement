@@ -36,3 +36,13 @@ def test_unknown_name_lists_playbooks(tool):
 def test_empty_playbooks_rejected():
     with pytest.raises(ValueError, match="at least one playbook"):
         load_playbook_tool({}, "English")
+
+
+def test_configured_topic_lists_are_substituted():
+    book = Playbook(
+        description="Study.", text="Topics: $topics", lists={"topics": ("height", "parking")}
+    )
+    assert (
+        load_playbook_tool({"study": book}, "English").invoke({"name": "study"})
+        == "Topics: `height`, `parking`"
+    )

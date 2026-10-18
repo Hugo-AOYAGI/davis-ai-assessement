@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z18_ume.oracle.json
+id: z18_ume
+level: zoning
+tests: UME sector of Moulon
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 2 Allée Albert Fert, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CP0231
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UME
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

@@ -1,0 +1,177 @@
+{
+  "parcel_id": "91272000CP0231",
+  "cadastre": {
+    "url": "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/91/91272/cadastre-91272-parcelles.json.gz",
+    "retrieved_utc": "2026-10-17",
+    "source_sha256": "54b101a25b3140b7bd500a3b6549fdf07e74a4746bd28d92f22f4ac59b726408",
+    "original_feature": {
+      "type": "Feature",
+      "id": "91272000CP0231",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.1566534,
+              48.7119205
+            ],
+            [
+              2.1539251,
+              48.7119517
+            ],
+            [
+              2.1539266,
+              48.7119927
+            ],
+            [
+              2.1539198,
+              48.7119927
+            ],
+            [
+              2.153912,
+              48.7117648
+            ],
+            [
+              2.1539158,
+              48.7117647
+            ],
+            [
+              2.1565123,
+              48.7117349
+            ],
+            [
+              2.1564807,
+              48.7105744
+            ],
+            [
+              2.1538726,
+              48.7106217
+            ],
+            [
+              2.1538705,
+              48.7105696
+            ],
+            [
+              2.1540627,
+              48.7105607
+            ],
+            [
+              2.1543411,
+              48.710554
+            ],
+            [
+              2.15457,
+              48.7105505
+            ],
+            [
+              2.1548652,
+              48.710551
+            ],
+            [
+              2.1552503,
+              48.7105477
+            ],
+            [
+              2.1555886,
+              48.7105403
+            ],
+            [
+              2.1558583,
+              48.710531
+            ],
+            [
+              2.1560468,
+              48.7105263
+            ],
+            [
+              2.1562099,
+              48.7105208
+            ],
+            [
+              2.1563818,
+              48.7105128
+            ],
+            [
+              2.1565291,
+              48.710506
+            ],
+            [
+              2.1566702,
+              48.7105065
+            ],
+            [
+              2.1566872,
+              48.7105063
+            ],
+            [
+              2.1567254,
+              48.7118453
+            ],
+            [
+              2.156706,
+              48.7118455
+            ],
+            [
+              2.1567064,
+              48.7118748
+            ],
+            [
+              2.1566521,
+              48.7118754
+            ],
+            [
+              2.1566534,
+              48.7119205
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "91272000CP0231",
+        "commune": "91272",
+        "prefixe": "000",
+        "section": "CP",
+        "numero": "231",
+        "contenance": 7689,
+        "arpente": true,
+        "created": "2023-11-13",
+        "updated": "2024-09-24"
+      }
+    }
+  },
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "source_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "original_row": {
+      "id": "91272_0090_00002",
+      "id_fantoir": "91272_0090",
+      "numero": "2",
+      "rep": "",
+      "nom_voie": "Allée Albert Fert",
+      "code_postal": "91190",
+      "code_insee": "91272",
+      "nom_commune": "Gif-sur-Yvette",
+      "code_insee_ancienne_commune": "",
+      "nom_ancienne_commune": "",
+      "x": "637947.3",
+      "y": "6845943.14",
+      "lon": "2.156639",
+      "lat": "48.710644",
+      "type_position": "segment",
+      "alias": "",
+      "nom_ld": "",
+      "libelle_acheminement": "GIF SUR YVETTE",
+      "nom_afnor": "ALLEE ALBERT FERT",
+      "source_position": "commune",
+      "source_nom_voie": "commune",
+      "certification_commune": "0",
+      "cad_parcelles": ""
+    },
+    "relation": "BAN address point lies inside parcel; no asserted BAN parcel link"
+  },
+  "selection": {
+    "kind": "spread",
+    "tests": "UME sector of Moulon"
+  },
+  "address": "2 Allée Albert Fert, 91190 Gif-sur-Yvette"
+}

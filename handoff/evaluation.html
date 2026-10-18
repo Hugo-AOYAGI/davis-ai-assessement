@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Buildability agent: evaluation</title>
+<style>
+html, body { background: #ffffff; color-scheme: light; margin: 0; }
+.viz-root {
+  color-scheme: light;
+  --fg: #1a1a19; --fg2: #5d5c58; --line: #e4e3df; --soft: #f4f3f0;
+  --v1: #2a78d6; --v2: #eb6834; --v3: #1baf7a; --good: #0f7b3e; --bad: #c62f2f;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #ffffff; color: var(--fg); line-height: 1.5; font-size: 14px;
+  max-width: 800px; margin: 0 auto; padding: 24px; border-radius: 10px; box-sizing: border-box;
+}
+.viz-root h1 { font-size: 21px; margin: 0 0 12px; }
+.viz-root h2 { font-size: 16px; margin: 30px 0 4px; }
+.viz-root p { margin: 4px 0; }
+.viz-root .muted { color: var(--fg2); font-size: 12.5px; }
+.viz-root .versions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 6px; }
+.viz-root .card { background: var(--soft); border-radius: var(--radius, 8px); padding: 12px 14px; }
+.viz-root .card b { display: block; margin-bottom: 2px; }
+.viz-root table { border-collapse: collapse; width: 100%; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.viz-root th, .viz-root td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+.viz-root th { font-size: 12px; font-weight: 600; color: var(--fg2); white-space: nowrap; }
+.viz-root th:first-child, .viz-root td:first-child { text-align: left; }
+.viz-root tr.total td { font-weight: 650; border-top: 2px solid var(--line); border-bottom: 0; }
+.viz-root td.best { font-weight: 700; }
+.viz-root td small { color: var(--fg2); font-size: 11.5px; margin-left: 4px; }
+.viz-root .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.viz-root .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0 0; }
+.viz-root .tile { background: var(--soft); border-radius: var(--radius, 8px); padding: 12px 14px; }
+.viz-root .tile .k { font-size: 12px; color: var(--fg2); margin-bottom: 6px; }
+.viz-root .tile .row { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.viz-root .tile .row span { color: var(--fg2); font-size: 12.5px; }
+.viz-root .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--fg2); margin: 8px 0; }
+.viz-root .grp { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+.viz-root .grp .name { font-size: 13px; font-weight: 600; }
+.viz-root .bars { display: flex; flex-direction: column; gap: 2px; }
+.viz-root .bar { display: flex; align-items: center; gap: 6px; height: 14px; }
+.viz-root .bar i { display: block; height: 12px; border-radius: 0 4px 4px 0; min-width: 2px; }
+.viz-root .bar span { font-size: 11.5px; color: var(--fg2); font-variant-numeric: tabular-nums; }
+.viz-root .bar:hover span { color: var(--fg); }
+.viz-root .gridwrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; align-items: start; }
+.viz-root .grid th, .viz-root .grid td { padding: 2px 4px; font-size: 12px; text-align: center; }
+.viz-root .grid td:first-child, .viz-root .grid th:first-child { text-align: left; }
+.viz-root .ok { color: var(--good); font-weight: 700; }
+.viz-root .ko { color: var(--bad); }
+.viz-root ul { margin: 4px 0; padding-left: 18px; }
+.viz-root li { margin: 3px 0; }
+.viz-root .metrics td, .viz-root .metrics th { text-align: left; vertical-align: top; }
+.viz-root .metrics td:first-child { font-weight: 600; white-space: nowrap; }
+.viz-root .formula { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--soft); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+.viz-root .claims td, .viz-root .claims th { text-align: left; vertical-align: top; }
+.viz-root .claims td:first-child { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+.viz-root .claims td:last-child { color: var(--fg2); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+
+<h1>Buildability agent: evaluation</h1>
+
+<div class="versions">
+  <div class="card"><b>v1</b>The agent looks at the scanned zoning plan and guesses by eye where the site is.</div>
+  <div class="card"><b>v2</b>A tool draws the parcel outline on the zoning plan, with an estimated registration uncertainty.</div>
+</div>
+<p class="muted">v1 and v2 were run with Claude Haiku 5.5 (lower-cost configuration). v2 was also run with Claude Sonnet 5.5 (larger, about 20× the price) for every agent.</p>
+
+<h2>How we measure</h2>
+<p class="muted">70 test cases, with expected answers source-checked by model workers against cadastre, the archived 2021 zoning map and PLU regulation; this is not human sign-off. 20 cases test each step on its own, 10 test the full study.</p>
+<table class="metrics">
+<tr><th>Metric</th><th>What it means</th><th>How it is computed</th></tr>
+<tr><td>Fact</td><td>One expected value in the output: a parcel id, a zone code, a maximum height, a setback, a rule of the regulation.</td><td>451 facts over the 70 cases. Ids and codes must match exactly; numbers within a small tolerance; lists must hold the expected items and none of the excluded ones.</td></tr>
+<tr><td>Cited</td><td>The value is backed by its source.</td><td>When the fact comes from the regulation, the output must cite a page of the PDF that holds the rule. The quote is checked automatically against the page text.</td></tr>
+<tr><td>Facts right</td><td>The share of expected facts answered correctly, with evidence where required.</td><td><span class="formula">grounded-correct facts ÷ facts expected</span></td></tr>
+<tr><td>Key fact</td><td>A fact a study cannot get wrong: parcel, zone, verdict, footprint, height…</td><td>193 of the 451 facts are marked key in the test case.</td></tr>
+<tr><td>Forbidden claim</td><td>A known trap, e.g. quoting the rules of the wrong zone.</td><td>A judge model (Claude Sonnet) reads the output and answers yes or no for each forbidden claim. It also decides whether a regulation note states an expected rule.</td></tr>
+<tr><td>Case passed</td><td>The benchmark's critical-fact and forbidden-claim criteria passed.</td><td>Every key fact correct, cited where evidence is required, and no forbidden claim. One miss fails the case. <span class="formula">cases passed ÷ cases</span></td></tr>
+<tr><td>Cost</td><td>What the agent spends on model calls.</td><td>Tokens of every agent call × list price. The judge is not included: it grades, it is not part of the product.</td></tr>
+<tr><td>Time</td><td>How long one case takes.</td><td>Wall time from the request to the final answer, averaged per case. Cases ran 4 at a time.</td></tr>
+</table>
+<p class="muted">One run per configuration on a small benchmark; differences are descriptive, not a statistical significance claim. The judge was not calibrated. Case passing does not independently require every ambiguity flag, citation diagnostic or envelope consistency check. Geographic facts have no regulatory-text citation requirement.</p>
+
+<h2>Summary</h2>
+<div class="tiles" id="tiles"></div>
+
+<h2>Cases passed</h2>
+<div class="legend" id="legend"></div>
+<div id="passChart"></div>
+
+<h2>Facts right</h2>
+<table id="factTable"></table>
+
+<h2>Forbidden claims made</h2>
+<table id="mustNotTable"></table>
+<table class="claims">
+<tr><th>Case</th><th>Forbidden claim made</th><th>Versions</th></tr>
+<tr><td>d02_uga_height</td><td>States that the applicable maximum construction height in UGa is 10 metres.</td><td>v1 Haiku</td></tr>
+<tr><td>d03_aurc_defers_to_ur</td><td>Applies the URa sector figures to AURc.</td><td>v2 Haiku</td></tr>
+<tr><td>d08_oap_joliot_curie</td><td>States a maximum height in metres, a footprint ratio or a number of parking spaces as an OAP requirement.</td><td>v2 Sonnet</td></tr>
+<tr><td>e05_vallee_ua_housing</td><td>Uses a parcel other than CA0005 (for example the neighbouring CA0004 or CA0006) as the study site.</td><td>v2 Sonnet</td></tr>
+<tr><td>e06_chevry_ua_housing</td><td>Cites the Vallée - UA chapter (PDF pages 13 to 30) as the source of the applicable UA rules.</td><td>v1 Haiku</td></tr>
+<tr><td>e06_chevry_ua_housing</td><td>States that constructions in UA must be built on the current or projected alignment (Vallée UA rule).</td><td>v1 Haiku</td></tr>
+<tr><td>e06_chevry_ua_housing</td><td>States that the maximum footprint in UA is 60 percent of the site area (Vallée UA value).</td><td>v1 Haiku</td></tr>
+<tr><td>e06_chevry_ua_housing</td><td>States that the maximum height in UA is 9 metres at the eaves or the acroterion, 12 metres at the ridge, or R+2+combles (Vallée UA values).</td><td>v1 Haiku</td></tr>
+<tr><td>e06_chevry_ua_housing</td><td>States that the side setback in UA is 8 metres with views and half the height (2 metre minimum) without views (Vallée UA rule).</td><td>v1 Haiku</td></tr>
+<tr><td>e08_uh_housing</td><td>States a COS (coefficient d&#x27;occupation du sol) or a floor-area ratio as a rule applying in UH.</td><td>v2 Haiku</td></tr>
+<tr><td>e09_aurc_housing</td><td>States that no OAP applies to the site, or relies on another OAP chapter (for example chapter 5 Rougemonts) instead of chapter 4 Damiette (AURc).</td><td>v1 Haiku</td></tr>
+<tr><td>e10_n_housing</td><td>Applies the figures of the sectors Nc, Nca or NL to plain zone N (20% extension, 15% footprint, 10 m ridge height, 8 m spacing between buildings).</td><td>v2 Haiku</td></tr>
+<tr><td>e10_n_housing</td><td>Uses a neighbouring parcel (CC0199, CC0198, CC0152 or CC0201) as the study site instead of CC0193.</td><td>v1 Haiku, v2 Haiku</td></tr>
+</table>
+
+<h2>Full study, by topic</h2>
+<table id="e2eTable"></table>
+
+<h2>Cost and time per case</h2>
+<table id="costTable"></table>
+
+<h2>Case by case</h2>
+<p class="muted"><span class="ok">✓</span> passed · <span class="ko">✗</span> failed</p>
+<div class="gridwrap" id="grids"></div>
+
+<h2>Takeaways</h2>
+<ul>
+  <li><b>The v2 configuration improved zoning in these runs:</b> 2 to 13 cases passed with Haiku. Parcel overlays, image rendering and image-context pruning changed together; this does not isolate one cause.</li>
+  <li><b>The Sonnet configuration passed three more cases:</b> it cost roughly eight times as much overall, while average full-study latency was about half. Repeated runs would be needed to assess stability.</li>
+  <li><b>Same failures on both models:</b> thin legend items on the plan (flood zone, reserved land), the choice of neighbouring parcels, and one crash in the envelope drawing (e06).</li>
+</ul>
+<p class="muted">Historical runs from 18 October 2026, before the submission cleanup. These results have not been rerun after the fixes. <a href="evaluation/README.md">Method and limitations</a> &middot; <a href="evaluation/manifest.json">Run manifest</a> &middot; <a href="workflow/">Workflow explainer</a>. Exact code revisions were not recorded with the original runs.</p>
+
+</div>
+<script>
+const V = ["v1 Haiku", "v2 Haiku", "v2 Sonnet"];
+const C = ["var(--v1)", "var(--v2)", "var(--v3)"];
+let LV = [
+  {k: "surveyor", name: "Parcels", n: 20},
+  {k: "zoning", name: "Zoning", n: 20},
+  {k: "doc", name: "Regulation", n: 20},
+  {k: "e2e", name: "Full study", n: 10},
+];
+const D = {"pass": {"surveyor": [15, 15, 17], "zoning": [2, 13, 14], "doc": [15, 14, 14], "e2e": [3, 4, 4]}, "facts": {"surveyor": 43, "zoning": 40, "doc": 224, "e2e": 144}, "grounded": {"surveyor": [34, 34, 38], "zoning": [14, 32, 33], "doc": [204, 202, 203], "e2e": [62, 106, 107]}, "cost": {"surveyor": [0.002287337, 0.0024111955000000003, 0.031130289999999998], "zoning": [0.0196167735, 0.01595339575, 0.047029484999999996], "doc": [0.02206062025, 0.022371639500000002, 0.234424665], "e2e": [0.1517953665, 0.15678017100000002, 1.24012521]}, "time": {"surveyor": [17.00718860999914, 16.36406951501267, 14.547053245001006], "zoning": [160.87688379000755, 49.36037698501023, 19.477101490006316], "doc": [81.66032150000683, 91.61268933500978, 62.88138211501064], "e2e": [510.03297003000046, 446.9261355900089, 225.43890632000983]}};
+const E2E = [["Footprint", [4, 8, 8], 9], ["Green space", [9, 16, 15], 18], ["Height", [5, 8, 8], 9], ["Legend items", [1, 2, 4], 5], ["OAP applicability", [6, 8, 8], 9], ["Other facts", [1, 2, 2], 5], ["Parcels", [9, 12, 11], 15], ["Parking", [2, 3, 4], 7], ["Setbacks", [8, 22, 22], 31], ["Site area", [7, 7, 6], 9], ["Storeys", [3, 5, 4], 9], ["Verdict", [3, 7, 7], 8], ["Zone", [4, 6, 8], 10]];
+const P = {"A": {"s01_joliot_curie": 1, "s02_croix_de_fer": 1, "s03_corner_avelines": 1, "s04_lamartine_two_parcels": 0, "s05_troenes_roadpoint": 0, "s06_clairiere_hamlet": 1, "s07_fontaine_commune_collision": 1, "s08_couvent_enclosed": 1, "s09_grands_pres_ter": 1, "s10_moulon_shared_parcel": 1, "s11_longs_reages": 1, "s12_clairiere": 1, "s13_salmouille": 1, "s14_voltaire": 1, "s15_hoche": 1, "s16_paul_bert": 1, "s17_mail_potier": 0, "s18_rue_potier": 1, "s19_blanc_lapierre": 0, "s20_unknown_address": 0, "z01_joliot_curie": 1, "z02_zone_boundary": 0, "z03_ebc": 0, "z04_ppri": 0, "z05_emplacement_reserve": 0, "z06_retail_frontage": 0, "z07_natural_zone": 0, "z08_chevry": 0, "z09_uxc": 0, "z10_version_disagreement": 0, "z11_vallee_ua": 0, "z12_uga": 0, "z13_ugd": 0, "z14_ugc": 0, "z15_aurc": 1, "z16_um4": 0, "z17_um5a": 0, "z18_ume": 0, "z19_uhe": 0, "z20_uec": 0, "d01_ua_vallee_vs_chevry": 1, "d02_uga_height": 0, "d03_aurc_defers_to_ur": 1, "d04_umg_student_parking_titre1": 1, "d05_umg_public_interest": 1, "d06_umg_green_roofs": 0, "d07_uh_chevry_housing": 1, "d08_oap_joliot_curie": 1, "d09_outside_oap": 0, "d10_document_outside_corpus": 1, "d11_repealed_articles": 0, "d12_ua_chevry_housing": 1, "d13_um4_housing": 1, "d14_um5a_housing": 0, "d15_ugd_housing": 1, "d16_ugc_housing": 1, "d17_uca_housing": 1, "d18_uhe_housing": 1, "d19_uxc_offices": 1, "d20_n_housing": 1, "e01_reference": 1, "e02_reference_public_facility": 0, "e03_reference_offices": 1, "e04_um4_housing": 1, "e05_vallee_ua_housing": 0, "e06_chevry_ua_housing": 0, "e07_uga_housing": 0, "e08_uh_housing": 0, "e09_aurc_housing": 0, "e10_n_housing": 0}, "B": {"s01_joliot_curie": 1, "s02_croix_de_fer": 1, "s03_corner_avelines": 1, "s04_lamartine_two_parcels": 0, "s05_troenes_roadpoint": 0, "s06_clairiere_hamlet": 1, "s07_fontaine_commune_collision": 1, "s08_couvent_enclosed": 1, "s09_grands_pres_ter": 1, "s10_moulon_shared_parcel": 1, "s11_longs_reages": 1, "s12_clairiere": 1, "s13_salmouille": 1, "s14_voltaire": 1, "s15_hoche": 1, "s16_paul_bert": 1, "s17_mail_potier": 0, "s18_rue_potier": 1, "s19_blanc_lapierre": 0, "s20_unknown_address": 0, "z01_joliot_curie": 1, "z02_zone_boundary": 1, "z03_ebc": 1, "z04_ppri": 0, "z05_emplacement_reserve": 0, "z06_retail_frontage": 0, "z07_natural_zone": 0, "z08_chevry": 1, "z09_uxc": 1, "z10_version_disagreement": 0, "z11_vallee_ua": 1, "z12_uga": 1, "z13_ugd": 1, "z14_ugc": 1, "z15_aurc": 1, "z16_um4": 0, "z17_um5a": 0, "z18_ume": 1, "z19_uhe": 1, "z20_uec": 1, "d01_ua_vallee_vs_chevry": 1, "d02_uga_height": 1, "d03_aurc_defers_to_ur": 0, "d04_umg_student_parking_titre1": 0, "d05_umg_public_interest": 1, "d06_umg_green_roofs": 0, "d07_uh_chevry_housing": 1, "d08_oap_joliot_curie": 1, "d09_outside_oap": 0, "d10_document_outside_corpus": 1, "d11_repealed_articles": 0, "d12_ua_chevry_housing": 1, "d13_um4_housing": 1, "d14_um5a_housing": 1, "d15_ugd_housing": 1, "d16_ugc_housing": 1, "d17_uca_housing": 1, "d18_uhe_housing": 1, "d19_uxc_offices": 0, "d20_n_housing": 1, "e01_reference": 1, "e02_reference_public_facility": 1, "e03_reference_offices": 0, "e04_um4_housing": 0, "e05_vallee_ua_housing": 0, "e06_chevry_ua_housing": 0, "e07_uga_housing": 1, "e08_uh_housing": 0, "e09_aurc_housing": 1, "e10_n_housing": 0}, "C": {"s01_joliot_curie": 1, "s02_croix_de_fer": 1, "s03_corner_avelines": 1, "s04_lamartine_two_parcels": 0, "s05_troenes_roadpoint": 0, "s06_clairiere_hamlet": 1, "s07_fontaine_commune_collision": 1, "s08_couvent_enclosed": 1, "s09_grands_pres_ter": 1, "s10_moulon_shared_parcel": 1, "s11_longs_reages": 1, "s12_clairiere": 1, "s13_salmouille": 1, "s14_voltaire": 1, "s15_hoche": 1, "s16_paul_bert": 1, "s17_mail_potier": 1, "s18_rue_potier": 1, "s19_blanc_lapierre": 1, "s20_unknown_address": 0, "z01_joliot_curie": 1, "z02_zone_boundary": 1, "z03_ebc": 1, "z04_ppri": 0, "z05_emplacement_reserve": 0, "z06_retail_frontage": 0, "z07_natural_zone": 1, "z08_chevry": 1, "z09_uxc": 1, "z10_version_disagreement": 1, "z11_vallee_ua": 1, "z12_uga": 0, "z13_ugd": 1, "z14_ugc": 1, "z15_aurc": 1, "z16_um4": 0, "z17_um5a": 0, "z18_ume": 1, "z19_uhe": 1, "z20_uec": 1, "d01_ua_vallee_vs_chevry": 1, "d02_uga_height": 1, "d03_aurc_defers_to_ur": 1, "d04_umg_student_parking_titre1": 0, "d05_umg_public_interest": 1, "d06_umg_green_roofs": 0, "d07_uh_chevry_housing": 1, "d08_oap_joliot_curie": 0, "d09_outside_oap": 0, "d10_document_outside_corpus": 0, "d11_repealed_articles": 0, "d12_ua_chevry_housing": 1, "d13_um4_housing": 1, "d14_um5a_housing": 1, "d15_ugd_housing": 1, "d16_ugc_housing": 1, "d17_uca_housing": 1, "d18_uhe_housing": 1, "d19_uxc_offices": 1, "d20_n_housing": 1, "e01_reference": 1, "e02_reference_public_facility": 1, "e03_reference_offices": 0, "e04_um4_housing": 1, "e05_vallee_ua_housing": 0, "e06_chevry_ua_housing": 0, "e07_uga_housing": 1, "e08_uh_housing": 0, "e09_aurc_housing": 0, "e10_n_housing": 0}};
+const MN = {"checked": {"surveyor": 0, "zoning": 3, "doc": 98, "e2e": 59}, "hits": {"surveyor": [0, 0, 0], "zoning": [0, 0, 0], "doc": [1, 1, 1], "e2e": [7, 3, 1]}};
+const COUNTS = {"surveyor": 20, "zoning": 20, "doc": 20, "e2e": 10};
+const FACT_TOTAL = 451;
+const CASE_TOTAL = 70;
+const TOTAL_COST = [2.39724828, 2.382526325, 18.6529409];
+
+LV = LV.map(l => ({...l, n: COUNTS[l.k]}));
+const pct = (a, b) => Math.round(100 * a / b) + "%";
+const tot = f => [0, 1, 2].map(i => LV.reduce((s, l) => s + f(l.k)[i], 0));
+const best = (a, hi = true) => { const m = hi ? Math.max(...a) : Math.min(...a); return a.map(x => x === m); };
+const head = first => `<tr><th>${first}</th>${V.map((v, i) => `<th><span class="sw" style="background:${C[i]}"></span>${v}</th>`).join("")}</tr>`;
+const row = (label, cells, flags, cls = "") => `<tr class="${cls}"><td>${label}</td>${cells.map((c, i) => `<td class="${flags && flags[i] ? "best" : ""}">${c}</td>`).join("")}</tr>`;
+const money = x => x < 0.1 ? "$" + x.toFixed(3) : "$" + x.toFixed(2);
+const dur = s => s >= 120 ? (s / 60).toFixed(1) + " min" : Math.round(s) + " s";
+const sw = i => `<span class="sw" style="background:${C[i]}"></span>`;
+
+const passT = tot(k => D.pass[k]), factT = tot(k => D.grounded[k]);
+document.getElementById("tiles").innerHTML = [
+  ["Cases passed", passT.map(x => x + " / " + CASE_TOTAL)],
+  ["Facts right", factT.map(x => pct(x, FACT_TOTAL))],["Forbidden claims made", tot(k => MN.hits[k])],
+  ["Cost per full study", D.cost.e2e.map(money)],
+  ["Time per full study", D.time.e2e.map(dur)],
+].map(([k, v]) => `<div class="tile"><div class="k">${k}</div>${v.map((x, i) => `<div class="row"><span>${sw(i)}${V[i]}</span><b>${x}</b></div>`).join("")}</div>`).join("");
+
+document.getElementById("legend").innerHTML = V.map((v, i) => `<span>${sw(i)}${v}</span>`).join("");
+document.getElementById("passChart").innerHTML = LV.map(l => `<div class="grp"><div class="name">${l.name}</div><div class="bars">${
+  D.pass[l.k].map((p, i) => `<div class="bar" title="${V[i]}: ${p} of ${l.n} passed"><i style="width:${Math.max(0.5, 100 * p / l.n) * 0.85}%;background:${C[i]}"></i><span>${p}/${l.n}</span></div>`).join("")}</div></div>`).join("");
+
+document.getElementById("factTable").innerHTML = head("Step") +
+  LV.map(l => row(l.name, D.grounded[l.k].map(x => `${pct(x, D.facts[l.k])}<small>${x}/${D.facts[l.k]}</small>`), best(D.grounded[l.k]))).join("") +
+  row("All", factT.map(x => `${pct(x, FACT_TOTAL)}<small>${x}/${FACT_TOTAL}</small>`), best(factT), "total");
+
+const eT = D.grounded.e2e;
+document.getElementById("e2eTable").innerHTML = head("Facts right") +
+  E2E.map(([n, v, t]) => row(n, v.map(x => `${x}<small>/ ${t}</small>`), best(v))).join("") +
+  row(`All ${D.facts.e2e} facts`, eT.map(x => `${pct(x, D.facts.e2e)}<small>${x}/${D.facts.e2e}</small>`), best(eT), "total");
+
+document.getElementById("costTable").innerHTML = head("Step (cost · time)") +
+  LV.map(l => row(l.name, D.cost[l.k].map((c, i) => `${money(c)}<small>· ${dur(D.time[l.k][i])}</small>`), best(D.cost[l.k], false))).join("") +
+  row(`All ${CASE_TOTAL} cases`, TOTAL_COST.map(money), best(TOTAL_COST, false), "total");
+
+const ids = Object.keys(P.C).sort();
+document.getElementById("grids").innerHTML = LV.map(l => {
+  const rows = ids.filter(id => id[0] === {surveyor: "s", zoning: "z", doc: "d", e2e: "e"}[l.k]);
+  return `<table class="grid"><tr><th>${l.name}</th>${[0, 1, 2].map(i => `<th title="${V[i]}">${sw(i).replace("margin-right: 6px", "")}</th>`).join("")}</tr>${rows.map(id =>
+    `<tr><td title="${id}">${id.slice(0, 3)}</td>${["A", "B", "C"].map(v => P[v][id] ? '<td class="ok">✓</td>' : '<td class="ko">✗</td>').join("")}</tr>`).join("")}</table>`;
+}).join("");
+const mnT = tot(k => MN.hits[k]);
+document.getElementById("mustNotTable").innerHTML = head("Step (claims checked)") +
+  LV.map(l => row(`${l.name}<small>${MN.checked[l.k] || "none"}</small>`, MN.checked[l.k] ? MN.hits[l.k] : ["–", "–", "–"], MN.checked[l.k] ? best(MN.hits[l.k], false) : null)).join("") +
+  row(`All<small>${LV.reduce((s, l) => s + MN.checked[l.k], 0)}</small>`, mnT, best(mnT, false), "total");
+</script>
+</body>
+</html>

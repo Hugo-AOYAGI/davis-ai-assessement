@@ -66,7 +66,7 @@ def build_scoring(cfg: DictConfig, judge: Judge) -> Scoring:
     Returns:
         The scoring dependencies.
     """
-    corpus = load_corpus(project_path(cfg.corpus.dir))
+    corpus = load_corpus(project_path(cfg.corpus.dir), expected_id=cfg.corpus.id)
     policy = cfg.policies.citations
     verification = Verification(policy.min_score, policy.neighbour_pages, policy.max_quote_chars)
     tolerances = cfg.eval.tolerances

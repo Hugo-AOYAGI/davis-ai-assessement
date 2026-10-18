@@ -84,3 +84,23 @@ site_view:
     width_px: 3
     font_px: 14
     label_background_rgb: [255, 255, 255]
+
+# Ready tool node: the site outlined on the georeferenced zoning plan (`corpus.georef`), for the
+# zoning analyst. Needs `uv run python -m agent.entrypoints.ingest georef` to have run.
+plan_site:
+  _target_: agent.tools.plan.site.plan_site_tool
+  surveyor: ${geo.surveyor}
+  pages: ${images.pages}
+  store: ${images.store}
+  georeference:
+    _target_: agent.agents.config.project_path
+    relative: ${corpus.georef.output}
+  close_margin_m: 80         # close-up crop: ground margin around the site
+  context_margin_m: 600      # context crop: ground margin, to follow district-wide perimeters
+  context_max_px: 1200       # context image long edge, rulers included (close-up: images.pages.max_image_px)
+  max_upscale: 4.0           # enlargement cap of the plan's pixels (the outline stays sharp)
+  uncertainty_factor: 2.0    # stated outline uncertainty = this x the georeference mean error
+  style:
+    _target_: agent.adapters.images.render.LineStyle
+    rgb: [255, 0, 0]
+    width_px: 1.5            # thin, so labels and hatching under it stay readable

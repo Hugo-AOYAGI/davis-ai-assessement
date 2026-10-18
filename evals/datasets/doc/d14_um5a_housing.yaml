@@ -1,0 +1,122 @@
+id: d14_um5a_housing
+level: doc
+tests: zone x program grid, Moulon UM5a housing (site of z17_um5a); the UM5a-specific height and parking rules concern hotel accommodation only, housing follows the UM5 and zone-wide rules
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The site lies in sector UM5a of zone UM (Moulon).
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UM5a
+    legend_items:
+      - Secteur à Orientation d'Aménagement et de Programmation
+    parcel_ids: [91272000CP0128]
+    program: new housing (dwellings), not a student residence or hotel accommodation
+facts:
+  - statement: In sector UM5a, the maximum height of buildings whose main destination is housing is 20 metres, the same limit as for housing in UM5.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5."
+  - statement: In sector UM5a, housing buildings are also limited to R+5 (a maximum of six levels above ground).
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "avec un nombre de niveaux limité à R+5"
+  - statement: The UM5a-specific height rule (31 metres) applies only to buildings whose main destination is hotel accommodation (hébergement hôtelier), not to housing.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "dans le secteur UM5a, la hauteur maximale des constructions à destination principale d’hébergement hôtelier est limitée à 31 mètres."
+  - statement: In zone UM (including UM5a), the footprint (emprise au sol) of buildings is not regulated by the zone rules.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 312
+        quote: "L’emprise au sol des constructions n’est pas réglementée"
+  - statement: Housing parking in zone UM, UM5a included, is at least 1 space per 35 m² of floor area (surface de plancher), capped at 2 spaces per dwelling.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 315
+        quote: "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement"
+  - statement: The UM5a-specific parking ratio (1 space per 2.5 rooms) applies only to hotel accommodation, not to housing.
+    evidence:
+      - doc: plu_reglement
+        page: 315
+        quote: "1 place pour 2,5 chambres dans le secteur UM5a."
+  - statement: Where a building is set back from the road alignment, the setback must be at least 1 metre; building on the alignment is also allowed.
+    evidence:
+      - doc: plu_reglement
+        page: 310
+        quote: "Les constructions ou parties de construction peuvent être implantées à l’alignement ou en recul de ce dernier."
+      - doc: plu_reglement
+        page: 311
+        quote: "En cas de recul, ce dernier doit être au moins égal à 1 mètre."
+  - statement: Buildings may be built on one or more side or rear boundaries, or set back from them.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "Les constructions peuvent être implantées soit sur une ou plusieurs limites séparatives, soit en retrait de ces dernières."
+  - statement: A setback from a side or rear boundary for a facade with windows (vues) and a height of at most 12 metres is at least half the facade height, with a minimum of 5 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "à la moitié de la hauteur des façades ou parties de façade ayant une hauteur au plus égale à 12 mètres, avec un minimum de 5 mètres"
+  - statement: A setback from a side or rear boundary for a facade with windows and a height above 12 metres is at least 6 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "à 6 mètres pour les façades ou parties de façade ayant une hauteur supérieure à 12 mètres"
+  - statement: A setback from a side or rear boundary for a facade without windows is at least 3 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "Pour les façades ou parties de façade ne comportant pas de vue le retrait doit être au moins égal à 3 mètres."
+  - statement: Several buildings on the same plot must be joined or at least 10 metres apart if at least one of the facing facades has windows.
+    evidence:
+      - doc: plu_reglement
+        page: 312
+        quote: "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comportent des vues"
+  - statement: Several buildings on the same plot must be at least 3 metres apart if neither facing facade has windows.
+    evidence:
+      - doc: plu_reglement
+        page: 312
+        quote: "3 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vues."
+  - statement: New construction in zone UM must keep at least 20 percent of the site area as green space (espaces verts) and at least 10 percent as full-ground area (pleine terre).
+    evidence:
+      - doc: plu_reglement
+        page: 318
+        quote: "En espace vert 20% au moins de la superficie du terrain."
+      - doc: plu_reglement
+        page: 318
+        quote: "En espace de pleine terre 10% au moins de la superficie du terrain."
+  - statement: Every article of the UM chapter requires any project to be compatible with the orientations d'aménagement et de programmation (OAP) in document 3 of the PLU.
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "Tout projet doit être compatible avec les orientations d’aménagement et de programmation définies dans la pièce n°3 du PLU."
+must_not:
+  - States that the maximum height for housing in UM5a is 31 metres.
+  - States that the maximum height for housing in UM5a or UM5 is 24 metres or 25 metres.
+  - Applies the UM5a hotel-accommodation parking ratio (1 space per 2.5 rooms) to housing.
+  - States that the footprint of buildings in UM5a is limited to a percentage of the site area.

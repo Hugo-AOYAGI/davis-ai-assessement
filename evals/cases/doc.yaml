@@ -1,0 +1,225 @@
+# Starter case list of the doc level (evals/README.md §2). One entry per item to write.
+# Brief fields: label (rules | oap), zone (zone code, plus `sector` when the code alone is
+# ambiguous), program, documents, legend_items (exact plan-legend labels that apply), focus (the
+# regulatory points the item must pin down; the sample agent finds the pages), trap (the wrong
+# reading to rule out with must_not). The zone and legend items stand in for what the zoning
+# analyst would have reported; they are never taken from agent output.
+- id: d01_ua_vallee_vs_chevry
+  tests: two zones are both called UA (Vallée and Chevry) with different values; only the Vallée chapter applies
+  label: rules
+  zone: UA
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, road setback, side setbacks, parking per dwelling]
+  trap: reading the Chevry UA chapter (a different 50 % footprint, 12 m / 15 m heights)
+
+- id: d02_uga_height
+  tests: struck-through "7 10 mètres" in UGa article 10; the height in force is 7 m, the struck-through 10 m is not
+  label: rules
+  zone: UGa
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [height, footprint, parking per dwelling]
+  trap: the struck-through value (check the page image, the text layer does not show the strike-through) and the general UG heights (7 m / 10 m eaves / ridge)
+
+- id: d03_aurc_defers_to_ur
+  tests: AURc articles 10 and 11 defer to zone UR; the figures live in the UR chapter
+  label: rules
+  zone: AURc
+  sector: Vallée (Damiette)
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [what AURc says itself, which articles point to UR, the UR height / footprint / setbacks that then apply]
+  trap: stating that AURc sets no height or footprint, or giving UR figures without saying they come by reference
+
+- id: d04_umg_student_parking_titre1
+  tests: parking of a student residence is capped by Titre I (general provisions) as well as set by UMG article 12
+  label: rules
+  zone: UMG
+  sector: Moulon
+  program: one student social residence and one young-workers residence, two separate buildings
+  documents: [plu_reglement]
+  legend_items: [Secteur à Orientation d'Aménagement et de Programmation]
+  focus: [UMG 12 car and bicycle norms for residences étudiantes and other housing, the Titre I cap on parking]
+  trap: applying only UMG 12 and missing the Titre I cap; treating "jeunes actifs" as defined
+
+- id: d05_umg_public_interest
+  tests: public-interest facilities get their own height and exemptions in UMG; the green-space rules of UMG 13 do not apply to them
+  label: rules
+  zone: UMG
+  sector: Moulon
+  program: public-interest facility (équipement d'intérêt collectif)
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [UMG 10 height for facilities versus other uses, UMG 13 scope, footprint]
+  trap: giving the housing / offices height for a public-interest facility, or applying UMG 13 green-space ratios to it
+
+- id: d06_umg_green_roofs
+  tests: the lexique counts a green roof at 0.5 for green space while UMG 13 does not count green roofs at all
+  label: rules
+  zone: UMG
+  sector: Moulon
+  program: offices
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [UMG 13 green-space rule and what counts, lexique definition of espaces végétalisés / pleine terre, the conflict]
+  trap: counting green roofs as green space in UMG without noting the contradiction
+
+- id: d07_uh_chevry_housing
+  tests: zone x program grid, Chevry UH housing with real numeric limits (footprint, setbacks, height, parking)
+  label: rules
+  zone: UH
+  sector: Chevry
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, road setback, side setbacks, rear setback, height, parking per dwelling]
+  trap: reading a Vallée zone chapter, or the general rule where a sector rule exists
+
+- id: d08_oap_joliot_curie
+  tests: the OAP chapter 8 (Joliot Curie) applies to a UMG site together with chapter 7 (Moulon); what it prescribes for housing
+  label: oap
+  zone: UMG
+  sector: Moulon (Joliot Curie)
+  program: one student social residence and one young-workers residence, two separate buildings
+  documents: [oap, plu_reglement_graphique]
+  legend_items: [Secteur à Orientation d'Aménagement et de Programmation]
+  focus: [which chapters apply, the Joliot Curie programme and form orientations, any figure the OAP states]
+  trap: citing another district's chapter (chapters 1 to 6); presenting orientations as hard figures
+
+- id: d09_outside_oap
+  tests: a Vallée UA site outside every OAP perimeter; no OAP chapter applies and none may be cited as applying
+  label: oap
+  zone: UA
+  sector: Vallée (site of z11_vallee_ua, 192 Avenue du Général Leclerc, parcel 91272000CA0005)
+  program: housing
+  documents: [oap, plu_reglement_graphique]
+  legend_items: []
+  focus: [which OAP sectors exist and where, that the site lies in none of them]
+  trap: citing the nearest OAP chapter as applying to the site
+
+- id: d10_document_outside_corpus
+  tests: a UH site wholly inside the PPRi; the regulation defers to the PPRi document, which is not in the corpus, and that gap must be flagged
+  label: rules
+  zone: UH
+  sector: Vallée (site of z04_ppri, 32 Rue du Clos, parcel 91272000BK0007)
+  program: housing
+  documents: [plu_reglement]
+  legend_items: ["Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)"]
+  focus: [what the UH chapter and general provisions say about the PPRi, which rules are deferred to the PPRi]
+  trap: inventing PPRi constraints that are not in the corpus, or ignoring the deferral
+
+- id: d11_repealed_articles
+  tests: articles 5 (minimum plot size) and 14 (COS) are repealed; no minimum plot size or floor-area ratio may be stated
+  label: rules
+  zone: UH
+  sector: the sector of the UH chapter (check it in the regulation)
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [the wording of articles 5 and 14 in the zone chapter, the footprint and height that do apply]
+  trap: stating a minimum plot size or a COS / floor-area ratio
+
+- id: d12_ua_chevry_housing
+  tests: zone x program grid, Chevry UA housing (site of z08_chevry); values differ from Vallée UA
+  label: rules
+  zone: UA
+  sector: Chevry
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, road setback, side setbacks, parking per dwelling]
+  trap: reading the Vallée UA chapter
+
+- id: d13_um4_housing
+  tests: zone x program grid, Moulon UM4 housing (site of z16_um4); heights set per sub-sector
+  label: rules
+  zone: UM4
+  sector: Moulon
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [height for UM4, footprint, setbacks, parking per dwelling]
+  trap: giving the height of another UM sub-sector or of UMG
+
+- id: d14_um5a_housing
+  tests: zone x program grid, Moulon UM5a housing (site of z17_um5a); the sub-sector suffix matters
+  label: rules
+  zone: UM5a
+  sector: Moulon
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [height for UM5a versus UM5, footprint, setbacks, parking per dwelling]
+  trap: applying the UM5 rule where UM5a has its own
+
+- id: d15_ugd_housing
+  tests: zone x program grid, Vallée UGd housing (site of z13_ugd); UGd shares the 15 % footprint with UGa but not every limit
+  label: rules
+  zone: UGd
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, setbacks, parking per dwelling]
+  trap: applying the general UG figures or the UGa height
+
+- id: d16_ugc_housing
+  tests: zone x program grid, Vallée UGc housing (site of z14_ugc)
+  label: rules
+  zone: UGc
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, setbacks, parking per dwelling]
+  trap: applying the UGa / UGd 15 % footprint to UGc
+
+- id: d17_uca_housing
+  tests: zone x program grid, UCa housing (site of z02_zone_boundary, its UCa part)
+  label: rules
+  zone: UCa
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, setbacks, parking per dwelling]
+  trap: applying the general UC rule where the UCa sector rule differs, or the UD chapter
+
+- id: d18_uhe_housing
+  tests: zone x program grid, UHe housing (site of z19_uhe)
+  label: rules
+  zone: UHe
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [footprint ratio, height, setbacks, parking per dwelling, what makes UHe differ from UH]
+  trap: giving the plain UH figures where UHe has its own
+
+- id: d19_uxc_offices
+  tests: zone x program grid, UXc economic zone (site of z09_uxc); offices or activities are the main use, housing is restricted
+  label: rules
+  zone: UXc
+  sector: Vallée
+  program: offices
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [whether offices are permitted, height, footprint, setbacks, parking for offices]
+  trap: collapsing UXc into UX, or stating housing rules
+
+- id: d20_n_housing
+  tests: zone x program grid, negative case, natural zone N (site of z07_natural_zone); new housing is prohibited or tightly restricted
+  label: rules
+  zone: N
+  sector: Vallée
+  program: housing
+  documents: [plu_reglement]
+  legend_items: []
+  focus: [article 1 prohibited uses, article 2 conditional uses (extensions of existing dwellings, annexes), any figure for those]
+  trap: giving a buildable envelope for new housing as if it were permitted

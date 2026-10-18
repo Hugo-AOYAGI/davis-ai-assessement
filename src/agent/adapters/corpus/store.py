@@ -27,17 +27,19 @@ def save_corpus(corpus: Corpus, directory: Path) -> Path:
     return path
 
 
-def load_corpus(directory: Path) -> Corpus:
+def load_corpus(directory: Path, expected_id: str | None = None) -> Corpus:
     """Read a corpus written by :func:`save_corpus`.
 
     Args:
         directory: Corpus directory.
+        expected_id: Configured identity to verify, when supplied.
 
     Returns:
         The corpus.
 
     Raises:
         FileNotFoundError: When the directory holds no ingested corpus.
+        ValueError: If its identity differs from the configured corpus.
     """
     path = directory / CORPUS_FILE
     if not path.is_file():
@@ -46,4 +48,8 @@ def load_corpus(directory: Path) -> Corpus:
             "Build it with `uv run python -m agent.entrypoints.ingest`."
         )
         raise FileNotFoundError(msg)
-    return Corpus.model_validate(json.loads(path.read_text(encoding="utf-8")))
+    corpus = Corpus.model_validate(json.loads(path.read_text(encoding="utf-8")))
+    if expected_id is not None and corpus.id != expected_id:
+        msg = f"Corpus at {path} has id {corpus.id!r}, expected {expected_id!r}. Check corpus.dir."
+        raise ValueError(msg)
+    return corpus

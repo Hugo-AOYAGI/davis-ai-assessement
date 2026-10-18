@@ -12,6 +12,10 @@ playbooks:
       Full buildability study of an address for a construction program: site and zone, the
       rules and OAP notes, decisions and ambiguities, then submit_study.
     path: prompts/playbooks/study.md
+    lists:
+      rules_topics: ${policies.study.required_topics.rules}
+      oap_topics: ${policies.study.required_topics.oap}
+      destination_topics: ${policies.study.required_topics.destinations}
 
 # Initial message of a CLI or eval run, rendered from the Case ($address, $program, $facts).
 request: prompts/orchestrator/request.md
@@ -25,6 +29,7 @@ tools:
     corpus:                           # provider, called on the first submission
       _target_: agent.adapters.corpus.store.load_corpus
       _partial_: true
+      expected_id: ${corpus.id}
       directory:
         _target_: agent.agents.config.project_path
         relative: ${corpus.dir}
@@ -42,6 +47,7 @@ tools:
       notes: {artifact: "notes.{label}", producer: doc_analyst}
       envelope: {artifact: envelope, producer: architect}
       labels: ${policies.study.required_notes}
+      required_topics: ${policies.study.required_topics}
       oap_label: oap                  # the layout's OAP citations must come from notes.oap (the rules' from any notes.*)
     geometry: ${geo.edge_labels}
     envelope: ${policies.envelope.settings}

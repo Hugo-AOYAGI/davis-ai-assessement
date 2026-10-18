@@ -76,7 +76,7 @@ def test_plain_key_is_used_as_is(notes_args):
 
 
 def test_unknown_placeholder_is_refused():
-    with pytest.raises(ValueError, match=r"names \['kind'\], not fields of DocNotes"):
+    with pytest.raises(ValueError, match="requires plain placeholders"):
         submit_tool(name="submit_notes", artifact="notes.{kind}", contract=DocNotes)
 
 
@@ -155,3 +155,19 @@ def test_hydra_instantiates_tool():
     )
     assert tool.name == "submit_parcel"
     assert set(tool.tool_call_schema["properties"]) == set(ParcelChoice.model_fields)
+
+
+@pytest.mark.parametrize(
+    "artifact",
+    [
+        "notes.{label!r}",
+        "notes.{label:>12}",
+        "notes.{label[0]}",
+        "notes.{missing}",
+        "notes.{}",
+        "notes.{label",
+    ],
+)
+def test_artifact_template_rejects_non_plain_fields(artifact):
+    with pytest.raises(ValueError):
+        submit_tool(name="submit_notes", artifact=artifact, contract=DocNotes)

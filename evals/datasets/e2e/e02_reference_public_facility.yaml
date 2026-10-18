@@ -1,0 +1,95 @@
+# Source audit: surveyor s01 and archived-2021 zoning z01 for CR0247 (same site as e01);
+# doc item d05 for the public-interest rules; regulation PDF pp320,324-326,328,331,375-376,
+# OAP pp33-36, re-read directly. Geometry oracle: cadastre area 5951.6 m2.
+# Green minimum is "not set" (null): UMG 13 quantitative rules do not apply to CINASPIC.
+# No proposal volume is asserted: the harness recomputes the proposal from the submitted layout.
+# Actual review: one Claude Sonnet source review, not two Opus drafts or human sign-off.
+id: e02_reference_public_facility
+level: e2e
+tests: same site as e01, public-interest facility; its own UMG height (25 m, not the 20 m housing limit); UMG 13 green-space rules do not apply
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: One public-interest facility (équipement d'intérêt collectif), in a single building.
+  facts: []
+from_items: [s01_joliot_curie, z01_joliot_curie, d05_umg_public_interest]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CR0247]
+    critical: true
+    source: hand
+  - key: site.choice.parcel_ids
+    expect_none_of: [91272000CR0249]
+    critical: true
+    source: hand
+  - key: study.regime.zone
+    expect: UMG
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    critical: true
+    source: gpu_2021
+  - key: envelope.rules.buildings.max_height_m
+    expect: 25
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "Pour les constructions à destination principale d’un service public ou d’intérêt collectif : 25 mètres"
+  - key: envelope.rules.buildings.max_storeys
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "Pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5."
+  - key: envelope.rules.max_footprint_ratio
+    expect: null
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 326
+        quote: "L’emprise au sol des constructions n’est pas réglementée"
+  - key: envelope.rules.min_green_ratio
+    expect: null
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 331
+        quote: "Les dispositions quantitatives fixées ci-dessus ne sont pas applicables aux constructions et installations nécessaires aux services publics ou d’intérêt collectif."
+  - key: envelope.min_green_area_m2
+    expect: null
+    critical: true
+    source: geometry
+  - key: envelope.site_area_m2
+    expect: 5951.6
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.rules.setbacks[kind=road].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 324
+        quote: "peuvent être implantées à l’alignement ou en recul"
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 6
+    evidence:
+      - doc: plu_reglement
+        page: 325
+        quote: "à 6 mètres pour les façades ou parties de façade comportant des vues"
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 3
+    evidence:
+      - doc: plu_reglement
+        page: 325
+        quote: "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue"
+must_flag:
+  - UMG article 12 sets no fixed parking ratio for a public service or collective-interest building (the number of spaces depends on the facility's nature, grouping, public-transport access and nearby public car parks; only higher education and research has 1 space per 170 m2), so the study must flag that the parking requirement cannot be fixed without knowing the facility.
+  - The 25 m PLU height limit and the article 9 absence of a footprint limit are both subject to compatibility with the OAP (document 3), whose only quantified height objective (R+4 on average) concerns housing; the OAP gives no height or footprint figure for a facility.
+must_not:
+  - States that the maximum height of the facility is 20 m (the UMG housing limit) or 18 m (the limit for other destinations).
+  - Requires the UMG article 13 minimum of 20% green space, 10% open ground or the tree-planting ratio for the facility.
+  - States that UMG article 9 imposes a numeric maximum footprint ratio.
+  - Applies the R+5 storey limit, which belongs to housing, to the facility.
+  - Uses parcel CR0249 as the study site instead of CR0247.

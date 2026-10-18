@@ -86,7 +86,7 @@ class StudyDigest(Contract):
     """Legend items applying to the site."""
     oap_applicable: bool
     admissibility: tuple[BuildingVerdict, ...]
-    envelope: EnvelopeNumbers
+    envelope: EnvelopeNumbers | None
     ambiguities: int
     evidence_crops: int
     citations: CitationStats
@@ -149,7 +149,6 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
         The digest.
     """
     study, envelope = verified.study, verified.envelope
-    rules = envelope.rules
     return StudyDigest(
         parcel_ids=verified.site.choice.parcel_ids,
         zone=study.regime.zone,
@@ -159,10 +158,12 @@ def study_digest(verified: VerifiedStudy) -> StudyDigest:
             BuildingVerdict(building=entry.building, verdict=entry.verdict)
             for entry in study.admissibility
         ),
-        envelope=EnvelopeNumbers(
+        envelope=None
+        if envelope is None
+        else EnvelopeNumbers(
             site_area_m2=envelope.site_area_m2,
-            max_footprint_ratio=rules.max_footprint_ratio.value,
-            min_green_ratio=rules.min_green_ratio.value,
+            max_footprint_ratio=envelope.rules.max_footprint_ratio.value,
+            min_green_ratio=envelope.rules.min_green_ratio.value,
             min_green_area_m2=envelope.min_green_area_m2,
             bounds=tuple(_scenario_numbers(bound) for bound in envelope.bounds),
             proposal=_scenario_numbers(envelope.proposal),

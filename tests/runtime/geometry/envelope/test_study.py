@@ -2,6 +2,7 @@ import pytest
 
 from agent.contracts.findings.notes import OpenPoint
 from agent.contracts.geometry import BoundaryKind
+from agent.runtime.geometry.envelope.shapes import site_shape
 from agent.runtime.geometry.envelope.study import compute_envelope_study
 from agent.runtime.geometry.envelope.summary import describe_envelope
 
@@ -92,19 +93,19 @@ def test_empty_part_fails(compute, make_layout):
     assert proposal.warnings == ("A: its part of the footprint is empty.",)
 
 
-def test_caps_scale_the_proposal(compute, make_rules):
+def test_caps_trim_physical_footprints(compute, make_rules):
     study = compute(make_rules(ratio=0.2))
     proposal = study.proposal
-    assert sum(m.footprint_area_m2 for m in proposal.buildings) == pytest.approx(240)
+    assert sum(m.footprint_area_m2 for m in proposal.buildings) == pytest.approx(240, abs=0.5)
     assert [m.footprint_area_m2 for m in proposal.buildings] == pytest.approx([120, 120], abs=0.5)
-    assert any("scaled" in note for note in proposal.assumptions)
-    assert study.bounds[1].buildings[0].footprint_area_m2 == pytest.approx(240)
+    assert any("trimmed" in note for note in proposal.assumptions)
+    assert study.bounds[1].buildings[0].footprint_area_m2 == pytest.approx(240, abs=0.5)
 
 
 def test_green_cap_is_reported(compute, make_rules):
     study = compute(make_rules(green=0.5))
-    assert study.min_green_area_m2 == pytest.approx(600)
-    assert study.bounds[1].buildings[0].footprint_area_m2 == pytest.approx(600)
+    assert study.min_green_area_m2 == pytest.approx(600, abs=0.5)
+    assert study.bounds[1].buildings[0].footprint_area_m2 == pytest.approx(600, abs=0.5)
 
 
 def test_one_building_takes_the_whole_footprint(compute, make_rules, make_layout):
@@ -128,3 +129,33 @@ def test_summary_gives_each_scenario(compute):
     assert "Proposal (cut along_long_axis, first share 0.5, order A then B" in text
     assert "- A, B: ground 672 m², height 20 m, volume 13440 m³" in text
     assert "the buildings fit" in text
+
+
+def test_capped_areas_and_volumes_match_geometry(compute, make_rules, setback, distance):
+    uncapped = compute(make_rules(side=setback(BoundaryKind.SIDE, distance(4, 0.5))))
+    capped = compute(make_rules(side=setback(BoundaryKind.SIDE, distance(4, 0.5)), ratio=0.2))
+    for original, scenario in zip(
+        (*uncapped.bounds, uncapped.proposal), (*capped.bounds, capped.proposal), strict=True
+    ):
+        for before, after in zip(original.buildings, scenario.buildings, strict=True):
+            assert after.footprint is not None
+            shape = site_shape(after.footprint)
+            assert site_shape(before.footprint).covers(shape)
+            assert after.footprint_area_m2 == pytest.approx(shape.area)
+            assert after.levels[0].area_m2 == pytest.approx(shape.area)
+            assert all(level.area_m2 <= shape.area for level in after.levels)
+            assert after.volume_m3 == pytest.approx(
+                sum(level.area_m2 * (level.to_m - level.from_m) for level in after.levels)
+            )
+    first, second = (site_shape(massing.footprint) for massing in capped.proposal.buildings)
+    assert first.distance(second) >= 10
+
+
+def test_zero_cap_has_no_building_geometry(compute, make_rules):
+    study = compute(make_rules(ratio=0))
+    for scenario in (*study.bounds, study.proposal):
+        assert not scenario.fits
+        assert scenario.total_volume_m3 == 0
+        assert all(
+            building.footprint is None and not building.levels for building in scenario.buildings
+        )

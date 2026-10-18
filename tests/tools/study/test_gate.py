@@ -41,7 +41,8 @@ from agent.runtime.geometry.envelope.study import EnvelopeSettings, compute_enve
 from agent.tools.envelope.compute import GeometrySettings
 from agent.tools.study.checks import citation_rules
 from agent.tools.study.gate import submit_study_tools
-from agent.tools.study.inputs import Delivery, StudyInputs
+from agent.tools.study.inputs import Delivery, StudyInputs, read_findings
+from agent.tools.submit.factory import SubmissionRejected
 
 PAGES = (
     Path(__file__).parents[2] / "runtime" / "citations" / "fixtures" / "plu_reglement_pages.json"
@@ -453,8 +454,8 @@ def test_envelope_applies_setbacks_and_green_cap(make_gate, study, findings):
     windows = envelope.bounds[1]
     assert windows.footprint_area_m2 == pytest.approx((40 - 4 - 4) * (30 - 5 - 4))
     assert envelope.min_green_area_m2 == pytest.approx(600)
-    assert windows.buildings[0].footprint_area_m2 == pytest.approx(600)
-    assert envelope.proposal.total_volume_m3 == pytest.approx(600 * 20)
+    assert windows.buildings[0].footprint_area_m2 == pytest.approx(600, abs=0.5)
+    assert envelope.proposal.total_volume_m3 == pytest.approx(600 * 20, abs=10)
 
 
 def test_envelope_is_recomputed(make_gate, study, findings, envelope):
@@ -476,7 +477,7 @@ def test_reply_gives_the_envelope_figures(make_gate, study, findings):
         "Bound largest",
         "Bound windows",
         "Proposal (cut along_long_axis",
-        "- A: ground 600 m², height 20 m, volume 12000 m³",
+        "- A: ground 600 m², height 20 m, volume",
     ):
         assert line in reply
 
@@ -638,6 +639,7 @@ def test_config_node_builds_the_tool(study, findings, tmp_path):
     assert node.inputs.labels == ["rules", "oap", "destinations"]
     with open_dict(cfg):
         node.corpus = {"_target_": f"{__name__}.fixture_corpus", "_partial_": True}
+        node.inputs.required_topics = {}
         node.images = {"_target_": f"{FakeImages.__module__}.FakeImages", "root": str(tmp_path)}
         node.crops_dir = {"_target_": "pathlib.Path", "_args_": [str(tmp_path / "crops")]}
     tool, revise = instantiate(node, _convert_="all")
@@ -726,8 +728,8 @@ def test_buildings_must_match_admissibility(make_gate, study, findings, envelope
     store_envelope(findings, compute(rules, layout.model_copy(update={"order": ("A", "B")})))
     content = rejection(invoke(make_gate(), study, findings))
     assert (
-        "envelope.rules.buildings: buildings 'A', 'B' do not match admissibility buildings 'A'"
-        in content
+        "envelope.rules.buildings: buildings 'A', 'B' do not match "
+        "eligible admissibility buildings 'A'" in content
     )
 
 
@@ -763,3 +765,108 @@ def test_envelope_citations_are_checked_and_numbered(make_gate, study, findings)
 
 def test_accepted_envelope_is_typed(make_gate, study, findings):
     assert isinstance(stored(invoke(make_gate(), study, findings)).envelope, EnvelopeStudy)
+
+
+@pytest.mark.parametrize(
+    "template",
+    [
+        "notes.{label}.{other}",
+        "notes.{label}.{label}",
+        "notes.{label!r}",
+        "notes.{label:>8}",
+        "notes.{label",
+    ],
+)
+def test_notes_key_rejects_templates_it_cannot_read_back(template):
+    with pytest.raises(ValueError):
+        StudyInputs.model_validate(
+            {**INPUTS.model_dump(), "notes": {"artifact": template, "producer": "doc_analyst"}}
+        )
+
+
+def test_notes_label_must_match_artifact_key(make_gate, study, findings):
+    findings["notes.rules"]["label"] = "other"
+    content = rejection(invoke(make_gate(), study, findings))
+    assert "must match artifact label 'rules'" in content
+
+
+def test_study_zone_must_match_delivered_zone(make_gate, study, findings):
+    submitted = study.model_copy(update={"regime": study.regime.model_copy(update={"zone": "UA"})})
+    assert "regime.zone: must match" in rejection(invoke(make_gate(), submitted, findings))
+
+
+def test_study_must_retain_applying_overlays(make_gate, study, findings):
+    submitted = study.model_copy(
+        update={"regime": study.regime.model_copy(update={"overlays": ()})}
+    )
+    assert "regime.overlays:" in rejection(invoke(make_gate(), submitted, findings))
+
+
+def test_study_must_retain_zoning_ambiguities(make_gate, study, findings, zone):
+    point = ambiguity("Which side of the zone boundary contains the site?")
+    findings["zone"] = zone.model_copy(update={"ambiguities": (point,)}).model_dump(mode="json")
+    assert "retain zoning question" in rejection(invoke(make_gate(), study, findings))
+    submitted = study.model_copy(update={"ambiguities": (*study.ambiguities, point)})
+    stored(invoke(make_gate(), submitted, findings))
+
+
+def test_all_prohibited_program_needs_no_envelope(make_gate, study, findings):
+    prohibited = tuple(
+        entry.model_copy(update={"verdict": Verdict.PROHIBITED}) for entry in study.admissibility
+    )
+    submitted = study.model_copy(update={"admissibility": prohibited})
+    findings.pop("envelope")
+    verified = stored(invoke(make_gate(), submitted, findings))
+    assert verified.envelope is None
+    assert verified.boundaries
+
+
+def test_all_prohibited_program_ignores_stale_envelope(make_gate, study, findings):
+    prohibited = tuple(
+        entry.model_copy(update={"verdict": Verdict.PROHIBITED}) for entry in study.admissibility
+    )
+    submitted = study.model_copy(update={"admissibility": prohibited})
+    findings["envelope"] = {"invalid": "old artifact"}
+    assert stored(invoke(make_gate(), submitted, findings)).envelope is None
+
+
+def test_mixed_program_computes_only_non_prohibited_buildings(make_gate, study, findings):
+    prohibited = study.admissibility[0].model_copy(
+        update={"building": "B", "verdict": Verdict.PROHIBITED}
+    )
+    submitted = study.model_copy(update={"admissibility": (*study.admissibility, prohibited)})
+    verified = stored(invoke(make_gate(), submitted, findings))
+    assert verified.envelope is not None
+    assert [building.building for building in verified.envelope.proposal.buildings] == ["A"]
+    assert verified.study.admissibility[-1].verdict is Verdict.PROHIBITED
+
+
+def test_mixed_program_rejects_geometry_for_prohibited_buildings(
+    make_gate, study, findings, envelope_rules, layout
+):
+    prohibited = study.admissibility[0].model_copy(
+        update={"building": "B", "verdict": Verdict.PROHIBITED}
+    )
+    submitted = study.model_copy(update={"admissibility": (*study.admissibility, prohibited)})
+    rules = envelope_rules.model_copy(
+        update={
+            "buildings": (
+                *envelope_rules.buildings,
+                envelope_rules.buildings[0].model_copy(update={"building": "B"}),
+            )
+        }
+    )
+    store_envelope(findings, compute(rules, layout.model_copy(update={"order": ("A", "B")})))
+    content = rejection(invoke(make_gate(), submitted, findings))
+    assert "do not match eligible admissibility buildings 'A'" in content
+    assert "only buildings whose uses are not prohibited" in content
+
+
+def test_required_topics_are_checked_independently_of_model_checklist(findings):
+    inputs = INPUTS.model_copy(update={"required_topics": {"rules": ("height", "parking")}})
+    with pytest.raises(SubmissionRejected, match=r"missing required topics.*parking"):
+        read_findings(findings, inputs)
+    findings["notes.rules"]["notes"].append(
+        Note(topic="parking", text="Parking rules.", citations=(HEIGHT,)).model_dump(mode="json")
+    )
+    assert read_findings(findings, inputs).notes[0].label == "rules"

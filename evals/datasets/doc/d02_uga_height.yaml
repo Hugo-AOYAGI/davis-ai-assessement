@@ -1,0 +1,43 @@
+id: d02_uga_height
+level: doc
+tests: UGa article 10 retains 7 m and strikes through 10 m; text extraction alone loses this distinction
+status: verified
+built_by: codex_manual_corpus_and_pdf_review
+input:
+  label: rules
+  aim: Identify the height, footprint and residential parking limits for new housing in sector UGa (Vallée).
+  documents: [plu_reglement]
+  topics: [height, footprint, parking]
+  context:
+    zone: UGa
+    legend_items: []
+    program: ordinary new housing, not social rental housing or a specialised residence
+facts:
+  - statement: In sector UGa, maximum construction height is 7 metres at the acroterion; 10 metres is struck through and is not the applicable limit.
+    critical: true
+    evidence:
+      # PDF p91 (printed p90) shows a strike through 10, not through 7.
+      # Preserve both numbers because this is the verbatim text-layer quotation.
+      - doc: plu_reglement
+        page: 91
+        quote: "La hauteur des constructions ne doit pas excéder 7 10 mètres à l’acrotère."
+  - statement: In sector UGa, construction footprint must not exceed 15 percent of the total site area in the zone.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "Dans les secteurs UGa et UGd L’emprise au sol des constructions ne doit pas excéder 15% de la superficie totale du terrain dans la zone."
+  - statement: In sector UGa, the footprint of ancillary constructions must not exceed 4 percent of the site area.
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "En outre, l’emprise au sol des constructions annexes ne doit pas excéder 4 % de la superficie du terrain."
+  - statement: Ordinary housing requires 2 parking spaces per dwelling under UG article 12.
+    evidence:
+      - doc: plu_reglement
+        page: 94
+        quote: "Pour les constructions à destination d'habitation : 2 places par logement;"
+must_not:
+  - States that the applicable maximum construction height in UGa is 10 metres.
+  - Applies the general UG ridge-height limit of 10 metres to UGa housing.
+  - States that the maximum construction footprint in UGa is 30 percent of the site area.

@@ -1,0 +1,154 @@
+id: d18_uhe_housing
+level: doc
+tests: UHe is a sector of zone UH (Vallée) that shares the general UH figures and adds only radiological restrictions; the UH chapter must be read with UHe in mind, not replaced by invented UHe figures or by the figures of UHc, UHd or UHf
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The zone is the UHe sector of zone UH of the Vallée chapter of the regulation.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UHe
+    legend_items:
+      - Zone correspondant au périmètre de prescriptions sanitaires
+    program: new housing (ordinary dwellings)
+facts:
+  - statement: In UHe, the footprint of main buildings must not exceed 20 percent of the site area (article UH9 rule "En UH et UHe et UHf").
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 112
+        quote: "En UH et UHe et UHf :"
+      - doc: plu_reglement
+        page: 112
+        quote: "au plus 20% de la superficie du terrain dans la zone pour les constructions principales"
+  - statement: In UHe, the footprint of ancillary buildings must not exceed 5 percent of the site area, and terraces and swimming pools count as footprint.
+    evidence:
+      - doc: plu_reglement
+        page: 112
+        quote: "au plus 5% de la superficie du terrain dans la zone pour les constructions annexes"
+      - doc: plu_reglement
+        page: 112
+        quote: "Les terrasses et piscines constituent de l’emprise au sol"
+  - statement: UHe has no height rule of its own; the general UH rule (UH outside UHf) applies, so a main building is limited to 7 metres at the eaves or the acroterion.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "En UH hors secteur UHf"
+      - doc: plu_reglement
+        page: 113
+        quote: "7 mètres à l’égout du toit ou à l’acrotère."
+  - statement: Under the same UH rule, a main building is limited to 10 metres at the ridge (faîtage, faîte or ceiling height).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "10 mètres au faîtage, faîte ou hauteur plafond ;"
+  - statement: Under the same UH rule, the number of levels of a main building is limited to R+1+combles.
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "Avec un nombre de niveaux limité à R+1+combles."
+  - statement: Parking for housing in UHe is 2 spaces per dwelling, one of them covered, as the general rule; but in new housing operations of more than 3 dwellings (subdivision, grouped permits, collective buildings) 3 spaces per dwelling and 1 visitor space per 3 dwellings are required instead (all zones except UHc).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 116
+        quote: "en zone UH hors secteur UHf : 2 places par logement dont une couverte,"
+      - doc: plu_reglement
+        page: 118
+        quote: "il sera exigé 3 places par logement et 1 place « visiteurs » pour 3 logements"
+  - statement: Beyond the 25 metre strip measured from the serving roads, only terraces and ancillary buildings (garages, garden sheds, uncovered pools and their technical works) are allowed, so a new dwelling must sit within the strip.
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "Au-delà de la bande des 25 mètres, ne sont autorisées que les terrasses et les constructions annexes"
+  - statement: Setback from roads in UH outside UHf is 9 metres from the road axis when the road right-of-way is under 8 metres, and 5 metres from the alignment when the right-of-way is 8 metres or more or for public spaces.
+    evidence:
+      - doc: plu_reglement
+        page: 107
+        quote: "9 mètres par rapport à l’axe de la voie, dès lors que cette dernière a une emprise inférieure à 8 mètres"
+      - doc: plu_reglement
+        page: 107
+        quote: "5 mètres par rapport à l’alignement actuel ou projeté"
+  - statement: Setback from side and rear boundaries must be at least 8 metres where the facade has views, and half the facade height (H/2) with a minimum of 2 metres where it has none.
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+      - doc: plu_reglement
+        page: 110
+        quote: "la moitié de la hauteur de la façade ou partie de façade intéressée de la construction (L=H/2) avec"
+  - statement: Several buildings on one plot must be at least 8 metres apart if at least one of the facing facades has views, and 4 metres apart if neither has views.
+    evidence:
+      - doc: plu_reglement
+        page: 111
+        quote: "8 mètres si au moins l’une des deux façades ou parties de façades concernées comporte des vues"
+      - doc: plu_reglement
+        page: 111
+        quote: "4 mètres si les deux façades ou parties de façades concernées ne comportent pas de vues"
+  - statement: In UH, UHe and UHf, vegetated spaces must cover at least 70 percent of the site area.
+    evidence:
+      - doc: plu_reglement
+        page: 119
+        quote: "70% de la superficie du terrain en UH, UHe et UHf"
+  - statement: What sets UHe apart is the residual radioactive contamination of its districts (Coudraies, Clos Rose); the regulation only allows dwellings or extensions of existing buildings there, under conditions.
+    evidence:
+      - doc: plu_reglement
+        page: 99
+        quote: "concernés par des risques de contamination radioactive résiduelle"
+      - doc: plu_reglement
+        page: 99
+        quote: "Les dispositions réglementaires ne permettent d’autoriser que les habitations ou extensions de bâtiments existants dans certaines conditions."
+  - statement: In UHe, any exploitation of subsoil natural resources (quarry, water abstraction, hydrocarbons) is additionally forbidden.
+    evidence:
+      - doc: plu_reglement
+        page: 100
+        quote: "Dans les secteurs UHe :"
+      - doc: plu_reglement
+        page: 100
+        quote: "Sont de plus interdites toutes exploitations des ressources naturelles du sous-sol"
+  - statement: In the prescription perimeter, housing construction and works, with their outbuildings and garages, are authorised provided that any work requiring excavation is accompanied by removal of the soil by an approved body to a specialised treatment or storage centre.
+    evidence:
+      - doc: plu_reglement
+        page: 101
+        quote: "DANS LE PERIMETRE DE PRESCRIPTIONS"
+      - doc: plu_reglement
+        page: 101
+        quote: "s’accompagnent de l’évacuation des terres par un organisme agréé"
+      - doc: plu_reglement
+        page: 101
+        quote: "les constructions ou travaux à usage d’habitation"
+  - statement: In the prescription perimeter, excavation deeper than 50 cm over a surface of 10 m² or more requires prior information of the municipal services and a prior radiological mapping (dose rate) of the area.
+    evidence:
+      - doc: plu_reglement
+        page: 101
+        quote: "doivent donner lieu au préalable à une cartographie radiologique (débit de dose)"
+  - statement: In the prescription perimeter, a check of the bottom of the excavation must be done before the foundations are laid.
+    evidence:
+      - doc: plu_reglement
+        page: 102
+        quote: "Un contrôle de fond de fouille devra être réalisé avant la pose de fondations."
+must_not:
+  - States that UHe has its own height limits different from the general UH 7 m / 10 m limits.
+  - States that the maximum footprint of main buildings in UHe differs from 20 percent of the site area.
+  - Applies the UHc (25 percent), UHd (30 percent) or UHf (11 m height, 15 m road setback) figures to UHe.
+  - States that housing is forbidden in UHe.
+  - Omits the radiological conditions that the regulation attaches to UHe and to the prescription perimeter.

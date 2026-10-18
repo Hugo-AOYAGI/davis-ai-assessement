@@ -1,0 +1,18 @@
+id: s07_fontaine_commune_collision
+level: surveyor
+tests: 5 Rue de la Fontaine exists in both Gif-sur-Yvette and neighboring Saint-Aubin;
+  honor the requested commune.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 5 Rue de la Fontaine, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000BK0099
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 279.65
+  tolerance: 0.02
+  source: cadastre

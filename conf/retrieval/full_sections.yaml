@@ -8,6 +8,7 @@ corpus:               # where the tools read the corpus; loaded on first tool ca
     _target_: agent.agents.config.project_path
     relative: ${corpus.dir}
   stopwords: ${corpus.search.stopwords}
+  expected_id: ${corpus.id}
 max_chars: 120000     # longest tool reply; longer text is cut with a hint to read narrower
 max_pages: 4          # pages per read_pages call
 search_k: 8           # hits per search call

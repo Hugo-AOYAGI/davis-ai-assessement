@@ -8,8 +8,8 @@ from shapely import Polygon as ShapelyPolygon
 from shapely.geometry.base import BaseGeometry
 
 from agent.contracts.envelope import Distance, EnvelopeRules, SetbackRule
-from agent.contracts.geometry import Boundary, BoundaryKind, BuildingMassing, Level
-from agent.runtime.geometry.envelope.shapes import largest_part, set_back
+from agent.contracts.geometry import Boundary, BoundaryKind, Level
+from agent.runtime.geometry.envelope.shapes import largest_part, set_back, trim_area
 from agent.runtime.report.markdown import area, percent
 
 
@@ -203,46 +203,47 @@ def ground_cap(rules: EnvelopeRules, site_area_m2: float) -> Cap | None:
                 f"the site area minus the minimum green area ({percent(green)})",
             )
         )
-    return min(caps, key=_cap_area) if caps else None
+    return min(caps, key=lambda cap: cap.area_m2) if caps else None
 
 
-def _cap_area(cap: Cap) -> float:
-    """Return a cap's area, to compare caps."""
-    return cap.area_m2
-
-
-def scale_together(
-    massings: Sequence[BuildingMassing], cap: Cap | None
-) -> tuple[list[BuildingMassing], list[str]]:
-    """Scale every building's areas down by one factor when their total ground area is capped.
+def cap_together(
+    rises: Sequence[Rise],
+    cap: Cap | None,
+    rebuild: Callable[[ShapelyPolygon | None, int], Rise],
+    *,
+    tolerance_m: float,
+    min_area_m2: float,
+) -> tuple[list[Rise], list[str]]:
+    """Trim ground polygons proportionally to a shared cap and recompute their upper slices.
 
     Args:
-        massings: The buildings of one scenario (or one alternative of a bound).
+        rises: The buildings of one scenario, or one alternative of a bound.
         cap: The ground-area cap, ``None`` when there is none.
+        rebuild: Recompute a building from its trimmed footprint and position in ``rises``.
+        tolerance_m: Precision of the clipping line.
+        min_area_m2: Discard smaller disconnected parts.
 
     Returns:
-        The massings, scaled when needed, and the assumption recorded when they are.
+        Geometrically consistent rises and the recorded layout assumption.
     """
-    total = sum(massing.footprint_area_m2 for massing in massings)
+    total = sum(raised.footprint.area for raised in rises if raised.footprint is not None)
     if cap is None or total <= cap.area_m2:
-        return list(massings), []
+        return list(rises), []
     factor = cap.area_m2 / total
     note = (
-        f"Ground area {area(total)} exceeds {cap.reason}, {area(cap.area_m2)}: every building's "
-        f"areas are scaled by {factor:.3f}; the footprints show where to build, not how much."
+        f"Ground area {area(total)} exceeds {cap.reason}, {area(cap.area_m2)}: each footprint "
+        f"is trimmed from its western side to at most {factor:.1%} of its area, then its upper "
+        "slices are recomputed. This is a layout choice, not an optimized capacity bound."
     )
-    return [_scale(massing, factor) for massing in massings], [note]
-
-
-def _scale(massing: BuildingMassing, factor: float) -> BuildingMassing:
-    """Scale a massing's ground area, level areas and volume by a factor."""
-    levels = tuple(
-        level.model_copy(update={"area_m2": level.area_m2 * factor}) for level in massing.levels
-    )
-    return massing.model_copy(
-        update={
-            "footprint_area_m2": massing.footprint_area_m2 * factor,
-            "levels": levels,
-            "volume_m3": massing.volume_m3 * factor,
-        }
-    )
+    result = []
+    for position, raised in enumerate(rises):
+        if raised.footprint is None:
+            result.append(raised)
+            continue
+        clipped = trim_area(raised.footprint, raised.footprint.area * factor, tolerance_m)
+        footprint, dropped = largest_part(clipped, min_area_m2)
+        rebuilt = rebuild(footprint, position)
+        result.append(
+            Rise(rebuilt.footprint, rebuilt.levels, raised.left_out or dropped or rebuilt.left_out)
+        )
+    return result, [note]

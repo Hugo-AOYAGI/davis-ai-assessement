@@ -1,0 +1,30 @@
+# Independent source checks: evals/fixtures/zoning/z02_zone_boundary.oracle.json
+id: z02_zone_boundary
+level: zoning
+tests: parcel split across UCa and UD
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 9 Route de Belleville, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000BI0093
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  any_of:
+  - UCa
+  - UD
+- key: overlays
+  present: []
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_flag:
+- The parcel is split across zones UCa and UD; a single zone does not cover the whole
+  parcel.

@@ -1,0 +1,149 @@
+{
+  "parcel_id": "91272000AI0109",
+  "cadastre": {
+    "url": "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/91/91272/cadastre-91272-parcelles.json.gz",
+    "retrieved_utc": "2026-10-17",
+    "source_sha256": "54b101a25b3140b7bd500a3b6549fdf07e74a4746bd28d92f22f4ac59b726408",
+    "original_feature": {
+      "type": "Feature",
+      "id": "91272000AI0109",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.1224628,
+              48.6900666
+            ],
+            [
+              2.1224605,
+              48.6900217
+            ],
+            [
+              2.122464,
+              48.6900075
+            ],
+            [
+              2.1224714,
+              48.6899862
+            ],
+            [
+              2.122481,
+              48.6899703
+            ],
+            [
+              2.1224994,
+              48.6899502
+            ],
+            [
+              2.1225199,
+              48.6899331
+            ],
+            [
+              2.1225451,
+              48.6899184
+            ],
+            [
+              2.1226773,
+              48.6899189
+            ],
+            [
+              2.1226779,
+              48.6898905
+            ],
+            [
+              2.1226971,
+              48.6898911
+            ],
+            [
+              2.122697,
+              48.6899198
+            ],
+            [
+              2.122808,
+              48.6899197
+            ],
+            [
+              2.1228078,
+              48.6900072
+            ],
+            [
+              2.1228077,
+              48.6900359
+            ],
+            [
+              2.1228076,
+              48.6900672
+            ],
+            [
+              2.1226863,
+              48.6900664
+            ],
+            [
+              2.1226778,
+              48.6900663
+            ],
+            [
+              2.1225515,
+              48.690066
+            ],
+            [
+              2.1225315,
+              48.6900659
+            ],
+            [
+              2.1224628,
+              48.6900666
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "91272000AI0109",
+        "commune": "91272",
+        "prefixe": "000",
+        "section": "AI",
+        "numero": "109",
+        "contenance": 400,
+        "arpente": false,
+        "created": "2006-03-23",
+        "updated": "2024-09-24"
+      }
+    }
+  },
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "source_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "original_row": {
+      "id": "91272_1805_00007",
+      "id_fantoir": "91272_1805",
+      "numero": "7",
+      "rep": "",
+      "nom_voie": "Allee de la Mare l’Oiseau",
+      "code_postal": "91190",
+      "code_insee": "91272",
+      "nom_commune": "Gif-sur-Yvette",
+      "code_insee_ancienne_commune": "",
+      "nom_ancienne_commune": "",
+      "x": "635423.07",
+      "y": "6843663.86",
+      "lon": "2.122679",
+      "lat": "48.689897",
+      "type_position": "entrée",
+      "alias": "",
+      "nom_ld": "",
+      "libelle_acheminement": "GIF SUR YVETTE",
+      "nom_afnor": "ALLEE DE LA MARE L OISEAU",
+      "source_position": "commune",
+      "source_nom_voie": "commune",
+      "certification_commune": "1",
+      "cad_parcelles": "91272000AI0109"
+    },
+    "relation": "BAN cad_parcelles certified link and point inside parcel"
+  },
+  "selection": {
+    "kind": "spread",
+    "tests": "UEc sector in Chevry"
+  },
+  "address": "7 Allee de la Mare l’Oiseau, 91190 Gif-sur-Yvette"
+}

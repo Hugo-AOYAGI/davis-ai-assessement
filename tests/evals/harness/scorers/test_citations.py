@@ -1,6 +1,6 @@
 from agent.contracts.evidence import Citation, SourceKind
 from evals.harness.items import Evidence, KeyFact
-from evals.harness.scorers.citations import check_evidence, located_citations, score_citations
+from evals.harness.scorers.citations import located_citations, score_citations
 from evals.harness.scorers.facts import score_facts
 
 RASTER = "plu_reglement_graphique"
@@ -63,9 +63,3 @@ def test_raster_citation_is_recorded_and_valid_when_it_names_the_legend_item(var
 def test_geometric_citations_never_ground(study, matcher):
     geometric = study.site.citations[0]
     assert not matcher.valid_on(geometric, [Evidence(doc=geometric.doc, page=1)])
-
-
-def test_check_evidence_verifies_the_item_quotes(items, matcher):
-    checks = check_evidence(items["d02_uga_height"].facts, matcher)
-    assert len(checks) == 3
-    assert all(check.verified for check in checks)

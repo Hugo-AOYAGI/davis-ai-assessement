@@ -1,0 +1,107 @@
+id: d03_aurc_defers_to_ur
+level: doc
+tests: AURc articles 10 and 11 defer to zone UR, so the height figures come from the UR chapter by reference, while AURc sets its own footprint (article 9) and road setback (article 6)
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is AURc (Vallée, Damiette sector).
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: AURc
+    legend_items: []
+    program: ordinary new housing
+facts:
+  - statement: In zone AURc, article AURc10 (maximum height of constructions) sets no figure of its own; it states that the rules applicable are those of zone UR.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 189
+        quote: "ARTICLE AURc10 - HAUTEUR MAXIMALE DES CONSTRUCTIONS. Les règles applicables sont celles de la zone UR."
+  - statement: Under UR article 10.2, the height of a main building must not exceed 7 metres at the eaves or at the acrotère.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 159
+        quote: "La hauteur d'une construction principale ne doit pas excéder : – 7 mètres à l’égout du toit ou à l’acrotère."
+  - statement: Under UR article 10.2, the height of a main building must not exceed 10 metres at the ridge (faîtage, faîte) or ceiling height.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 159
+        quote: "– 10 mètres au faîtage, faîte ou hauteur plafond ;"
+  - statement: Under UR article 10.2, the height of ancillary buildings must not exceed 2.50 metres at the eaves, 3 metres at the acrotère and 4.50 metres at the ridge.
+    evidence:
+      - doc: plu_reglement
+        page: 159
+        quote: "La hauteur des constructions annexes ne peut excéder : – 2,50 mètres à l’égout du toit ; – 3 mètres à l’acrotère ;"
+      - doc: plu_reglement
+        page: 159
+        quote: "– 4,50 mètres au faîtage, faîte ou hauteur plafond et réduite à 3,50 mètres en limite séparative."
+  - statement: In zone AURc, the footprint of constructions must not exceed 20 percent of the total site area in the zone; this is set by AURc article 9 itself, not by reference to UR.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 188
+        quote: "L’emprise au sol des constructions doit être au plus égale à 20 % de la superficie totale du terrain dans la zone."
+  - statement: In zone AURc, article AURc11 (exterior appearance) does not set its own rules; it states that the rules applicable are those of zone UR.
+    evidence:
+      - doc: plu_reglement
+        page: 189
+        quote: "Article AURc11 - Aspect extérieur Les règles applicables sont celles de la zone UR."
+  - statement: In zone AURc, article AURc6 sets its own minimum setback from the road alignment, 5 metres when the road right-of-way is 8 metres or more, 6 metres otherwise.
+    evidence:
+      - doc: plu_reglement
+        page: 186
+        quote: "– 5 mètres par rapport à l’alignement actuel ou projeté, ou la limite qui s’y substitue repérable aux documents graphiques (emplacement réservé, élargissement de voirie), dès lors que l’emprise de la voie est égale ou supérieure à 8 mètres, 6 m sinon."
+  - statement: In zone AURc, article AURc7 (setback from side boundaries) states that the rules applicable are those of zone UR.
+    evidence:
+      - doc: plu_reglement
+        page: 188
+        quote: "LIMITES SEPARATIVES Les règles applicables sont celles de la zone UR."
+  - statement: Under UR article 7.2, the setback from a boundary must be at least 8 metres where the facade has windows (vues); without windows it is half the facade height with a minimum of 4 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 156
+        quote: "une distance au moins égale à la moitié de la hauteur de la façade, avec un minimum de 4 m , en l’absence de vues - au moins 8 m dans le cas contraire."
+      - doc: plu_reglement
+        page: 156
+        quote: "– 8 mètres lorsque la façade ou partie de façade concernée comporte de vues ;"
+  - statement: In zone AURc, article AURc8 (distance between buildings on one property) states that the rules applicable are those of zone UR.
+    evidence:
+      - doc: plu_reglement
+        page: 188
+        quote: "SUR UNE MEME PROPRIETE Les règles applicables sont celles de la zone UR."
+  - statement: Under UR article 8.1, two buildings on one plot must be at least 16 metres apart if both facing facades have windows, 12 metres if one has, and 8 metres if neither has.
+    evidence:
+      - doc: plu_reglement
+        page: 157
+        quote: "– 16 mètres si chacune des façades ou parties de façades concernées comporte des vues ; – 12 mètres si l’une des deux façades ou parties de façades concernées comporte des vues ; – 8 mètres si les deux façades ou parties de façades concernées ne comportent pas de vues."
+  - statement: In zone AURc, article AURc3 (access and roads) states that the rules applicable are those of zone UR.
+    evidence:
+      - doc: plu_reglement
+        page: 185
+        quote: "CONDITIONS DE DESSERTE PAR LES VOIES PUBLIQUES OU PRIVEES Les règles applicables sont celles de la zone UR."
+  - statement: In zone AURc, article AURc4 (water, electricity and sanitation networks) states that the rules applicable are those of zone UR.
+    evidence:
+      - doc: plu_reglement
+        page: 186
+        quote: "D’UN ASSAINISSEMENT INDIVIDUEL Les règles applicables sont celles de la zone UR."
+  - statement: In zone AURc, housing requires 2 parking spaces per dwelling, one of them covered, set by AURc article 12 itself.
+    evidence:
+      - doc: plu_reglement
+        page: 189
+        quote: "2 places par logement dont une couverte."
+  - statement: In zone AURc, an operation is authorised only if the site covers at least 9000 m², a threshold that no longer applies to residual plots not integrated in a partial development.
+    evidence:
+      - doc: plu_reglement
+        page: 185
+        quote: "le terrain d’assiette de l’opération envisagée couvre une superficie minimale de 9000 m²."
+must_not:
+  - States that no height limit applies to housing in AURc, or gives a height figure for AURc without saying that article AURc10 refers to the rules of zone UR.
+  - States that the AURc height limit is set in the AURc chapter itself, or gives UR height figures as if they were AURc's own text.
+  - States that the maximum height of a main building in AURc is 10 metres at the eaves or acrotère, or 7 metres at the ridge.
+  - States that the AURc footprint limit is 10 percent (the UR figure) or 13 percent (the URa figure), or that AURc defers to UR for footprint.
+  - Applies the UR road setback of 10 metres or 14 metres from the axis to AURc, or states that AURc defers to UR for the road setback.
+  - Applies the URa sector figures to AURc.

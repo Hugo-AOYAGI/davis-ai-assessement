@@ -9,7 +9,7 @@ BODY = "Demo"
 
 
 def line(page: int, text: str, y: float = 100.0, size: float = 9.0, font: str = BODY) -> Line:
-    return Line(page=page, text=text, x0=50.0, y0=y, size=size, font=font, lead=text)
+    return Line(page=page, text=text, y0=y, size=size, font=font, lead=text)
 
 
 def heading(page: int, text: str, y: float = 100.0) -> Line:

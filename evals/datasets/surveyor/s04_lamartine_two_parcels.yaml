@@ -1,0 +1,19 @@
+id: s04_lamartine_two_parcels
+level: surveyor
+tests: One certified address links two adjoining cadastral parcels; retain both rather
+  than only the nearest parcel.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 18 Avenue Lamartine, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000BM0417
+  - 91272000BM0419
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 1390.05
+  tolerance: 0.02
+  source: cadastre

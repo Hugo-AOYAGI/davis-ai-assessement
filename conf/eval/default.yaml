@@ -1,4 +1,4 @@
-# Eval pass settings (docs/EVALS.md §4, §6, §7). Composed under `eval` by conf/eval.yaml.
+# Eval pass settings (evals/README.md §4, §6, §7). Composed under `eval` by conf/eval.yaml.
 defaults:
   - harness  # how one item is run and judged: eval.eval_tasks, eval.judge
   - _self_

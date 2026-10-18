@@ -3,6 +3,7 @@ from collections.abc import Iterable, Sequence
 from deepagents import CompiledSubAgent
 from hydra.utils import instantiate
 from langchain.agents import create_agent
+from langchain.agents.middleware import AgentMiddleware
 from langchain_anthropic.middleware import AnthropicPromptCachingMiddleware
 from langchain_core.tools import BaseTool
 from langgraph.graph.state import CompiledStateGraph
@@ -14,6 +15,7 @@ from agent.llm.factory import build_model
 from agent.llm.truncation import OutputCapMiddleware
 from agent.observability.logs import get_logger
 from agent.tools.images.inline import InlineImagesMiddleware
+from agent.tools.images.prune import PruneImagesMiddleware
 from agent.tools.submit.artifacts import ArtifactsMiddleware, ArtifactsState
 
 logger = get_logger(__name__)
@@ -59,7 +61,9 @@ def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None)
     The same graph is delegated to by the orchestrator's ``task`` tool and invoked directly by
     per-sub-agent evals with ``{"messages": [HumanMessage(task)]}``. It declares the
     ``artifacts`` state key, so what its ``submit_<artifact>`` tool stores flows back to the
-    parent. Image tool replies reference stored PNGs, inlined only in each model request.
+    parent. Image tool replies reference stored PNGs, inlined only in each model request; with
+    ``max_images`` set in its config, only the images of that many latest image-holding
+    messages are sent to the model (``null`` or absent: all of them).
     Prompt caching is added here because deepagents only adds it to the sub-agents it
     compiles itself; it is a no-op for non-Anthropic models.
 
@@ -82,16 +86,20 @@ def build_subagent(cfg: DictConfig, name: str, ledger: CostLedger | None = None)
     logger.info(
         "sub-agent %s: model node %s, tools %s", name, spec.model, [tool.name for tool in tools]
     )
+    max_images = spec.get("max_images")
+    pruning = [] if max_images is None else [PruneImagesMiddleware(int(max_images))]
+    middleware: list[AgentMiddleware] = [
+        *pruning,  # before inlining, so dropped images are never read from disk
+        InlineImagesMiddleware(instantiate(cfg.images.store)),
+        ArtifactsMiddleware(),
+        OutputCapMiddleware(),
+        AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
+    ]
     return create_agent(
         model=build_model(cfg.models, spec.model, ledger),
         tools=tools,
         system_prompt=read_prompt(spec.prompt),
-        middleware=[
-            InlineImagesMiddleware(instantiate(cfg.images.store)),
-            ArtifactsMiddleware(),
-            OutputCapMiddleware(),
-            AnthropicPromptCachingMiddleware(unsupported_model_behavior="ignore"),
-        ],
+        middleware=middleware,
         name=name,
     )
 

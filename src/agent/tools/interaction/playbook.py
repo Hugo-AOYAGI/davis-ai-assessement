@@ -3,6 +3,7 @@ from string import Template
 from typing import Annotated
 
 from langchain_core.tools import BaseTool, StructuredTool, ToolException
+from pydantic import Field
 
 from agent.contracts.base import Contract
 
@@ -22,6 +23,8 @@ class Playbook(Contract):
     """When to use it, shown to the model in the tool description."""
     text: str
     """The recipe, in Markdown; ``$language`` is substituted on loading."""
+    lists: dict[str, tuple[str, ...]] = Field(default_factory=dict)
+    """Configured lists substituted as comma-separated Markdown code labels."""
 
 
 def load_playbook_tool(playbooks: Mapping[str, Playbook], language: str) -> BaseTool:
@@ -41,7 +44,13 @@ def load_playbook_tool(playbooks: Mapping[str, Playbook], language: str) -> Base
         msg = "load_playbook needs at least one playbook"
         raise ValueError(msg)
     texts = {
-        name: Template(playbook.text).safe_substitute(language=language)
+        name: Template(playbook.text).safe_substitute(
+            language=language,
+            **{
+                key: ", ".join(f"`{value}`" for value in values)
+                for key, values in playbook.lists.items()
+            },
+        )
         for name, playbook in playbooks.items()
     }
     listing = "\n".join(

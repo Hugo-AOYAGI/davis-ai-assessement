@@ -178,16 +178,18 @@ def _proposal(envelope: EnvelopeStudy, index: CitationIndex) -> str:
     )
 
 
-def envelope_section(envelope: EnvelopeStudy, index: CitationIndex) -> str:
+def envelope_section(envelope: EnvelopeStudy | None, index: CitationIndex) -> str:
     """Render the envelope: its rules, a table per bound, the proposal and the assumptions.
 
     Args:
-        envelope: The architect's envelope, recomputed by the gate.
+        envelope: The recomputed envelope, absent for a wholly prohibited program.
         index: Citation numbering of the report.
 
     Returns:
         The ``Envelope`` section.
     """
+    if envelope is None:
+        return "## Envelope\n\nNo envelope computed: every proposed building use is prohibited."
     green = NONE if envelope.min_green_area_m2 is None else area(envelope.min_green_area_m2)
     bounds = "\n\n".join(
         f"### Bound: {BOUND_TITLES[bound.name]}\n\n{_massings(bound)}" for bound in envelope.bounds

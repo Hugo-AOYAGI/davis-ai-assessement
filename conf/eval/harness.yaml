@@ -40,11 +40,3 @@ judge:
   views:                     # what the judge reads of an end-to-end study (its report)
     max_quote_chars: 400     # quotes are cut beyond this length in the citations table
     crops_link_base: evidence
-  validation:                # deliberately broken studies (evals/harness/judging/mutations.py)
-    limit: max_height_m      # the limit changed, hedged and contradicted
-    shift: 3                 # added to its value (changed, contradicted) or taken off (hedge)
-    hedge: "Depending on the reading, the maximum is between {low:g} and {high:g} m."
-    contradiction: "\n\nIn short, buildings may rise to {value:g} m."
-    invented_topic: appearance
-    invented_rule: >-
-      Every roof must be covered with red clay tiles and every facade rendered in white lime.

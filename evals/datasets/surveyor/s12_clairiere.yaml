@@ -1,0 +1,18 @@
+# Oracle provenance: evals/fixtures/surveyor/s12_clairiere.sources.json
+id: s12_clairiere
+level: surveyor
+tests: commune-certified BAN single-parcel link; address point inside cadastral polygon
+status: verified
+built_by: codex; independent BAN export and API Carto verification
+input:
+  address: 105 Allee de la Clairiere, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000AK0493
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 421
+  tolerance: 0.02
+  source: cadastre

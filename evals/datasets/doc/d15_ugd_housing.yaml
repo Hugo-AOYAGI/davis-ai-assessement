@@ -1,0 +1,104 @@
+id: d15_ugd_housing
+level: doc
+tests: UGd housing (Vallée, the Abbaye sector) shares the 15 % footprint with UGa but has its own height, setback and spacing limits; the general UG figures and the UGa height are wrong readings
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    the regulatory rules for the program in the zone, plus the provisions of every applying
+    legend item. The zone is the sector UGd of the Vallée zone UG.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UGd
+    legend_items: []
+    parcel_ids: [91272000BI0058]
+    program: housing
+facts:
+  - statement: In sector UGd, the construction footprint of buildings must not exceed 15 percent of the total site area in the zone.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "Dans les secteurs UGa et UGd L’emprise au sol des constructions ne doit pas excéder 15% de la superficie totale du terrain dans la zone."
+  - statement: In sector UGd, the footprint of ancillary constructions must not exceed 4 percent of the site area.
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "En outre, l’emprise au sol des constructions annexes ne doit pas excéder 4 % de la superficie du terrain."
+  - statement: In sector UGd, the height of a main building must not exceed 10 metres at the eaves or at the acroterion.
+    critical: true
+    evidence:
+      # PDF p91 (printed p90): rendered page checked, no strike-through in the UGd block
+      # (the only struck value on the page is the 10 in the UGa line).
+      - doc: plu_reglement
+        page: 91
+        quote: "10 mètres à l’égout du toit ou à l’acrotère."
+  - statement: In sector UGd, the height of a main building must not exceed 13 metres at the ridge (faîtage, faîte) or ceiling height.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 91
+        quote: "13 mètres au faîtage, faîte ou hauteur plafond"
+  - statement: In sector UGd, the height of ancillary constructions must not exceed 2.50 metres at the eaves.
+    evidence:
+      - doc: plu_reglement
+        page: 91
+        quote: "2,50 mètres à l’égout du toit"
+  - statement: In sector UGd, where a facade or part of a facade facing a side or rear boundary has views, the setback from the boundary must be at least the building height (L=H), measured at the eaves or the top of the acroterion, with a minimum of 8 metres.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "la hauteur de la construction mesurée à l’égout du toit ou au sommet de l’acrotère (L=H) avec un minimum de 8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - statement: In sector UGd, where the facade or part of a facade facing a side or rear boundary has no views, the setback from the boundary must be at least half the building height (L=1/2H), with a minimum of 4 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "la moitié de la hauteur de la construction mesurée à l’égout du toit ou au sommet de l’acrotère (L=1/2H) avec un minimum de 4 mètres lorsque la façade ou partie de façade concernée ne comporte pas de vues"
+  - statement: In sector UGd, buildings may be placed on one or two lateral boundaries or set back from the boundaries (UG general option for all sectors).
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "sur une ou deux limites séparatives latérales"
+  - statement: In sector UGd, constructions or parts of constructions with a facade on a road or public right-of-way must be built in priority at the current alignment of the road or public right-of-way (no fixed setback distance is given for UGd).
+    evidence:
+      - doc: plu_reglement
+        page: 86
+        quote: "doivent être implantées en priorité à l’alignement actuel de la voie ou emprise publique"
+  - statement: In sector UGd, several buildings on the same property must be at least 4 metres apart where the facing facades have no views.
+    evidence:
+      - doc: plu_reglement
+        page: 89
+        quote: "4 mètres dès lors que les façades en vis-à-vis ne comportent pas de vues"
+  - statement: In sector UGd, several buildings on the same property must be at least 16 metres apart where one of the facing facades has views.
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "16 mètres dès lors que l’une des façades en vis-à-vis comporte des vues"
+  - statement: Housing requires 2 parking spaces per dwelling under UG article 12 (UGd has no specific parking norm).
+    evidence:
+      - doc: plu_reglement
+        page: 94
+        quote: "Pour les constructions à destination d'habitation : 2 places par logement;"
+must_not:
+  - States that the maximum height of a UGd main building is 7 metres at the eaves or acroterion, or 10 metres at the ridge (the general UG limits, which exclude UGd).
+  - States that the maximum construction height in UGd is 7 metres (the UGa limit).
+  - States that the maximum construction footprint in UGd is 30 percent of the site area, or that the ancillary footprint limit is 8 percent (the general UG figures).
+  - States that the side or rear setback in UGd is 8 metres with views and half the height with a 2 metre minimum without views (the general UG rule, which excludes UGd).
+  - States that the distance between two buildings on one property in UGd is 8 metres with views (the UGa and UGb value) or follows the general UG L=H / L=1.5H formulas.
+must_flag: []

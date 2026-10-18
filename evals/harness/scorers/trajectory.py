@@ -1,4 +1,4 @@
-"""Trajectory of a run (``docs/EVALS.md`` §4): tool calls, gate rejections, evidence read."""
+"""Trajectory of a run (``evals/README.md``§4): tool calls, gate rejections, evidence read."""
 
 from collections import Counter
 from collections.abc import Callable, Mapping, Sequence

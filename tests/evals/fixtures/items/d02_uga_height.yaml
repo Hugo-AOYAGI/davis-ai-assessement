@@ -1,6 +1,6 @@
 id: d02_uga_height
 level: doc
-tests: struck-through "7 10 mètres" (p.91); the height in force is 10 m
+tests: struck-through "7 10 mètres" (p.91); 7 m is retained and 10 m is struck through
 status: verified
 built_by: claude
 input:                                  # the task as the orchestrator writes it (playbook §3)
@@ -13,13 +13,13 @@ input:                                  # the task as the orchestrator writes it
     legend_items: []
     program: housing
 facts:
-  - statement: Maximum height in UGa is 10 m at the acroterion
+  - statement: Maximum height in UGa is 7 m at the acroterion; 10 m is struck through
     critical: true
-    evidence: [{doc: plu_reglement, page: 91, quote: "10 mètres à l’acrotère"}]
+    evidence: [{doc: plu_reglement, page: 91, quote: "7 10 mètres à l’acrotère"}]
   - statement: Maximum footprint in UGa is 15 % of the site area
     critical: true
     evidence: [{doc: plu_reglement, page: 90, quote: "Dans les secteurs UGa et UGd L’emprise au sol des constructions ne doit pas excéder 15%"}]
   - statement: Housing requires 2 parking spaces per dwelling
     evidence: [{doc: plu_reglement, page: 94, quote: "2 places par logement"}]
 must_not:
-  - States a maximum height of 7 m in UGa
+  - States an applicable maximum height of 10 m in UGa

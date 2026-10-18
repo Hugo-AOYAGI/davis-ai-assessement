@@ -1,0 +1,28 @@
+# Independent source checks: evals/fixtures/zoning/z01_joliot_curie.oracle.json
+id: z01_joliot_curie
+level: zoning
+tests: reference parcel wholly in UMG and nested OAP perimeters; distinguish nearby
+  EBC from the site
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CR0247
+  program: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs, two separate
+    buildings
+facts:
+- key: zone
+  expect: UMG
+  critical: true
+  source: gpu_2021
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

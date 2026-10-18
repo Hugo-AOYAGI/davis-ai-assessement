@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z16_um4.oracle.json
+id: z16_um4
+level: zoning
+tests: UM4 sector of Moulon
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 8 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CP0123
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UM4
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

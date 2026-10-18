@@ -1,0 +1,72 @@
+id: d04_umg_student_parking_titre1
+level: doc
+tests: parking of a student residence is set by UMG article 12 and also capped by Titre I (general provisions); "jeunes actifs" residence is not defined anywhere in the regulation
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: the regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is UMG (Moulon, Joliot-Curie).
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UMG
+    legend_items: ["Secteur à Orientation d'Aménagement et de Programmation"]
+    program: one student social residence and one young-workers residence, two separate buildings
+facts:
+  - statement: UMG article 12.1 requires, for student residences (résidences étudiantes), 1 car parking space per 150 m² of floor area (surface de plancher).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 327
+        quote: "1 place de stationnement par tranche de 150 m² de surface de plancher, pour les résidences étudiantes."
+  - statement: Titre I (general provisions, article 2) states that no more than one parking space per dwelling may be required for rental housing financed with a State-aided loan.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 5
+        quote: "Il ne peut être exigé la réalisation de plus d'une aire de stationnement par logement pour"
+      - doc: plu_reglement
+        page: 5
+        quote: "les logements locatifs financés avec un prêt aidé par l'Etat"
+  - statement: Titre I (general provisions, article 2) extends the same cap of at most one parking space per dwelling to the résidences universitaires referred to in article L. 631-12 of the code de la construction et de l'habitation.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 5
+        quote: "Il ne peut être exigé la réalisation de plus d'une aire de stationnement par logement pour"
+      - doc: plu_reglement
+        page: 6
+        quote: "les résidences universitaires mentionnées à l'article L. 631-12 du code de la construction et de l'habitation"
+  - statement: UMG article 12.1 requires, for other housing, 1 car parking space per 35 m² of floor area, within a limit of 2 spaces per dwelling.
+    evidence:
+      - doc: plu_reglement
+        page: 327
+        quote: "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement"
+  - statement: UMG article 12.1 requires 1 parking space per dwelling for dwellings financed with a State-aided loan.
+    evidence:
+      - doc: plu_reglement
+        page: 327
+        quote: "1 place de stationnement par logement, pour les logements financés avec un prêt aidé par l’Etat"
+  - statement: UMG article 12.3 requires, for housing, 0.75 m² of bicycle parking per dwelling up to two main rooms and 1.5 m² per dwelling otherwise, in a space of at least 3 m².
+    evidence:
+      - doc: plu_reglement
+        page: 328
+        quote: "0,75 m² par logement pour les logements jusqu’à deux pièces principales"
+      - doc: plu_reglement
+        page: 328
+        quote: "1,5 m² par logement dans les autres cas"
+      - doc: plu_reglement
+        page: 329
+        quote: "L’espace destiné au stationnement des vélos a une superficie minimale de 3 m²."
+  - statement: UMG article 12.5 requires at least 85 percent of the car spaces built on the plot for housing to be integrated in the building, but for student residences a majority of spaces in basement is not required.
+    evidence:
+      - doc: plu_reglement
+        page: 329
+        quote: "Pour le cas des résidences étudiantes, la réalisation de la majorité des places de stationnement en sous-sol n’est pas requise."
+must_flag:
+  - The regulation never defines or names a residence for young workers or young active people (jeunes actifs, jeunes travailleurs) in the UMG chapter, the general provisions or the lexique, so its destination (housing, hotel accommodation or other) and the parking norm that applies to it are an open classification.
+must_not:
+  - Applies only the UMG article 12.1 student-residence norm of 1 space per 150 m² and never mentions the Titre I cap of one parking space per dwelling.
+  - States that the Titre I cap on parking applies to the young-workers residence as a settled fact, without noting that the regulation does not define such a residence and that it depends on its classification and financing.
+  - Presents a definition of a young-workers residence (jeunes actifs) as given by the regulation or its lexique.
+  - States that student residences in UMG are subject to the 0.5 space per room norm of hotel accommodation.

@@ -1,4 +1,4 @@
-"""Resolve a fact key (``docs/EVALS.md`` §2) against an output, with the citations backing it.
+"""Resolve a fact key (``evals/README.md``§2) against an output, with the citations backing it.
 
 Grammar: dotted field names, each optionally followed by list selectors, e.g.
 ``study.admissibility[building~"Jeunes Actifs"].verdict`` or ``edges[other_side=public_land]``.

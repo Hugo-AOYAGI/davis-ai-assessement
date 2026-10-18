@@ -1,0 +1,18 @@
+id: s10_moulon_shared_parcel
+level: surveyor
+tests: Several addresses on different Moulon streets identify the same large parcel;
+  do not shrink the site to one entrance or building.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 1 Rue Francis Perrin, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000CP0220
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 10647.85
+  tolerance: 0.02
+  source: cadastre

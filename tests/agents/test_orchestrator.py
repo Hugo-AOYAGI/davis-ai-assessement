@@ -183,7 +183,8 @@ def test_subagent_appears_in_task_tool(cfg):
 def test_gate_corpus_is_loaded_lazily(monkeypatch):
     calls = []
 
-    def fake_load_corpus(directory):
+    def fake_load_corpus(directory, expected_id):
+        assert expected_id == cfg.corpus.id
         calls.append(directory)
         return "corpus"
 
@@ -273,3 +274,17 @@ def test_end_to_end_delegation(cfg, monkeypatch):
     replies = {m.tool_call_id: m.content for m in state["messages"] if isinstance(m, ToolMessage)}
     assert replies == {"t1": "child done"}
     assert state["messages"][-1].content == "parent done"
+
+
+def test_playbook_uses_the_gate_topic_configuration():
+    cfg = load_config(["policies.study.required_topics.rules=[height,parking]"])
+    tools = {tool.name: tool for tool in orchestrator_tools(cfg)}
+    text = tools["load_playbook"].invoke({"name": "study"})
+    assert "- topics: `height`, `parking`." in text
+    assert "$rules_topics" not in text
+
+
+def test_standard_study_labels_have_trusted_topic_checklists():
+    cfg = load_config()
+    for label in cfg.policies.study.required_notes:
+        assert cfg.policies.study.required_topics[label]

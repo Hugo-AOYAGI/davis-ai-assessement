@@ -1,11 +1,12 @@
 from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 
 import pymupdf
 import pytest
 from pydantic import ValidationError
 
 from agent.adapters.images.pages import PageImages, RegionError
-from agent.adapters.images.render import RULER_BAND_PX
+from agent.adapters.images.render import RULER_BAND_PX, LineStyle, Overlay
 from agent.contracts.evidence import ImageRegion
 
 BLUE = (0, 0, 255)
@@ -15,26 +16,22 @@ WHITE = (255, 255, 255)
 
 BAND = RULER_BAND_PX
 MAX_PX = 440
+STYLE = LineStyle(rgb=(255, 0, 0), width_px=1)
 
 
-def make(
-    root,
-    documents=({"id": "plan", "path": "plan.pdf", "kind": "map", "title": "Plan"},),
-    max_image_px=MAX_PX,
-    cache_size=2,
-    scan_min_coverage=0.8,
-):
-    return PageImages(
-        documents=documents,
-        root=root,
-        render_dpi=144,
-        max_image_px=max_image_px,
-        max_upscale=4.0,
-        ruler_step_px=100,
-        crop_max_px=500,
-        cache_size=cache_size,
-        scan_min_coverage=scan_min_coverage,
-    )
+def make(root, **overrides):
+    settings: dict[str, Any] = {
+        "documents": ({"id": "plan", "path": "plan.pdf", "kind": "map", "title": "Plan"},),
+        "render_dpi": 144,
+        "max_image_px": MAX_PX,
+        "max_upscale": 4.0,
+        "ruler_step_px": 100,
+        "crop_max_px": 500,
+        "cache_size": 2,
+        "scan_min_coverage": 0.8,
+        "max_image_bytes": 4_000_000,
+    }
+    return PageImages(root=root, **{**settings, **overrides})
 
 
 @pytest.fixture
@@ -81,6 +78,29 @@ def test_zoom_upscale_is_capped(images):
     view = images.zoom(region(1, (0, 0, 10, 5)))
     assert view.image_size == (BAND + 120, BAND + 60)
     assert max(view.image_size) <= MAX_PX
+
+
+def test_oversized_zoom_is_redrawn_smaller_with_the_same_region(tmp_path, pdf, decode):
+    box = region(1, (150, 0, 250, 100))
+    full = make(tmp_path).zoom(box)
+    budget = len(full.png) // 2
+    small = make(tmp_path, max_image_bytes=budget).zoom(box)
+    assert len(small.png) <= budget
+    assert small.image_size < full.image_size
+    assert small.overview_size == full.overview_size
+    width = small.image_size[0] - BAND
+    image = decode(small.png)
+    assert (image.width, image.height) == small.image_size
+    assert image.pixel(BAND + width // 2 - 4, BAND + 10) == RED
+    assert image.pixel(BAND + width // 2 + 4, BAND + 10) != RED
+
+
+def test_outlined_respects_max_px(images):
+    overlay = Overlay(rings=(((0.0, 0.0), (30.0, 0.0), (30.0, 30.0)),), style=STYLE)
+    view = images.outlined(region(1, (0, 0, 100, 50)), overlay, max_upscale=4.0, max_px=240)
+    assert max(view.image_size) == 240
+    wide = images.outlined(region(1, (0, 0, 100, 50)), overlay, max_upscale=4.0, max_px=None)
+    assert max(wide.image_size) == MAX_PX
 
 
 def test_check_unknown_doc(images):
@@ -139,7 +159,8 @@ def test_concurrent_calls(images):
 
 
 @pytest.mark.parametrize(
-    "override", [{"max_image_px": BAND}, {"cache_size": 0}, {"scan_min_coverage": 1.5}]
+    "override",
+    [{"max_image_px": BAND}, {"cache_size": 0}, {"scan_min_coverage": 1.5}, {"max_image_bytes": 0}],
 )
 def test_rejects_bad_settings(tmp_path, override):
     with pytest.raises(ValidationError):

@@ -1,3 +1,4 @@
+import math
 from collections.abc import Sequence
 from typing import Self
 
@@ -92,6 +93,23 @@ def fit_size(size: Size, max_long_edge: int) -> Size:
         return size
     scale = max_long_edge / long_edge
     return max(1, round(width * scale)), max(1, round(height * scale))
+
+
+def scaled_size(size: Size, factor: float) -> Size:
+    """Multiply a size by ``factor``, each side at least one pixel and never above ``size``.
+
+    Args:
+        size: ``(width, height)`` to scale.
+        factor: Scale factor, below 1 to shrink.
+
+    Returns:
+        The scaled ``(width, height)``.
+    """
+    width, height = size
+    return (
+        min(width, max(1, math.floor(width * factor))),
+        min(height, max(1, math.floor(height * factor))),
+    )
 
 
 def _to_full_axis(lo: int, hi: int, full: int, overview: int) -> tuple[int, int]:

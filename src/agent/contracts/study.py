@@ -1,6 +1,7 @@
 from enum import StrEnum
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from agent.contracts.base import Contract
 from agent.contracts.envelope import EnvelopeStudy
@@ -89,6 +90,11 @@ class Study(Contract):
     summary: str = Field(min_length=1)
     """Markdown narrative for a human reader: reasoning, conclusions, caveats."""
 
+    @property
+    def requires_envelope(self) -> bool:
+        """Whether at least one proposed use remains eligible for geometric assessment."""
+        return any(entry.verdict is not Verdict.PROHIBITED for entry in self.admissibility)
+
 
 class VerifiedStudy(Contract):
     """A study accepted by the ``submit_study`` gate, with what the gate computed."""
@@ -98,8 +104,8 @@ class VerifiedStudy(Contract):
     boundaries: tuple[Boundary, ...]
     """The site's edges labelled road / side / rear by the gate."""
     zone: ZoneFindings
-    envelope: EnvelopeStudy
-    """The architect's envelope, recomputed by the gate from its rules and layout."""
+    envelope: EnvelopeStudy | None
+    """The recomputed geometric envelope; absent when every proposed building is prohibited."""
     citation_checks: tuple[CitationCheck, ...]
     """One check per distinct regulatory citation of ``study``, then of ``envelope``.
 
@@ -109,3 +115,11 @@ class VerifiedStudy(Contract):
     """
     evidence: tuple[StoredCrop, ...]
     """Image regions saved as evidence: the zoning plan region and every note view."""
+
+    @model_validator(mode="after")
+    def _envelope_matches_admissibility(self) -> Self:
+        """Require geometry for feasible programs and omit it for wholly prohibited programs."""
+        if (self.envelope is not None) != self.study.requires_envelope:
+            msg = "envelope must be absent exactly when every building is prohibited"
+            raise ValueError(msg)
+        return self

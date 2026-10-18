@@ -52,11 +52,46 @@ def test_overrides_apply():
     assert list(cfg.case.facts) == ["a", "b"]
 
 
+SONNET_NODES = {"zoning_analyst", "judge"}
+
+
 def test_default_models():
     nodes = load_config().models.nodes
-    for node in NODES:
-        assert nodes[node].model == ("claude-opus-5-5" if node == "judge" else "claude-haiku-5-5")
+    for node in NODES - SONNET_NODES:
+        assert nodes[node].model == "claude-haiku-5-5"
         assert "effort" not in nodes[node]
+    assert nodes.judge.model == "claude-sonnet-5-5"
+
+
+def test_zoning_analyst_runs_on_sonnet(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-dummy")
+    models = load_config().models
+    node = models.nodes.zoning_analyst
+    assert node.model == "claude-sonnet-5-5"
+    assert node.effort == "medium"
+    assert node.max_tokens == models.nodes.surveyor.max_tokens
+    assert list(node.tags) == ["nostream"]
+    model = build_model(models, "zoning_analyst")
+    assert isinstance(model, ChatAnthropic)
+    assert model.reasoning_effort == "medium"
+
+
+def test_only_zoning_analyst_prunes_images():
+    subagents = load_config().subagents
+    assert subagents.zoning_analyst.max_images == 4
+    for name in set(SUBAGENTS) - {"zoning_analyst"}:
+        assert subagents[name].get("max_images") is None
+
+
+def test_zoning_analyst_has_plan_site():
+    cfg = load_config()
+    nodes = OmegaConf.to_container(cfg.subagents.zoning_analyst.tools, resolve=False)
+    assert isinstance(nodes, list)
+    assert "${geo.plan_site}" in nodes
+    plan_site = cfg.geo.plan_site
+    assert plan_site._target_ == "agent.tools.plan.site.plan_site_tool"
+    assert plan_site.georeference.relative == cfg.corpus.georef.output
+    assert plan_site.close_margin_m < plan_site.context_margin_m
 
 
 def test_node_override_is_isolated():

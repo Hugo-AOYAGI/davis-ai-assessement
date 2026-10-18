@@ -20,15 +20,19 @@ class RetrievalMode(StrEnum):
 class CorpusSource:
     """The ingested corpus the document tools read, loaded on first use and shared."""
 
-    def __init__(self, *, directory: Path, stopwords: Sequence[str]) -> None:
+    def __init__(
+        self, *, directory: Path, stopwords: Sequence[str], expected_id: str | None = None
+    ) -> None:
         """Keep the settings; nothing is loaded, so graphs build without the corpus on disk.
 
         Args:
             directory: Corpus directory.
             stopwords: Words ignored by keyword search.
+            expected_id: Configured corpus identity, checked on first use.
         """
         self.directory = Path(directory).resolve()
         self.stopwords = tuple(stopwords)
+        self.expected_id = expected_id
 
     def index(self) -> CorpusIndex:
         """Return the corpus index, the same one for every tool reading this directory.
@@ -36,7 +40,7 @@ class CorpusSource:
         Raises:
             FileNotFoundError: When the corpus has not been ingested.
         """
-        return load_index(self.directory, self.stopwords)
+        return load_index(self.directory, self.stopwords, self.expected_id)
 
 
 @contextmanager

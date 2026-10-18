@@ -1,160 +1,125 @@
-# CLAUDE.md
+# Contributor guide
 
-Regulatory-analysis agent (LangGraph + deepagents, Hydra, Phoenix, Claude models) producing a
-buildability study from planning documents. Read `docs/DESIGN.md`, `docs/REFINE.md` and
-`docs/REFINE_v2.md` (each later one wins where they differ) before changing architecture, and
-follow `docs/CODING_STANDARDS.md` for every change.
+This repository builds a cited planning-regulation study from PDFs and geographic services.
+Follow [CODING_STANDARDS.md](CODING_STANDARDS.md). [README.md](README.md) is the startup guide;
+[evals/README.md](evals/README.md) defines scoring. Historical local files in ignored `docs/`
+are not architectural authority.
 
-## Where things go
+## Current architecture
 
-| You are adding… | Put it in |
+`agent.agents.config.load_config(overrides)` composes configuration for server, CLI and evals.
+Hydra `_target_` nodes construct services and tools. Models are created only in `llm/`;
+prompts are read through shared configuration helpers.
+
+Dependencies flow from contracts to runtime, adapters, tools, agents, then entrypoints.
+A module never imports a layer to its right. Runtime has no I/O or LangChain dependency.
+Ingestion, model services and observability have their own responsibilities.
+
+| Responsibility | Location under `src/agent/` |
 |---|---|
-| A Pydantic schema shared between modules (`Study`, `Citation`, sub-agent outputs) | `src/agent/contracts/` |
-| Pure deterministic logic (geometry, citation matching), no LangChain, no I/O | `src/agent/runtime/` |
-| Access to the outside world (HTTP APIs, corpus files and page images on disk) | `src/agent/adapters/` (`geo/`, `corpus/`, `images/`) |
-| Document ingestion (classification, splitting) | `src/agent/ingest/` |
-| Model creation, LLM caching, cost tracking | `src/agent/llm/` (the only place models are instantiated) |
-| A LangChain tool exposed to an agent (thin wrapper over runtime/adapters) | `src/agent/tools/<area>/` |
-| Orchestrator and sub-agent assembly from config | `src/agent/agents/` |
-| Logging and Phoenix tracing setup | `src/agent/observability/` |
-| A runnable entrypoint (Agent Server graph, Hydra CLI run, ingest CLI) | `src/agent/entrypoints/` |
-| Any tunable value (model, temperature, path, threshold, limit) | `conf/<group>/` |
-| A system prompt, sub-agent prompt or playbook | `prompts/{orchestrator,subagents,playbooks}/` |
-| Eval sets, scorers, experiment runners | `evals/` |
-| Unit tests | `tests/`, mirroring `src/agent/` |
-| Chat UI components (tool calls, sub-agents, ask_user, study view) | `ui/src/` |
+| Validated shared schemas and artifacts | `contracts/` |
+| Pure geometry, citations, reports, revisions | `runtime/` |
+| HTTP, corpus files, page/image storage, georeference files | `adapters/` |
+| PDF classification/splitting and raster registration | `ingest/` |
+| Models, caching, cost and output limits | `llm/` |
+| Thin model-facing tools and submission gates | `tools/<area>/` |
+| Graph assembly and config loading | `agents/` |
+| Logging/tracing | `observability/` |
+| CLI, Agent Server graph and image routes | `entrypoints/` |
 
-Layering: `contracts ← runtime ← adapters ← tools ← agents ← entrypoints`. Never import to the right.
+`conf/` owns settings/factory wiring; `prompts/` owns system instructions and playbooks.
+`tests/` contains offline tests. `evals/` contains the harness, benchmark items, source
+fixtures and independent ground-truth maintenance tools. `handoff/` contains final deliverables.
 
-### Hydra config groups (`conf/`)
+## Workflow and contracts
 
-`case/` input address + program · `corpus/` corpus id and paths · `models/` per-node model
-settings · `agent/` orchestrator + playbook · `subagents/` enabled sub-agents and their prompts ·
-`retrieval/` navigation vs full sections, tool limits · `geo/` geographic services, site geometry
-knobs, the shared `site_view` tool node · `images/` corpus page images (render dpi, image sizes)
-and the tool image store · `policies/` ask_user, citation check, required notes, envelope computation, evidence crops,
-tracing.
+Read `prompts/playbooks/study.md`. Surveyor establishes `site`; zoning reads its parcels on
+the georeferenced plan and delivers `zone`. Document tasks then deliver `notes.rules`,
+`notes.oap`, `notes.destinations` and optional focused labels. Architect reads these artifacts
+and delivers `envelope`. Orchestrator decides admissibility/ambiguities and submits `Study`;
+the gate returns `VerifiedStudy`. A wholly prohibited program skips the architect and has
+`envelope: null`; other programs require an envelope artifact containing only eligible
+buildings, while admissibility retains the complete program.
 
-## Resources
+The same specialist graph is delegated to by the orchestrator and called by component evals
+(`build_subagent(cfg, name)`). Only document tasks run concurrently in the prescribed workflow.
+Image pruning changes model requests, not stored messages.
 
-| Resource | Location |
-|---|---|
-| Assessment brief | `Technical_assessment_AI_agents.pdf` |
-| PLU regulatory text (465 p.; zone UMG p.320–332, lexique p.374–379) | `ressources/plu_reglement_91272_20210706.pdf` |
-| PLU zoning plan (single raster A0 image) | `ressources/plu_reglement_graphique_91272_20210706.pdf` |
-| OAP (Joliot Curie ch. 8, p.33–36) | `ressources/oap_91272_20210706.pdf` |
-| Design decisions | `docs/DESIGN.md` |
-| v1 decisions (supersede DESIGN where they differ) | `docs/REFINE.md` |
-| v1 seams, work packages, as-built deviations | `docs/V1_PLAN.md` |
-| Envelope (bounds + proposal), `architect`, destinations (supersede REFINE where they differ) | `docs/REFINE_v2.md` |
-| Coding standards | `docs/CODING_STANDARDS.md` |
-| v0 work packages, file ownership, acceptance criteria | `docs/V0_PLAN.md` |
-| Deferred decisions, post-v0 improvements, rejected options | `docs/ROADMAP.md` |
-| Chat UI (Next.js, adapted from langchain-ai/agent-chat-ui) | `ui/` |
-| Ingested corpus cache, run outputs (gitignored) | `data/`, `outputs/` |
+Artifacts are validated JSON in `ArtifactsState.artifacts`. Read them with
+`read_artifact(artifacts, key, Contract)`. `submit_tool(...)` builds a single tool;
+`submit_tools(...)` builds submit/revise tools. Finalizers receive validated input and
+artifacts, then return a stored model or raise `SubmissionRejected`. Rejections retain a
+draft in tool-message metadata; revisions edit paths and rerun the same pipeline.
+`build_tools` flattens factories returning either one tool or a list.
 
-## Dev workflow
+The gate checks artifact consistency, retained questions, citations and envelope inputs,
+recomputes geometry, and saves evidence. Text checks do not verify legal interpretation;
+raster crops are inspectable evidence, not automatically verified zoning. Acceptance does
+not establish complete legal compliance. Area caps now trim physical footprints before
+recomputing slices; the clipping is conservative, not a layout optimizer.
 
-```bash
-uv sync                      # install / update environment
-uv run ruff format .         # format
-uv run ruff check .          # lint (add --fix for autofixes)
-uv run ty check              # type check
-uv run pytest                # unit tests
-```
+## Configuration and extension
 
-All four must pass before a change is done. Use sub-agents whenever possible to write code and
-run these checks; the main thread coordinates and reviews.
+`conf/config.yaml` selects case, corpus, models, agents, retrieval, geography, images and
+policies. `conf/eval.yaml` adds evaluation settings. Default ingestion builds both the text
+index and plan registration; README documents separate recovery commands.
 
-Running the agent:
-
-```bash
-uv run langgraph dev                         # Agent Server on http://localhost:2024 (graph: src/agent/entrypoints/graph.py)
-cd ui && pnpm install && pnpm dev                     # chat UI on http://localhost:3000
-cd ui && pnpm build && pnpm start                     # same UI, production build: use it to watch full studies (dev mode renders several times slower)
-```
-
-Evals (`docs/EVALS.md` §7; outputs in `outputs/evals/<date>/<time>/`):
-
-```bash
-uv run phoenix serve                                         # Phoenix UI on http://localhost:6006
-uv run python -m evals.run eval.dataset=surveyor             # the one shipped verified benchmark item
-uv run python -m evals.run eval.items=[s01_joliot_curie] eval.phoenix.enabled=false   # without Phoenix; still calls APIs
-uv run python -m evals.run eval.rescore=outputs/evals/<date>/<time>   # re-score saved records
-```
-
-Smoke checks: `uv run pytest tests/entrypoints` (offline graph build),
-`uv run python scripts/smoke_server.py --startup-only` (real server and graph schema, no model
-call), and `uv run python scripts/smoke_server.py` (real server plus one paid model response).
-Both server checks use port 2025 and stop their server when finished.
-
-## How to extend
-
-Everything is assembled from the composed config (`agent.agents.config.load_config(overrides)`,
-the single loader for server, CLI and evals). Never build models, read prompts or hardcode
-values elsewhere.
-
-**Add a config knob**: put the value in the right `conf/<group>/` file, read it from the `cfg`
-passed down to you, and pass it to your factory as an argument. Override it on the CLI
-(`group.key=value`) or per run on the server:
-`{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}`.
-
-**Add a tool**: write a factory function in `src/agent/tools/<area>/` that takes its knobs as
-arguments and returns a `BaseTool`. Keep it thin (logic in `runtime/` or `adapters/`); its
-description is what the model reads. Declare it in the `tools` list of the agent or sub-agent
-that uses it:
+Add tool factories in `tools/<area>/`, pure logic in runtime and external access in adapters.
+Declare factories in the relevant agent's tools list:
 
 ```yaml
 tools:
-  - _target_: agent.tools.geo.geocode.geocode_tool   # factory, called by hydra.utils.instantiate
-    geocoder: ${geo.geocoder}                        # knobs and clients as arguments
+  - _target_: agent.tools.geo.geocode.geocode_tool
+    geocoder: ${geo.geocoder}
     max_results: ${geo.max_results}
 ```
 
-**Add a sub-agent**: one file `conf/subagents/<name>.yaml`, content nested under `<name>:` (Hydra
-merges all selected files into `subagents`), plus its prompt `prompts/subagents/<name>.md` and a
-model node `models.nodes.<name>`. It must end by calling its submit tool:
+Add specialists through `conf/subagents/<name>.yaml` nested under the name, a Markdown prompt,
+a model node and typed submit contract. Enable them in the config defaults.
+Overrides work on CLI (`models.nodes.orchestrator.max_tokens=8000`) and per server run:
 
-```yaml
-surveyor:
-  description: Turns the case address into the site under study...  # read by the orchestrator
-  prompt: prompts/subagents/surveyor.md
-  model: surveyor                # key in models.nodes
-  tools:
-    - _target_: agent.tools.geo.geocode.geocode_tool
-      geocoder: ${geo.geocoder}
-      max_results: ${geo.max_results}
-    - ${geo.site_view}           # shared ready-made tool node
-    - _target_: agent.tools.submit.factory.submit_tools   # submit_parcel + revise_parcel
-      name: submit_parcel        # tool name
-      artifact: site             # state key
-      contract: {_target_: hydra.utils.get_class, path: agent.contracts.findings.site.ParcelChoice}
-      finalize:                  # ParcelChoice -> Site (built by code)
-        _target_: agent.tools.geo.site.parcel_finalizer
-        surveyor: ${geo.surveyor}
-      summarize: {_target_: hydra.utils.get_method, path: agent.tools.geo.site.summarize_site}
+```json
+{"configurable": {"overrides": ["models.nodes.orchestrator.max_tokens=8000"]}}
 ```
 
-Enable it with `subagents=[surveyor,...]` (default: `surveyor`, `zoning_analyst`, `doc_analyst`,
-`architect` in `conf/config.yaml`).
-`build_subagent(cfg, name)` returns the standalone graph; the orchestrator delegates to that same
-graph, and evals invoke it with `{"messages": [HumanMessage(task)]}`.
+Treat global logging/tracing/image routing as startup settings. Per-run configuration does
+not necessarily reconfigure process-global services.
 
-**Artifacts and submit tools**: the graph state has an `artifacts` mapping (`ArtifactsMiddleware`
-in `tools/submit/artifacts.py`). `submit_tool(*, name, artifact, contract, finalize=None,
-summarize=None)` builds the tool `name`; it validates the model's arguments against the contract,
-returns `field.path: message` errors to the model, and stores the result as JSON under
-`artifacts[artifact]`. `artifact` may hold `{field}` placeholders filled from the submission's
-top-level fields (`notes.{label}` gives `notes.rules`, `notes.oap`); `summarize(stored) -> str` is
-appended to the `<key> accepted.` reply, which always ends with `DONE` (an accepted submission is
-final: "do not submit again"). Artifacts written by a sub-agent reach the
-orchestrator's state. Read one back with `read_artifact(state["artifacts"], key, Contract)`. A
-gate such as `submit_study` passes `finalize(submission, artifacts) -> stored` and raises
-`SubmissionRejected(errors)` to refuse. `submit_tools(...)` (same arguments, used in config)
-returns `[submit, revise]`: a rejection keeps the rejected arguments as a draft in the error
-`ToolMessage.artifact` (not sent to the model, not in state), and `revise_<x>` applies path edits
-to that draft (`runtime/submissions/edits.py`) and runs the same pipeline, so the model sends
-only its fixes. A config tool node may build one tool or a list (`build_tools` flattens).
+## Development
 
-Dependencies: `uv add <pkg>` / `uv add --dev <pkg>`; never edit `uv.lock` by hand.
-Secrets live in `.env` (`ANTHROPIC_API_KEY`), never committed.
+```sh
+uv sync --locked
+uv run ruff format .
+uv run ruff check .
+uv run ty check
+uv run pytest
+```
+
+All checks must pass. Use subagents when useful with clear shared-file ownership; the main
+agent coordinates/reviews. Test changed invariants. Ordinary tests must not make paid calls.
+
+```sh
+uv run python -m agent.entrypoints.ingest
+uv run python scripts/smoke_server.py --startup-only
+uv run langgraph dev
+uv run python -m agent.entrypoints.run
+uv run python -m evals.run eval.dataset=surveyor eval.phoenix.enabled=false
+```
+
+Smoke uses port 2025 and stops its server; omitting `--startup-only` makes one paid call.
+Disabling Phoenix does not make evals offline. The suite has 20 surveyor, 20 zoning,
+20 document and 10 end-to-end items. Handoff results are frozen historical snapshots.
+
+Dependencies: use `uv add <pkg>` / `uv add --dev <pkg>`; never edit `uv.lock` manually.
+Declare direct imports directly. Secrets remain in `.env`, never in Git.
+
+## Submission
+
+Track maintained source, tests, source PDFs, benchmark evidence, README, this guide, standards
+and `handoff/`. Ignore local `docs/`, `artifacts/`, `sites/`, `data/` and `outputs/`.
+Do not add the nested authoring repository under `sites/` as a gitlink. Preserve font licenses
+and source provenance. Rebuild historical report presentation with:
+
+```sh
+uv run python -m scripts.build_eval_report handoff
+```

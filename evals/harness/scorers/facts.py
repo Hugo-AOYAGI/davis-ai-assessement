@@ -1,4 +1,4 @@
-"""Per-fact scores (``docs/EVALS.md`` §4): answer-correct and grounded-correct."""
+"""Per-fact scores (``evals/README.md``§4): answer-correct and grounded-correct."""
 
 from collections.abc import Iterable, Sequence
 

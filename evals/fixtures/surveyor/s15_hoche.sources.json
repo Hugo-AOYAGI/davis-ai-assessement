@@ -1,0 +1,134 @@
+{
+  "retrieved_at_utc": "2026-10-17T21:02:45.071332+00:00",
+  "selection_command": "uv run python -m evals.gt.site random --seed 27 --n 12 --sector Vallee",
+  "selected_result": 3,
+  "selection_protocol": "Seeded BAN shuffle, commune-certified single links, unique streets; strata spread, reject absent parcels and >2% area discrepancies; retain sub-metre doorway offsets only with explicit certified BAN link. No agent output consulted.",
+  "sector_selection_aid": "Vallee",
+  "ban_export_url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+  "ban_export_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+  "ban_row": {
+    "id": "91272_1540_00006",
+    "id_fantoir": "91272_1540",
+    "numero": "6",
+    "rep": "",
+    "nom_voie": "Avenue Hoche",
+    "code_postal": "91190",
+    "code_insee": "91272",
+    "nom_commune": "Gif-sur-Yvette",
+    "code_insee_ancienne_commune": "",
+    "nom_ancienne_commune": "",
+    "x": "636958.22",
+    "y": "6844216.72",
+    "lon": "2.143452",
+    "lat": "48.695021",
+    "type_position": "entrée",
+    "alias": "",
+    "nom_ld": "",
+    "libelle_acheminement": "GIF SUR YVETTE",
+    "nom_afnor": "AVENUE HOCHE",
+    "source_position": "commune",
+    "source_nom_voie": "commune",
+    "certification_commune": "1",
+    "cad_parcelles": "91272000BL0060"
+  },
+  "cadastre_url": "https://apicarto.ign.fr/api/cadastre/parcelle",
+  "cadastre_parameters": {
+    "code_insee": "91272",
+    "com_abs": "000",
+    "section": "BL",
+    "numero": "0060"
+  },
+  "cadastre_feature": {
+    "type": "Feature",
+    "id": "parcelle.73892540",
+    "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              2.14292623,
+              48.69494851
+            ],
+            [
+              2.14292961,
+              48.69494934
+            ],
+            [
+              2.14299161,
+              48.69496364
+            ],
+            [
+              2.14334599,
+              48.6950457
+            ],
+            [
+              2.14335749,
+              48.6950483
+            ],
+            [
+              2.1433935,
+              48.69505675
+            ],
+            [
+              2.1434536,
+              48.69507076
+            ],
+            [
+              2.14347017,
+              48.69494675
+            ],
+            [
+              2.14336759,
+              48.69493801
+            ],
+            [
+              2.1432426,
+              48.69492883
+            ],
+            [
+              2.14302071,
+              48.69491276
+            ],
+            [
+              2.14293288,
+              48.69490763
+            ],
+            [
+              2.14293016,
+              48.69490752
+            ],
+            [
+              2.14292623,
+              48.69494851
+            ]
+          ]
+        ]
+      ]
+    },
+    "geometry_name": "geom",
+    "properties": {
+      "gid": 73410116,
+      "numero": "0060",
+      "feuille": 1,
+      "section": "BL",
+      "code_dep": "91",
+      "nom_com": "Gif-sur-Yvette",
+      "code_com": "272",
+      "com_abs": "000",
+      "code_arr": "000",
+      "idu": "91272000BL0060",
+      "contenance": 372,
+      "code_insee": "91272"
+    }
+  },
+  "checks": {
+    "ban_point_inside_parcel": true,
+    "ban_point_distance_to_parcel_m": 0.0,
+    "polygon_area_epsg2154_m2": 371.6902624655865,
+    "cadastre_contenance_m2": 372,
+    "geometry_valid": true,
+    "polygon_parts": 1
+  },
+  "review": "Explicit commune-certified BAN single-parcel link; cadastre id exists and measured area agrees within 2%. BAN point lies inside parcel. Sector is a rough sampling aid, not an evaluated zoning fact. Road frontage is not inferred."
+}

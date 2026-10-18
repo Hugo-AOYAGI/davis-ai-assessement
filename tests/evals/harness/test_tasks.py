@@ -188,3 +188,32 @@ def test_e2e_output_is_the_verified_study(cfg, monkeypatch, study):
     monkeypatch.setattr(tasks, "run_study", lambda *args: (None, [], study))
     record = run_item(cfg, E2E)
     assert record.output == study.model_dump(mode="json")
+
+
+def test_legacy_wall_time_is_loaded_but_not_duplicated(cfg, monkeypatch):
+    install(monkeypatch, FakeGraph({"messages": []}))
+    record = run_item(cfg, SURVEYOR)
+    saved = record.model_dump(mode="json")
+    saved["wall_time_s"] = 99.0
+    restored = RunRecord.model_validate(saved)
+    assert restored.wall_time_s == record.cost.wall_time_s
+    assert "wall_time_s" not in restored.model_dump()
+    assert "wall_time_s" in restored.model_dump()["cost"]
+
+
+def test_failed_component_retains_submission_rejections(cfg, monkeypatch):
+    rejected = [
+        AIMessage("", tool_calls=[call("submit_parcel", "rejected")]),
+        ToolMessage("parcel_ids: missing", tool_call_id="rejected", status="error"),
+    ]
+
+    def fail(_):
+        raise RuntimeError("inference unavailable")
+
+    graph = RunnableLambda(lambda _: {"messages": rejected}) | RunnableLambda(fail)
+    install(monkeypatch, graph)
+    record = run_item(cfg, SURVEYOR)
+    assert record.error == "RuntimeError: inference unavailable"
+    assert record.rejections == ("submit_parcel: parcel_ids: missing",)
+    assert [type(message) for message in record.messages] == [HumanMessage, AIMessage, ToolMessage]
+    assert record.subagent_runs == ()

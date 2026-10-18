@@ -1,0 +1,19 @@
+# Oracle provenance: evals/fixtures/surveyor/s18_rue_potier.sources.json
+id: s18_rue_potier
+level: surveyor
+tests: commune-certified BAN single-parcel link; sub-metre address-point offset must
+  not override explicit parcel link
+status: verified
+built_by: codex; independent BAN export and API Carto verification
+input:
+  address: 4 Rue Pierre Potier, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000CP0220
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 10654
+  tolerance: 0.02
+  source: cadastre

@@ -1,0 +1,153 @@
+# Source audit: z12_uga (UGa zone, GPU 2021) and d02_uga_height (PDF pp90-91, 94, strike-through
+# checked on the rendered page) reused; pp80, 86, 88, 97 and p6 read directly.
+# Parcel: z12 lists CA0160, which is the allée de la Ferme Rose itself (a road strip), not a
+# building plot. The study site is the neighbouring house plot CA0128 (BAN numbering, cadastre
+# geometry, aerial photo); its zone, overlays and area were recomputed here, see the evidence note.
+# Geometry oracle: cadastral polygon area 1001.12 m2 (contenance 978 m2), footprint cap
+# 0.15 * 1001.12 = 150.17 m2; UG13 sets no numeric green minimum for a single house.
+# No single proposal volume is asserted: the layout (height, windows, cut) is the architect's
+# choice and the harness recomputes the submitted proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e07_uga_housing
+level: e2e
+tests: Vallée UGa housing; address point on the allée strip CA0160 not the house plot CA0128; 15 % footprint (not the general UG 30 %); struck-through height on PDF p.91 (7 m retained, 10 m struck); PPRi on most of the plot
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 10 allée de la Ferme Rose, 91190 Gif-sur-Yvette
+  program: One detached house.
+  facts:
+    - The project is new construction of a single dwelling (maison individuelle), with no shop, office or other activity.
+from_items: [z12_uga, d02_uga_height]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CA0128]
+    critical: true
+    source: hand
+  - key: site.choice.parcel_ids
+    expect_none_of: [91272000CA0160]
+    critical: true
+    source: hand
+  - key: study.regime.zone
+    expect: UGa
+    critical: true
+    source: gpu_2021
+  - key: study.regime.overlays
+    present:
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+    absent:
+      - Espaces Boisés Classés
+      - Zone humide
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: false
+    critical: true
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    evidence:
+      - doc: plu_reglement
+        page: 80
+        quote: "Elle peut accueillir outre l’habitat, les équipements collectifs et les activités compatibles avec le caractère résidentiel de la zone."
+  - key: envelope.rules.max_footprint_ratio
+    expect: 0.15
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "L’emprise au sol des constructions ne doit pas excéder 15% de la superficie totale du terrain dans la zone."
+  - key: envelope.rules.buildings.max_height_m
+    expect: 7
+    critical: true
+    evidence:
+      # PDF p91 (printed p90) shows a strike through 10, not through 7; the text layer keeps both.
+      - doc: plu_reglement
+        page: 91
+        quote: "La hauteur des constructions ne doit pas excéder 7 10 mètres à l’acrotère."
+  - key: envelope.rules.buildings.max_storeys
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 91
+  - key: envelope.rules.setbacks[kind=road].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 86
+        quote: "Les constructions peuvent être implantées à l’alignement ou avec un retrait."
+  - key: envelope.rules.setbacks[kind=side].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "sur une ou deux limites séparatives latérales"
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "avec un minimum de 8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.setbacks[kind=side].with_windows.height_ratio
+    expect: 1
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "(L=H) avec un minimum de 8 mètres"
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 4
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "avec un minimum de 4 mètres lorsque la façade ou partie de façade concernée ne comporte pas de vues"
+  - key: envelope.rules.setbacks[kind=side].without_windows.height_ratio
+    expect: 0.5
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "(L=1/2H)"
+  - key: envelope.rules.setbacks[kind=rear].with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "avec un minimum de 8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.setbacks[kind=rear].without_windows.min_m
+    expect: 4
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "avec un minimum de 4 mètres lorsque la façade ou partie de façade concernée ne comporte pas de vues"
+  - key: envelope.rules.min_green_ratio
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 97
+        quote: "Un arbre de haute tige, au minimum, par 100 m² de terrain doit être planté."
+  - key: study.parking[basis=unit].spaces
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 94
+        quote: "Pour les constructions à destination d'habitation : 2 places par logement;"
+  - key: envelope.site_area_m2
+    expect: 1001.12
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: null
+    source: geometry
+  - key: envelope.bounds[name=largest].buildings.footprint_area_m2
+    expect: 150.17
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - UGa article 10 shows two figures in the text layer (7 and 10 metres at the acrotère) and the page image strikes 10 through; the retained 7 m rests on that visual reading, which must be explained.
+  - UGa article 10 gives a height only at the acrotère, with no eaves or ridge figure; how it applies to a pitched roof is not stated and must be raised as a choice or open point.
+  - About 79 percent of the plot lies in the PPRi flood-risk zone, whose provisions are in annex 6.3 of the PLU, outside the corpus; the buildability there cannot be concluded and must be flagged.
+  - The UG recalls (regulation PDF page 80) subject every construction to the opinion of the Architecte des Bâtiments de France within the 500 m monument protection perimeters and the Vallée de Chevreuse registered site, whose extent is not in the corpus.
+must_not:
+  - States that the applicable maximum construction height in UGa is 10 metres, or applies the general UG limits (7 m at the eaves, 10 m at the ridge) to the UGa house.
+  - States that the maximum construction footprint in UGa is 30 percent of the site area (general UG value).
+  - Uses parcel CA0160, the allée de la Ferme Rose strip where the address point lies, as the study site.
+  - States that UG article 13 imposes a numeric minimum green-space share on a single house, for example the 10 percent rule that applies only to operations over one hectare.
+  - States that an OAP chapter or perimeter applies to the site, or reports OAP prescriptions as binding on the project.

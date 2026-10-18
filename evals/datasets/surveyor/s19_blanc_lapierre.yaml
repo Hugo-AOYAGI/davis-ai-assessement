@@ -1,0 +1,19 @@
+# Oracle provenance: evals/fixtures/surveyor/s19_blanc_lapierre.sources.json
+id: s19_blanc_lapierre
+level: surveyor
+tests: commune-certified BAN single-parcel link; sub-metre address-point offset must
+  not override explicit parcel link
+status: verified
+built_by: codex; independent BAN export and API Carto verification
+input:
+  address: 16 Rue André Blanc-Lapierre, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000CP0068
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 4087
+  tolerance: 0.02
+  source: cadastre

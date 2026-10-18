@@ -1,4 +1,4 @@
-"""The envelope scored twice (``docs/EVALS.md`` §4), against the expected values and recomputed.
+"""The envelope scored twice (``evals/README.md``§4), against the expected values and recomputed.
 
 The recomputation uses the agent's own site and parameters, which tells a wrong rule from a wrong
 calculation.
@@ -92,7 +92,7 @@ def score_envelope(  # noqa: PLR0913 - one argument per configured bundle
     min_area_m2: float,
     level_step_m: float,
     cut_tolerance_m: float,
-) -> EnvelopeScore:
+) -> EnvelopeScore | None:
     """Score the envelope of an accepted study.
 
     Args:
@@ -109,6 +109,8 @@ def score_envelope(  # noqa: PLR0913 - one argument per configured bundle
         Both comparisons, the recomputed envelope and the diagnosis.
     """
     reported = output.envelope
+    if reported is None:
+        return None
     recomputed = compute_envelope_study(
         output.site.polygon,
         output.boundaries,

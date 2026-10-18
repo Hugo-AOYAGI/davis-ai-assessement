@@ -60,3 +60,12 @@ def test_expected_figures_selects_envelope_expectations(items):
         *items["e01_reference"].facts,
     ]
     assert [f.key for f in expected_figures(facts)] == ["envelope.proposal.total_volume_m3"] * 2
+
+
+def test_prohibited_program_has_no_geometric_diagnostic(study):
+    data = study.model_dump(mode="json")
+    for entry in data["study"]["admissibility"]:
+        entry["verdict"] = "prohibited"
+    data["envelope"] = None
+    prohibited = type(study).model_validate(data)
+    assert score(prohibited, []) is None

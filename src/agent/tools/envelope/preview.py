@@ -23,6 +23,7 @@ from agent.tools.envelope.plan import (
 from agent.tools.images.blocks import ContentBlock, image_block, text_block
 from agent.tools.submit.artifacts import ArtifactsState
 from agent.tools.submit.factory import SubmissionRejected
+from agent.tools.submit.replies import format_validation
 
 NAME = "preview_envelope"
 DESCRIPTION = """Try your envelope rules and layout on the site, without delivering anything.
@@ -79,7 +80,7 @@ def preview_envelope_tool(  # noqa: PLR0913 - one argument per configured bundle
                 found, draft.rules, draft.layout, geometry=geometry, settings=settings
             )
         except ValidationError as error:
-            raise _rejected(_validation_lines(error)) from error
+            raise _rejected(format_validation(error)) from error
         except SubmissionRejected as rejection:
             raise _rejected(rejection.errors) from rejection
         except ValueError as error:
@@ -105,14 +106,6 @@ def preview_envelope_tool(  # noqa: PLR0913 - one argument per configured bundle
         func=preview,
         handle_tool_error=True,
     )
-
-
-def _validation_lines(error: ValidationError) -> list[str]:
-    """Render pydantic errors as ``field.path: message`` lines, as the submit tools do."""
-    return [
-        f"{'.'.join(str(part) for part in detail['loc']) or '(whole result)'}: {detail['msg']}"
-        for detail in error.errors(include_url=False)
-    ]
 
 
 def _rejected(errors: Sequence[str]) -> ToolException:

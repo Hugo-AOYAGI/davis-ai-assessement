@@ -102,19 +102,6 @@ class TokenCounts(Contract):
         return total / _TOKENS_PER_UNIT
 
 
-def cost_usd(usage: UsageMetadata, price: ModelPrice) -> float:
-    """Price one call from its usage metadata, cached tokens at cache rates.
-
-    Args:
-        usage: ``AIMessage.usage_metadata`` of the call.
-        price: The model's prices.
-
-    Returns:
-        Cost in USD.
-    """
-    return TokenCounts.from_usage(usage).cost(price)
-
-
 def find_price(pricing: Mapping[str, ModelPrice], model: str) -> ModelPrice | None:
     """Look up a model's price, accepting dated snapshot ids of a priced model.
 

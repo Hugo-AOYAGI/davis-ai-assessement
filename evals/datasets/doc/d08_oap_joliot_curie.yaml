@@ -1,0 +1,86 @@
+id: d08_oap_joliot_curie
+level: doc
+tests: OAP chapter 8 (Joliot Curie) applies to a UMG site together with chapter 7 (Moulon); the OAP gives orientations and objectives for housing, not hard limits
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: oap
+  aim: Whether an OAP covers the site, and what it prescribes for the program.
+  documents: [oap, plu_reglement_graphique]
+  topics: [perimeter, general_orientations, building_form, mobility_access, landscape_green, programming, other]
+  context:
+    zone: UMG
+    legend_items: ["Secteur à Orientation d'Aménagement et de Programmation"]
+    parcel_ids: [91272000CR0247]
+    program: one student social residence and one young-workers residence, two separate buildings
+facts:
+  - statement: The OAP chapter 8 (quartier Joliot Curie) applies to the site and its orientations come in addition to those of chapter 7 (site de Moulon), so chapters 7 and 8 apply together.
+    critical: true
+    evidence:
+      - doc: oap
+        page: 33
+        quote: "Ces orientations viennent en complément de celles définies à l’échelle du projet d’aménagement de Moulon"
+  - statement: For buildings with housing as main destination, the OAP asks for varied building heights (épannelage) reaching an average objective of R+4; this is an objective, not a maximum height.
+    critical: true
+    evidence:
+      - doc: oap
+        page: 33
+        quote: "Pour les constructions à destination principale d’habitation, un épannelage des constructions devra permettre d’atteindre un objectif de R+4 moyen."
+  - statement: Along rue Joliot-Curie, buildings should be set on the alignment of the street, without creating a uniform continuous built front (porosity and views towards block interiors are sought).
+    critical: true
+    evidence:
+      - doc: oap
+        page: 34
+        quote: "Le principe d’une implantation des constructions à l’alignement le long de la voie doit être retenu."
+      - doc: oap
+        page: 34
+        quote: "Ce principe ne doit toutefois pas aboutir à la création d’un front bâti uniforme et continu."
+  - statement: The programming of the Joliot-Curie district includes housing for students, researchers and families, next to higher education and research, public facilities, shops, services and economic activities.
+    critical: true
+    evidence:
+      - doc: oap
+        page: 36
+        quote: "constructions d'habitation destinées aux étudiants, aux chercheurs et aux familles"
+  - statement: Family and student housing programmes are located mainly in the west of the district, close to services and public facilities.
+    evidence:
+      - doc: oap
+        page: 36
+        quote: "les programmes de logements familiaux et étudiants sont implantés principalement à l’Ouest du quartier"
+  - statement: Chapter 7 states that in UM zones the heights and gabarits are set by the règlement, with the exception of the Joliot Curie district classed UMG.
+    evidence:
+      - doc: oap
+        page: 25
+        quote: "(à l’exception du quartier Joliot Curie, classé en zone UMG)"
+  - statement: To limit car use, the OAP asks for underground car parks or car parks within the building volume, pooled parking, and few spaces along the streets.
+    evidence:
+      - doc: oap
+        page: 35
+        quote: "la limitation de l’utilisation de la voiture, avec la réalisation de parkings souterrains ou dans le gabarit des constructions"
+      - doc: oap
+        page: 35
+        quote: "l’accueil d’un nombre réduit de places de stationnement le long des voies"
+  - statement: The OAP describes rue Joliot-Curie as the structuring east-west axis with a gabarit of about 20 m, shared between cars, cyclists and pedestrians.
+    evidence:
+      - doc: oap
+        page: 35
+        quote: "un gabarit de l’ordre de 20 m"
+  - statement: Ground floors housing common spaces, shops or facilities must open onto the public space, with an adapted height.
+    evidence:
+      - doc: oap
+        page: 34
+        quote: "doivent être conçus en prolongement de l’espace public et ouverts sur celui-ci, avec notamment une hauteur adaptée"
+  - statement: The landscape orientation is a landscape framework resting on the wooded slope (coteau boisé) and supporting an alternative management of rainwater.
+    evidence:
+      - doc: oap
+        page: 33
+        quote: "Installer une trame paysagère sur le site"
+      - doc: oap
+        page: 33
+        quote: "support d’une gestion alternative de l’eau pluviale"
+must_not:
+  - Applies to the site the orientations of another district's OAP chapter (chapters 1 to 6, for example Vatonne, gare de Gif, Rougemonts or the plateau de Chevry).
+  - States that chapter 8 alone applies and that chapter 7 (site de Moulon) does not.
+  - Presents R+4 as a maximum height or a binding per-building height limit set by the OAP.
+  - States a maximum height in metres, a footprint ratio or a number of parking spaces as an OAP requirement.
+  - Treats the gabarit of about 20 m of rue Joliot-Curie as a building height or building width limit.
+  - States that the OAP does not cover the site.

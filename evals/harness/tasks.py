@@ -1,4 +1,4 @@
-"""Run the unit under test on one eval item (``docs/EVALS.md`` §1, §7).
+"""Run the unit under test on one eval item (``evals/README.md``§1, §7).
 
 Component items run one sub-agent standalone (``build_subagent``) on the task text the
 orchestrator would write; end-to-end items run ``run_study``, as the CLI does, unattended.
@@ -21,7 +21,7 @@ from agent.entrypoints.run import make_unattended, run_study
 from agent.llm.usage import price_usage
 from agent.observability.logs import get_logger
 from evals.harness.items import DocInput, E2EInput, Item, Level
-from evals.harness.runs.capture import SubagentCapture
+from evals.harness.runs.capture import RunCapture
 from evals.harness.runs.record import RunRecord, rejections
 from evals.harness.runs.texts import TaskWords, task_text
 from evals.harness.scorers.trajectory import RunCost
@@ -58,10 +58,8 @@ def run_item(cfg: DictConfig, item: Item) -> RunRecord:
         The run record.
     """
     usage = UsageMetadataCallbackHandler()
-    capture = SubagentCapture(cfg.subagents.keys())
-    callbacks: list[BaseCallbackHandler] = [usage]
-    if item.level is Level.E2E:
-        callbacks.append(capture)
+    capture = RunCapture(cfg.subagents.keys())
+    callbacks: list[BaseCallbackHandler] = [usage, capture]
     start = time.perf_counter()
     outcome, error = _Outcome(None, []), None
     try:
@@ -75,7 +73,9 @@ def run_item(cfg: DictConfig, item: Item) -> RunRecord:
     priced = price_usage(cfg.models, usage.usage_metadata)
     cost_usd = sum(entry.cost_usd for entry in priced.values())
     runs = capture.runs
-    messages = [message for run in runs for message in run.messages] + outcome.messages
+    messages = [message for run in runs for message in run.messages] + (
+        outcome.messages or list(capture.messages)
+    )
     return RunRecord.model_validate(
         {
             "item_id": item.id,
@@ -84,7 +84,6 @@ def run_item(cfg: DictConfig, item: Item) -> RunRecord:
             "messages": messages,
             "subagent_runs": [run.name for run in runs],
             "cost": RunCost(cost_usd=cost_usd, wall_time_s=wall_time_s),
-            "wall_time_s": wall_time_s,
             "rejections": rejections(messages, cfg.eval.eval_tasks.max_rejection_chars),
             "error": error,
         }

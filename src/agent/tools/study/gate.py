@@ -14,10 +14,13 @@ from typing import Protocol
 from langchain_core.tools import BaseTool
 
 from agent.adapters.images.pages import RegionError
+from agent.contracts.base import Contract
 from agent.contracts.evidence import Citation, CitationCheck, ImageRegion, StoredCrop
 from agent.contracts.inputs.corpus import Corpus
 from agent.contracts.study import Study, VerifiedStudy
+from agent.runtime.geometry.edges import label_edges
 from agent.runtime.geometry.envelope.study import EnvelopeSettings
+from agent.runtime.submissions.findings import findings_errors
 from agent.tools.envelope.compute import GeometrySettings, site_envelope
 from agent.tools.study.checks import CitationRules, CorpusFacts, check_submission, corpus_facts
 from agent.tools.study.envelope import EnvelopeCitations, envelope_errors
@@ -63,8 +66,10 @@ def submit_study_tools(  # noqa: PLR0913 - one argument per configured bundle
 
     On each submission the gate reads the site, the zone, the required document notes and the
     architect's envelope delivered by the sub-agents (a missing one refuses the study, naming the
-    sub-agent to delegate to); checks that every open point of every notes artifact and of the
-    envelope has an ambiguity with the same question (case and whitespace aside); checks the
+    sub-agent to delegate to). If every proposed use is prohibited, the envelope is omitted.
+    The gate checks that every open point of every notes artifact and of the
+    envelope has an ambiguity with the same question (case and whitespace aside); checks that
+    the study preserves the zoning code, applying overlays and zoning ambiguities; checks the
     envelope against the notes and the study (``envelope_errors``); checks every distinct
     regulatory citation of the study and the envelope against the corpus, as
     ``check_submission`` describes; labels the site edges road / side / rear; recomputes the
@@ -96,23 +101,32 @@ def submit_study_tools(  # noqa: PLR0913 - one argument per configured bundle
 
     def finalize(study: Study, artifacts: Mapping[str, ArtifactData]) -> VerifiedStudy:
         """Check the study against the findings and complete it with what code computes."""
-        findings = read_findings(artifacts, inputs)
+        findings = read_findings(artifacts, inputs, require_envelope=study.requires_envelope)
         checks = _check(study, findings, inputs, corpus_index(), citations)
         delivered = findings.envelope
-        computed = site_envelope(
-            findings.site,
-            delivered.rules,
-            delivered.layout,
-            geometry=geometry,
-            settings=envelope,
-            open_points=delivered.open_points,
-        )
+        if delivered is None:
+            boundaries = label_edges(
+                findings.site.edges,
+                snap_tolerance_m=geometry.snap_tolerance_m,
+                collinear_angle_deg=geometry.collinear_angle_deg,
+            )
+            computed_envelope = None
+        else:
+            computed = site_envelope(
+                findings.site,
+                delivered.rules,
+                delivered.layout,
+                geometry=geometry,
+                settings=envelope,
+                open_points=delivered.open_points,
+            )
+            boundaries, computed_envelope = computed
         return VerifiedStudy(
             study=study,
             site=findings.site,
-            boundaries=computed.boundaries,
+            boundaries=boundaries,
             zone=findings.zone,
-            envelope=computed.study,
+            envelope=computed_envelope,
             citation_checks=checks,
             evidence=_save_crops(evidence_regions(findings, inputs), images, crops_dir),
         )
@@ -138,9 +152,12 @@ def _check(
         describe_open_point(key, point.question)
         for key, point in unmatched_open_points(study, open_points(findings, inputs))
     ]
+    errors += findings_errors(study, findings.zone)
     errors += envelope_errors(study, findings, inputs)
     checks: dict[Citation, CitationCheck] = {}
-    submissions = (study, EnvelopeCitations(envelope=findings.envelope))
+    submissions: list[Contract] = [study]
+    if findings.envelope is not None:
+        submissions.append(EnvelopeCitations(envelope=findings.envelope))
     for submission in submissions:
         try:
             found = check_submission(type(submission).__name__, submission, corpus, rules)

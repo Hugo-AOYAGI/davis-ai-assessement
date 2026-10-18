@@ -16,6 +16,39 @@ documents:
     path: ressources/oap_91272_20210706.pdf
     legal_force: compatibility
 
+# Georeferencing of the raster zoning plan (`ingest georef` step, agent.ingest.georef.plan):
+# an affine transform from ground metres to the plan's full-resolution page pixels, fitted by
+# matching the commune interior masked on the plan to the official commune outline.
+georef:
+  document: plu_reglement_graphique   # corpus document id of the raster plan
+  page: 1
+  insee: "91272"                      # commune whose outline is matched
+  crs: ${geo.crs}
+  output: ${corpus.dir}/georef/${corpus.georef.document}.json
+  debug_dir: outputs/georef           # mask.png and boundary.png
+  render_dpi: ${images.pages.render_dpi}
+  scan_min_coverage: ${images.pages.scan_min_coverage}
+  boundary:
+    _target_: agent.adapters.georef.boundary.CommuneBoundaryClient
+    url: https://apicarto.ign.fr/api/cadastre/commune  # cadastral outline (API Carto, IGN)
+    http: ${geo.http}
+    crs: ${geo.crs}
+    geographic_crs: ${geo.geographic_crs}
+    source: apicarto-cadastre-commune
+  mask:                     # agent.runtime.georef.mask.colour_region
+    downscale: 4            # page shrunk 4x (about 4.7 m per pixel) before masking and fitting
+    min_saturation: 30      # zone fills vs the white sheet (pale A fill is ~80)
+    close_px: 5             # bridges black lines and labels drawn over the fills
+    close_iterations: 2
+    open_px: 3              # cuts thin spurs drawn past the boundary
+    open_iterations: 2
+  fit:                      # agent.runtime.georef.fit.fit_affine
+    sample_step_m: 10       # outline sample spacing
+    robust_scale_px: 3      # residual beyond which samples lose weight (soft_l1)
+  overlay:                  # diagnostic PNGs
+    max_px: 2000
+    line_px: 2
+
 classifier:
   model: ingest_classifier            # key in models.nodes
   prompt: prompts/ingest/classifier.md

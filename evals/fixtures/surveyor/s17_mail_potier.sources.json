@@ -1,0 +1,142 @@
+{
+  "retrieved_at_utc": "2026-10-17T21:02:45.071332+00:00",
+  "selection_command": "uv run python -m evals.gt.site random --seed 27 --n 12 --sector Moulon",
+  "selected_result": 5,
+  "selection_protocol": "Seeded BAN shuffle, commune-certified single links, unique streets; strata spread, reject absent parcels and >2% area discrepancies; retain sub-metre doorway offsets only with explicit certified BAN link. No agent output consulted.",
+  "sector_selection_aid": "Moulon",
+  "ban_export_url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+  "ban_export_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+  "ban_row": {
+    "id": "91272_2077_00025",
+    "id_fantoir": "91272_2077",
+    "numero": "25",
+    "rep": "",
+    "nom_voie": "Mail Pierre Potier",
+    "code_postal": "91190",
+    "code_insee": "91272",
+    "nom_commune": "Gif-sur-Yvette",
+    "code_insee_ancienne_commune": "",
+    "nom_ancienne_commune": "",
+    "x": "638420.1",
+    "y": "6845966.46",
+    "lon": "2.163061",
+    "lat": "48.710899",
+    "type_position": "entrée",
+    "alias": "",
+    "nom_ld": "",
+    "libelle_acheminement": "GIF SUR YVETTE",
+    "nom_afnor": "MAIL PIERRE POTIER",
+    "source_position": "commune",
+    "source_nom_voie": "commune",
+    "certification_commune": "1",
+    "cad_parcelles": "91272000CR0213"
+  },
+  "cadastre_url": "https://apicarto.ign.fr/api/cadastre/parcelle",
+  "cadastre_parameters": {
+    "code_insee": "91272",
+    "com_abs": "000",
+    "section": "CR",
+    "numero": "0213"
+  },
+  "cadastre_feature": {
+    "type": "Feature",
+    "id": "parcelle.32917725",
+    "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              2.16322361,
+              48.71070288
+            ],
+            [
+              2.16262604,
+              48.71070795
+            ],
+            [
+              2.16241706,
+              48.71071287
+            ],
+            [
+              2.16232667,
+              48.7107134
+            ],
+            [
+              2.16213878,
+              48.71071658
+            ],
+            [
+              2.16213934,
+              48.71071542
+            ],
+            [
+              2.16192415,
+              48.71071795
+            ],
+            [
+              2.16192867,
+              48.71088493
+            ],
+            [
+              2.16192863,
+              48.71088745
+            ],
+            [
+              2.16192763,
+              48.71091604
+            ],
+            [
+              2.16242911,
+              48.71091048
+            ],
+            [
+              2.16263466,
+              48.71090797
+            ],
+            [
+              2.16263386,
+              48.71090724
+            ],
+            [
+              2.16318107,
+              48.71090622
+            ],
+            [
+              2.1633133,
+              48.71089888
+            ],
+            [
+              2.16322361,
+              48.71070288
+            ]
+          ]
+        ]
+      ]
+    },
+    "geometry_name": "geom",
+    "properties": {
+      "gid": 30954576,
+      "numero": "0213",
+      "feuille": 1,
+      "section": "CR",
+      "code_dep": "91",
+      "nom_com": "Gif-sur-Yvette",
+      "code_com": "272",
+      "com_abs": "000",
+      "code_arr": "000",
+      "idu": "91272000CR0213",
+      "contenance": 2165,
+      "code_insee": "91272"
+    }
+  },
+  "checks": {
+    "ban_point_inside_parcel": true,
+    "ban_point_distance_to_parcel_m": 0.0,
+    "polygon_area_epsg2154_m2": 2191.5638345951975,
+    "cadastre_contenance_m2": 2165,
+    "geometry_valid": true,
+    "polygon_parts": 1
+  },
+  "review": "Explicit commune-certified BAN single-parcel link; cadastre id exists and measured area agrees within 2%. BAN point lies inside parcel. Sector is a rough sampling aid, not an evaluated zoning fact. Road frontage is not inferred."
+}

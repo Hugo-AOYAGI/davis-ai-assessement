@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Buildability agent: evaluation</title>
+<style>
+html, body { background: #ffffff; color-scheme: light; margin: 0; }
+.viz-root {
+  color-scheme: light;
+  --fg: #1a1a19; --fg2: #5d5c58; --line: #e4e3df; --soft: #f4f3f0;
+  --v1: #2a78d6; --v2: #eb6834; --v3: #1baf7a; --good: #0f7b3e; --bad: #c62f2f;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #ffffff; color: var(--fg); line-height: 1.5; font-size: 14px;
+  max-width: 800px; margin: 0 auto; padding: 24px; border-radius: 10px; box-sizing: border-box;
+}
+.viz-root h1 { font-size: 21px; margin: 0 0 12px; }
+.viz-root h2 { font-size: 16px; margin: 30px 0 4px; }
+.viz-root p { margin: 4px 0; }
+.viz-root .muted { color: var(--fg2); font-size: 12.5px; }
+.viz-root .versions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 6px; }
+.viz-root .card { background: var(--soft); border-radius: var(--radius, 8px); padding: 12px 14px; }
+.viz-root .card b { display: block; margin-bottom: 2px; }
+.viz-root table { border-collapse: collapse; width: 100%; margin: 6px 0; font-variant-numeric: tabular-nums; }
+.viz-root th, .viz-root td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+.viz-root th { font-size: 12px; font-weight: 600; color: var(--fg2); white-space: nowrap; }
+.viz-root th:first-child, .viz-root td:first-child { text-align: left; }
+.viz-root tr.total td { font-weight: 650; border-top: 2px solid var(--line); border-bottom: 0; }
+.viz-root td.best { font-weight: 700; }
+.viz-root td small { color: var(--fg2); font-size: 11.5px; margin-left: 4px; }
+.viz-root .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.viz-root .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0 0; }
+.viz-root .tile { background: var(--soft); border-radius: var(--radius, 8px); padding: 12px 14px; }
+.viz-root .tile .k { font-size: 12px; color: var(--fg2); margin-bottom: 6px; }
+.viz-root .tile .row { display: flex; justify-content: space-between; font-variant-numeric: tabular-nums; }
+.viz-root .tile .row span { color: var(--fg2); font-size: 12.5px; }
+.viz-root .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: var(--fg2); margin: 8px 0; }
+.viz-root .grp { display: grid; grid-template-columns: 90px 1fr; gap: 10px; align-items: center; margin-bottom: 10px; }
+.viz-root .grp .name { font-size: 13px; font-weight: 600; }
+.viz-root .bars { display: flex; flex-direction: column; gap: 2px; }
+.viz-root .bar { display: flex; align-items: center; gap: 6px; height: 14px; }
+.viz-root .bar i { display: block; height: 12px; border-radius: 0 4px 4px 0; min-width: 2px; }
+.viz-root .bar span { font-size: 11.5px; color: var(--fg2); font-variant-numeric: tabular-nums; }
+.viz-root .bar:hover span { color: var(--fg); }
+.viz-root .gridwrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; align-items: start; }
+.viz-root .grid th, .viz-root .grid td { padding: 2px 4px; font-size: 12px; text-align: center; }
+.viz-root .grid td:first-child, .viz-root .grid th:first-child { text-align: left; }
+.viz-root .ok { color: var(--good); font-weight: 700; }
+.viz-root .ko { color: var(--bad); }
+.viz-root ul { margin: 4px 0; padding-left: 18px; }
+.viz-root li { margin: 3px 0; }
+.viz-root .metrics td, .viz-root .metrics th { text-align: left; vertical-align: top; }
+.viz-root .metrics td:first-child { font-weight: 600; white-space: nowrap; }
+.viz-root .formula { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; background: var(--soft); border-radius: 6px; padding: 2px 6px; white-space: nowrap; }
+.viz-root .claims td, .viz-root .claims th { text-align: left; vertical-align: top; }
+.viz-root .claims td:first-child { font-family: ui-monospace, Consolas, monospace; font-size: 12.5px; }
+.viz-root .claims td:last-child { color: var(--fg2); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+
+<h1>Buildability agent: evaluation</h1>
+
+<div class="versions">
+  <div class="card"><b>v1</b>The agent looks at the scanned zoning plan and guesses by eye where the site is.</div>
+  <div class="card"><b>v2</b>A tool draws the parcel outline on the zoning plan, with an estimated registration uncertainty.</div>
+</div>
+<p class="muted">v1 and v2 were run with Claude Haiku 5.5 (lower-cost configuration). v2 was also run with Claude Sonnet 5.5 (larger, about 20× the price) for every agent.</p>
+
+<h2>How we measure</h2>
+<p class="muted">{{CASE_TOTAL}} test cases, with expected answers source-checked by model workers against cadastre, the archived 2021 zoning map and PLU regulation; this is not human sign-off. 20 cases test each step on its own, 10 test the full study.</p>
+<table class="metrics">
+<tr><th>Metric</th><th>What it means</th><th>How it is computed</th></tr>
+<tr><td>Fact</td><td>One expected value in the output: a parcel id, a zone code, a maximum height, a setback, a rule of the regulation.</td><td>{{FACT_TOTAL}} facts over the {{CASE_TOTAL}} cases. Ids and codes must match exactly; numbers within a small tolerance; lists must hold the expected items and none of the excluded ones.</td></tr>
+<tr><td>Cited</td><td>The value is backed by its source.</td><td>When the fact comes from the regulation, the output must cite a page of the PDF that holds the rule. The quote is checked automatically against the page text.</td></tr>
+<tr><td>Facts right</td><td>The share of expected facts answered correctly, with evidence where required.</td><td><span class="formula">grounded-correct facts ÷ facts expected</span></td></tr>
+<tr><td>Key fact</td><td>A fact a study cannot get wrong: parcel, zone, verdict, footprint, height…</td><td>{{CRITICAL_TOTAL}} of the {{FACT_TOTAL}} facts are marked key in the test case.</td></tr>
+<tr><td>Forbidden claim</td><td>A known trap, e.g. quoting the rules of the wrong zone.</td><td>A judge model (Claude Sonnet) reads the output and answers yes or no for each forbidden claim. It also decides whether a regulation note states an expected rule.</td></tr>
+<tr><td>Case passed</td><td>The benchmark's critical-fact and forbidden-claim criteria passed.</td><td>Every key fact correct, cited where evidence is required, and no forbidden claim. One miss fails the case. <span class="formula">cases passed ÷ cases</span></td></tr>
+<tr><td>Cost</td><td>What the agent spends on model calls.</td><td>Tokens of every agent call × list price. The judge is not included: it grades, it is not part of the product.</td></tr>
+<tr><td>Time</td><td>How long one case takes.</td><td>Wall time from the request to the final answer, averaged per case. Cases ran 4 at a time.</td></tr>
+</table>
+<p class="muted">One run per configuration on a small benchmark; differences are descriptive, not a statistical significance claim. The judge was not calibrated. Case passing does not independently require every ambiguity flag, citation diagnostic or envelope consistency check. Geographic facts have no regulatory-text citation requirement.</p>
+
+<h2>Summary</h2>
+<div class="tiles" id="tiles"></div>
+
+<h2>Cases passed</h2>
+<div class="legend" id="legend"></div>
+<div id="passChart"></div>
+
+<h2>Facts right</h2>
+<table id="factTable"></table>
+
+<h2>Forbidden claims made</h2>
+<table id="mustNotTable"></table>
+<table class="claims">
+<tr><th>Case</th><th>Forbidden claim made</th><th>Versions</th></tr>
+<!-- CLAIM_ROWS -->
+</table>
+
+<h2>Full study, by topic</h2>
+<table id="e2eTable"></table>
+
+<h2>Cost and time per case</h2>
+<table id="costTable"></table>
+
+<h2>Case by case</h2>
+<p class="muted"><span class="ok">✓</span> passed · <span class="ko">✗</span> failed</p>
+<div class="gridwrap" id="grids"></div>
+
+<h2>Takeaways</h2>
+<ul>
+  <li><b>The v2 configuration improved zoning in these runs:</b> 2 to 13 cases passed with Haiku. Parcel overlays, image rendering and image-context pruning changed together; this does not isolate one cause.</li>
+  <li><b>The Sonnet configuration passed three more cases:</b> it cost roughly eight times as much overall, while average full-study latency was about half. Repeated runs would be needed to assess stability.</li>
+  <li><b>Same failures on both models:</b> thin legend items on the plan (flood zone, reserved land), the choice of neighbouring parcels, and one crash in the envelope drawing (e06).</li>
+</ul>
+<p class="muted">Historical runs from 18 October 2026, before the submission cleanup. These results have not been rerun after the fixes. <a href="evaluation/README.md">Method and limitations</a> &middot; <a href="evaluation/manifest.json">Run manifest</a> &middot; <a href="workflow/">Workflow explainer</a>. Exact code revisions were not recorded with the original runs.</p>
+
+</div>
+<script>
+const V = ["v1 Haiku", "v2 Haiku", "v2 Sonnet"];
+const C = ["var(--v1)", "var(--v2)", "var(--v3)"];
+let LV = [
+  {k: "surveyor", name: "Parcels", n: 20},
+  {k: "zoning", name: "Zoning", n: 20},
+  {k: "doc", name: "Regulation", n: 20},
+  {k: "e2e", name: "Full study", n: 10},
+];
+<!-- SCORE_DATA -->
+
+LV = LV.map(l => ({...l, n: COUNTS[l.k]}));
+const pct = (a, b) => Math.round(100 * a / b) + "%";
+const tot = f => [0, 1, 2].map(i => LV.reduce((s, l) => s + f(l.k)[i], 0));
+const best = (a, hi = true) => { const m = hi ? Math.max(...a) : Math.min(...a); return a.map(x => x === m); };
+const head = first => `<tr><th>${first}</th>${V.map((v, i) => `<th><span class="sw" style="background:${C[i]}"></span>${v}</th>`).join("")}</tr>`;
+const row = (label, cells, flags, cls = "") => `<tr class="${cls}"><td>${label}</td>${cells.map((c, i) => `<td class="${flags && flags[i] ? "best" : ""}">${c}</td>`).join("")}</tr>`;
+const money = x => x < 0.1 ? "$" + x.toFixed(3) : "$" + x.toFixed(2);
+const dur = s => s >= 120 ? (s / 60).toFixed(1) + " min" : Math.round(s) + " s";
+const sw = i => `<span class="sw" style="background:${C[i]}"></span>`;
+
+const passT = tot(k => D.pass[k]), factT = tot(k => D.grounded[k]);
+document.getElementById("tiles").innerHTML = [
+  ["Cases passed", passT.map(x => x + " / " + CASE_TOTAL)],
+  ["Facts right", factT.map(x => pct(x, FACT_TOTAL))],["Forbidden claims made", tot(k => MN.hits[k])],
+  ["Cost per full study", D.cost.e2e.map(money)],
+  ["Time per full study", D.time.e2e.map(dur)],
+].map(([k, v]) => `<div class="tile"><div class="k">${k}</div>${v.map((x, i) => `<div class="row"><span>${sw(i)}${V[i]}</span><b>${x}</b></div>`).join("")}</div>`).join("");
+
+document.getElementById("legend").innerHTML = V.map((v, i) => `<span>${sw(i)}${v}</span>`).join("");
+document.getElementById("passChart").innerHTML = LV.map(l => `<div class="grp"><div class="name">${l.name}</div><div class="bars">${
+  D.pass[l.k].map((p, i) => `<div class="bar" title="${V[i]}: ${p} of ${l.n} passed"><i style="width:${Math.max(0.5, 100 * p / l.n) * 0.85}%;background:${C[i]}"></i><span>${p}/${l.n}</span></div>`).join("")}</div></div>`).join("");
+
+document.getElementById("factTable").innerHTML = head("Step") +
+  LV.map(l => row(l.name, D.grounded[l.k].map(x => `${pct(x, D.facts[l.k])}<small>${x}/${D.facts[l.k]}</small>`), best(D.grounded[l.k]))).join("") +
+  row("All", factT.map(x => `${pct(x, FACT_TOTAL)}<small>${x}/${FACT_TOTAL}</small>`), best(factT), "total");
+
+const eT = D.grounded.e2e;
+document.getElementById("e2eTable").innerHTML = head("Facts right") +
+  E2E.map(([n, v, t]) => row(n, v.map(x => `${x}<small>/ ${t}</small>`), best(v))).join("") +
+  row(`All ${D.facts.e2e} facts`, eT.map(x => `${pct(x, D.facts.e2e)}<small>${x}/${D.facts.e2e}</small>`), best(eT), "total");
+
+document.getElementById("costTable").innerHTML = head("Step (cost · time)") +
+  LV.map(l => row(l.name, D.cost[l.k].map((c, i) => `${money(c)}<small>· ${dur(D.time[l.k][i])}</small>`), best(D.cost[l.k], false))).join("") +
+  row(`All ${CASE_TOTAL} cases`, TOTAL_COST.map(money), best(TOTAL_COST, false), "total");
+
+const ids = Object.keys(P.C).sort();
+document.getElementById("grids").innerHTML = LV.map(l => {
+  const rows = ids.filter(id => id[0] === {surveyor: "s", zoning: "z", doc: "d", e2e: "e"}[l.k]);
+  return `<table class="grid"><tr><th>${l.name}</th>${[0, 1, 2].map(i => `<th title="${V[i]}">${sw(i).replace("margin-right: 6px", "")}</th>`).join("")}</tr>${rows.map(id =>
+    `<tr><td title="${id}">${id.slice(0, 3)}</td>${["A", "B", "C"].map(v => P[v][id] ? '<td class="ok">✓</td>' : '<td class="ko">✗</td>').join("")}</tr>`).join("")}</table>`;
+}).join("");
+const mnT = tot(k => MN.hits[k]);
+document.getElementById("mustNotTable").innerHTML = head("Step (claims checked)") +
+  LV.map(l => row(`${l.name}<small>${MN.checked[l.k] || "none"}</small>`, MN.checked[l.k] ? MN.hits[l.k] : ["–", "–", "–"], MN.checked[l.k] ? best(MN.hits[l.k], false) : null)).join("") +
+  row(`All<small>${LV.reduce((s, l) => s + MN.checked[l.k], 0)}</small>`, mnT, best(mnT, false), "total");
+</script>
+</body>
+</html>

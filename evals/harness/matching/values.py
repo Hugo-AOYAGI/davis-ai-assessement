@@ -1,4 +1,4 @@
-"""Value normalisation and comparison for expected answers (``docs/EVALS.md`` §4)."""
+"""Value normalisation and comparison for expected answers (``evals/README.md``§4)."""
 
 import math
 import re

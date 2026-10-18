@@ -1,4 +1,4 @@
-"""Judge-scored checks (``docs/EVALS.md`` §4): must_flag, must_not, coverage, anti-patterns.
+"""Judge-scored checks (``evals/README.md``§4): must_flag, must_not, coverage, anti-patterns.
 
 Coverage takes one call per expected statement, not one per (statement, note) pair: the judge
 reads the numbered notes and answers with the numbers of those stating the fact. A doc item has

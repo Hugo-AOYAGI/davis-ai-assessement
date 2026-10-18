@@ -1,0 +1,121 @@
+{
+  "parcel_id": "91272000BD0231",
+  "cadastre": {
+    "url": "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/91/91272/cadastre-91272-parcelles.json.gz",
+    "retrieved_utc": "2026-10-17",
+    "source_sha256": "54b101a25b3140b7bd500a3b6549fdf07e74a4746bd28d92f22f4ac59b726408",
+    "original_feature": {
+      "type": "Feature",
+      "id": "91272000BD0231",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.1138867,
+              48.6982007
+            ],
+            [
+              2.114117,
+              48.699252
+            ],
+            [
+              2.1137333,
+              48.6992928
+            ],
+            [
+              2.1135511,
+              48.6985214
+            ],
+            [
+              2.1135384,
+              48.6984706
+            ],
+            [
+              2.1135191,
+              48.6983952
+            ],
+            [
+              2.1135129,
+              48.6983702
+            ],
+            [
+              2.1135124,
+              48.6983683
+            ],
+            [
+              2.1135072,
+              48.6983471
+            ],
+            [
+              2.1134867,
+              48.698265
+            ],
+            [
+              2.1135027,
+              48.6982634
+            ],
+            [
+              2.1135705,
+              48.6982566
+            ],
+            [
+              2.1136648,
+              48.6982472
+            ],
+            [
+              2.1138867,
+              48.6982007
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "91272000BD0231",
+        "commune": "91272",
+        "prefixe": "000",
+        "section": "BD",
+        "numero": "231",
+        "contenance": 3413,
+        "arpente": true,
+        "created": "2012-02-14",
+        "updated": "2026-05-12"
+      }
+    }
+  },
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "source_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "original_row": {
+      "id": "91272_0930_00059_bis",
+      "id_fantoir": "91272_0930",
+      "numero": "59",
+      "rep": "bis",
+      "nom_voie": "Route de Damiette",
+      "code_postal": "91190",
+      "code_insee": "91272",
+      "nom_commune": "Gif-sur-Yvette",
+      "code_insee_ancienne_commune": "",
+      "nom_ancienne_commune": "",
+      "x": "634780.51",
+      "y": "6844596.55",
+      "lon": "2.113808",
+      "lat": "48.698221",
+      "type_position": "entrée",
+      "alias": "",
+      "nom_ld": "",
+      "libelle_acheminement": "GIF SUR YVETTE",
+      "nom_afnor": "ROUTE DE DAMIETTE",
+      "source_position": "commune",
+      "source_nom_voie": "commune",
+      "certification_commune": "0",
+      "cad_parcelles": ""
+    },
+    "relation": "BAN address point lies inside parcel; no asserted BAN parcel link"
+  },
+  "selection": {
+    "kind": "spread",
+    "tests": "AURc zone inside an OAP perimeter"
+  },
+  "address": "59bis Route de Damiette, 91190 Gif-sur-Yvette"
+}

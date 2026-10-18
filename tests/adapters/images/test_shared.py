@@ -17,6 +17,7 @@ def shared(root: Path, documents=DOCUMENTS, render_dpi: int = 144) -> PageImages
         crop_max_px=500,
         cache_size=2,
         scan_min_coverage=0.8,
+        max_image_bytes=4_000_000,
     )
 
 

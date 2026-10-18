@@ -1,0 +1,107 @@
+id: d19_uxc_offices
+level: doc
+tests: zone x program grid, UXc economic sector (site of z09_uxc); the table of article UX1 forbids offices in generic UX but not in UXc, and articles 9, 10 and 12 give UXc its own values
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is the sector UXc of the chapter "Vallée - UX".
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UXc
+    legend_items: []
+    parcel_ids: [91272000CC0080]
+    program: new office building (bureaux et services)
+facts:
+  - statement: Offices (bureaux, services) are not forbidden in sector UXc; in the article UX1 table the "Bureaux, services" row is marked interdit only for the generic UX and the UXe sectors.
+    critical: true
+    evidence:
+      # PDF p168 (printed p167), rendered table inspected: row "Bureaux, services" has interdit under UX and UXe only;
+      # the UXa, UXb and UXc cells are empty. The text layer loses the column positions.
+      - doc: plu_reglement
+        page: 168
+        quote: "Bureaux, services"
+  - statement: Sector UXc is meant for activities compatible with the residential (pavillonnaire) character of the neighbouring districts.
+    evidence:
+      - doc: plu_reglement
+        page: 167
+        quote: "les secteurs UXc, pour l’accueil d’activités compatibles avec le caractère pavillonnaire des quartiers"
+  - statement: In sector UXc, maximum footprint is 80 percent of the site area for activities (40 percent applies to housing; the two are not cumulable).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 178
+        quote: "en UXc, 80% de la superficie du terrain dans la zone pour des activités et 40% pour de l’habitat"
+  - statement: In sector UXc, maximum height is 9 metres at the eaves or the top of the acroterion.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 178
+        quote: "La hauteur d’une construction ne doit pas excéder 9 mètres à l’égout du toit ou sommet de l’acrotère."
+  - statement: In sector UXc, the number of storeys is limited to R+2.
+    evidence:
+      - doc: plu_reglement
+        page: 178
+        quote: "Le nombre de niveaux est limité à R+2."
+  - statement: In UXc, constructions with a facade on a road or public space must be set back at least 10 metres from the alignment.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 174
+        quote: "doivent être implantées avec un retrait au moins égal à 10 mètres de l’alignement actuel"
+  - statement: Article UX7 applies to both side boundaries and rear boundaries of the plot.
+    evidence:
+      - doc: plu_reglement
+        page: 175
+        quote: "c'est-à-dire les limites latérales et de fond de terrain"
+  - statement: In UXc, buildings may be set back from the side and rear boundaries or built on them.
+    evidence:
+      - doc: plu_reglement
+        page: 176
+        quote: "Les constructions peuvent être implantées en retrait ou sur les limites séparatives."
+  - statement: In UXc, when a building is set back from a side or rear boundary, the setback must be at least half the height measured at the eaves (L=1/2 H), with a minimum of 6 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 176
+        quote: "Le retrait doit être au moins égal à la moitié de la hauteur de la construction mesurée à l’égout du toit (L=1/2 H)"
+  - statement: In UXc, several buildings on one property must be at least half the height of the taller building apart (L=1/2 H) with a minimum of 6 metres when the facades have no windows (vues).
+    evidence:
+      - doc: plu_reglement
+        page: 177
+        quote: "la moitié de la hauteur de la construction la plus haute mesurée à l’égout du toit (L=1/2 H) avec un minimum de 6 mètres si les façades ne comportent pas de vues"
+  - statement: In UXc, several buildings on one property must be at least the height of the building apart (L=H) with a minimum of 8 metres when one of the facades has windows (vues).
+    evidence:
+      - doc: plu_reglement
+        page: 177
+        quote: "la hauteur de la construction mesurée à l’égout du toit (L=H) avec un minimum de 8 mètres si l’une des façades comporte de vues"
+  - statement: For offices in UXc, parking requires 1 space per 30 m2 of floor area (surface de plancher).
+    evidence:
+      - doc: plu_reglement
+        page: 180
+        quote: "1 place par 30 m² de surface de plancher."
+  - statement: For offices, bicycle parking of 1.5 percent of the floor area created is required.
+    evidence:
+      - doc: plu_reglement
+        page: 181
+        quote: "1,5 % de la surface de plancher créée"
+  - statement: Two-way vehicle accesses must be at least 4 metres wide when fewer than 30 parking spaces are authorised, and 6 metres when more than 30.
+    evidence:
+      - doc: plu_reglement
+        page: 171
+        quote: "4 mètres (moins de 30 places de stationnement autorisées) ou 6 mètres (plus de 30 places de stationnement autorisées) pour le double sens"
+  - statement: Stormwater must be retained and infiltrated on the plot; only when infiltration is demonstrably impossible is a discharge of the excess to the public network tolerated, limited to a maximum flow of 0.7 l/s/ha.
+    evidence:
+      - doc: plu_reglement
+        page: 173
+        quote: "en cas d’impossibilité démontrée au regard de la structure des sols"
+      - doc: plu_reglement
+        page: 173
+        quote: "un débit maximum limité à 0.7 l/s/ha"
+must_not:
+  - States that offices (bureaux, services) are forbidden in UXc, or applies the generic UX column of the article UX1 table to UXc.
+  - Applies the generic UX height of 7 metres and R+1 to UXc.
+  - Applies the generic UX footprint of 30 percent or the housing footprint of 40 percent to an office building in UXc.
+  - Applies the UXb footprint of 60 percent, the UXa or UXb height of 12 metres, or the UXa/UXb setback rules to UXc.
+  - States that housing is freely allowed in UXc, or applies housing rules (1 space per 35 m2 of floor area, 40 percent footprint) to the offices.
+  - Gives the parking norm for offices as 1 space per 50 m2 of floor area (UXb norm, or the norm for other activities).

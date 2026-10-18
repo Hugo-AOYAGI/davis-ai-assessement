@@ -196,6 +196,11 @@ def describe_accepted(verified: VerifiedStudy) -> str:
         The site limits by kind, the number of evidence crops saved, then the envelope recomputed
         from the architect's rules and layout: each bound and the proposal.
     """
+    if verified.envelope is None:
+        return (
+            "All proposed uses are prohibited. No building envelope was computed. "
+            f"Evidence crops saved: {len(verified.evidence)}."
+        )
     kinds = Counter(boundary.kind for boundary in verified.boundaries)
     limits = ", ".join(f"{kinds[kind]} {kind.value}" for kind in BoundaryKind if kinds[kind])
     return (

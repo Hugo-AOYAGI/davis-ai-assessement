@@ -1,0 +1,27 @@
+# Independent source checks: evals/fixtures/zoning/z11_vallee_ua.oracle.json
+id: z11_vallee_ua
+level: zoning
+tests: Vallee UA comparison with the Chevry UA case
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 192 Avenue du Génèral Leclerc, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CA0005
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UA
+- key: overlays
+  present: []
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_not:
+- Locates the parcel in the Chevry sector rather than Vallée.

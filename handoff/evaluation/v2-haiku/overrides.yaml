@@ -1,0 +1,6 @@
+- eval.dataset=all
+- eval.phoenix.enabled=false
+- eval.concurrency=4
+- eval.max_cost_usd=20
+- models.nodes.zoning_analyst.model=claude-haiku-5-5
+- ~models.nodes.zoning_analyst.effort

@@ -1,0 +1,28 @@
+# Independent source checks: evals/fixtures/zoning/z03_ebc.oracle.json
+id: z03_ebc
+level: zoning
+tests: partial EBC inside an otherwise UH parcel
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 5 Chemin de Moulon, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CO0051
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UH
+- key: overlays
+  present:
+  - Espaces Boisés Classés
+  absent:
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_flag:
+- Only part of the parcel is covered by Espaces Boisés Classés (about 39%); the EBC
+  does not cover the whole parcel.

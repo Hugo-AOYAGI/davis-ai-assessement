@@ -1,0 +1,47 @@
+id: d09_outside_oap
+level: doc
+tests: a Vallée UA site outside every OAP perimeter; no OAP chapter applies and none may be cited as applying
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: oap
+  aim: whether an OAP covers the site, and what it prescribes for the program.
+  documents: [oap, plu_reglement_graphique]
+  topics: [perimeter, general_orientations, building_form, mobility_access, landscape_green, programming, other]
+  context:
+    zone: UA
+    legend_items: []
+    parcel_ids: [91272000CA0005]
+    program: housing
+facts:
+  - statement: The site (parcel 91272000CA0005, zone UA, Vallée) lies inside no OAP perimeter.
+    critical: true
+    evidence:
+      # Negative fact: the zoning plan carries no OAP perimeter on or around the parcel
+      # (independent proof in evals/fixtures/zoning/z11_vallee_ua*), so no quote exists.
+      - doc: plu_reglement_graphique
+        page: 1
+  - statement: No chapter of the OAP document applies to the site, so no OAP prescription applies to the housing program.
+    critical: true
+    evidence:
+      - doc: oap
+        page: 2
+  - statement: The OAP document has eight numbered chapters, from the Plateau de Chevry to the Joliot Curie district.
+    evidence:
+      - doc: oap
+        page: 2
+        quote: "8. Le quartier Joliot Curie"
+  - statement: The OAP sectors of La Vallée are Vatonne, La gare - centre, Damiette, Rougemonts and the three hamlets (Fèvrie, Damiette, Coupières).
+    evidence:
+      - doc: oap
+        page: 11
+        quote: "3. La gare - centre"
+  - statement: The Joliot Curie chapter belongs to the Plateau de Moulon part of the OAP, not to La Vallée.
+    evidence:
+      - doc: oap
+        page: 2
+        quote: "Le Plateau de Moulon"
+must_not:
+  - States that the site lies inside an OAP perimeter.
+  - Cites an OAP chapter (for example Vatonne, la gare, Rougemonts, Damiette, Moulon or Joliot Curie) as applying to the site.
+  - Reports OAP prescriptions (dwelling counts, building form, access, green space) as binding on the project.

@@ -1,4 +1,4 @@
-"""What the judge reads of an output, rendered compactly per level (``docs/EVALS.md`` §4).
+"""What the judge reads of an output, rendered compactly per level (``evals/README.md``§4).
 
 - zoning: the zone, every legend item checked, the rationale and the ambiguities;
 - doc: the numbered notes and the open points (citations are checked in code, not by the judge);

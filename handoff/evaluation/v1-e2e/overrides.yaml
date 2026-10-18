@@ -1,0 +1,4 @@
+- eval.dataset=e2e
+- eval.phoenix.enabled=false
+- eval.concurrency=4
+- eval.max_cost_usd=35

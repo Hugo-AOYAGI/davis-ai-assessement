@@ -1,0 +1,79 @@
+scope: 'Ten trap slots: original reference plus eight source-reviewed selections and
+  one synthetic negative. The legally landlocked case is not covered; s08 is explicitly
+  a cadastral-enclosure proxy.'
+cases:
+- id: s01_joliot_curie
+  category: reference_strip_nearest_parcel
+  status: verified
+  evidence: existing manually adjudicated reference; original item preserved
+- id: s03_corner_avelines
+  category: corner
+  status: verified
+  input_address: 3 Chemin des Avelines, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s03_corner_avelines
+  review: 'OSM road centerlines are 3.8 m (Chemin des Avelines, east) and 2.7 m (Rue
+    de la Fontaine, south) from BK0330, taking the minimum across all same-name OSM
+    way segments. Saved map visually inspected: parcel occupies the corner of these
+    two streets. No legal road ownership or access assertion is made.'
+- id: s04_lamartine_two_parcels
+  category: multiparcel
+  status: verified
+  input_address: 18 Avenue Lamartine, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s04_lamartine_two_parcels
+  review: BAN explicitly links BM0417 and BM0419. Their metric union is one Polygon.
+    The entrance point is outside both, nearer BM0417; nearest-only selection loses
+    BM0419.
+- id: s05_troenes_roadpoint
+  category: address_point_outside_target
+  status: verified
+  input_address: 13 Allée des Troènes, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s05_troenes_roadpoint
+  review: The certified BAN row identifies CO0036. The point lies on unregistered
+    ground 12.69 m from that parcel, which is still the nearest cadastral parcel in
+    the complete commune snapshot. OSM road geometry supports the entrance/road-point
+    context; no legal public-road ownership is asserted.
+- id: s06_clairiere_hamlet
+  category: hamlet
+  status: verified
+  input_address: 118 Allee de la Clairiere, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s06_clairiere_hamlet
+  review: The certified BAN row has nom_ld Hameau de la Clairière, number 118, and
+    exactly one linked parcel AK0548. Preserve the numbered site instead of treating
+    the hamlet as an undifferentiated property.
+- id: s07_fontaine_commune_collision
+  category: same_address_neighboring_commune
+  status: verified
+  input_address: 5 Rue de la Fontaine, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s07_fontaine_commune_collision
+  review: The department BAN export contains exact same number/street in Gif-sur-Yvette
+    (91272) and Saint-Aubin (91538). Only the Gif row links BK0099. The Saint-Aubin
+    row has no parcel oracle and is not used to invent a forbidden parcel id.
+- id: s08_couvent_enclosed
+  category: cadastral_enclosure_proxy
+  status: verified
+  input_address: 23 Chemin du Couvent, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s08_couvent_enclosed
+  review: 'All boundary is within 0.5 m buffers of neighboring cadastral polygons.
+    This is a cadastral-enclosure proxy, NOT verified legal landlocking: registered
+    roads, private access and easements remain unknown. The planned legally landlocked
+    trap is a coverage gap.'
+- id: s09_grands_pres_ter
+  category: house_number_suffix_collision
+  status: verified
+  input_address: 2ter Chemin des Grands Prés, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s09_grands_pres_ter
+  review: Three certified BAN rows distinguish plain 2 (CK0119), 2bis (CK0120) and
+    2ter (CK0122). Do not silently drop the suffix or select a neighboring entrance.
+- id: s10_moulon_shared_parcel
+  category: multiple_addresses_single_parcel
+  status: verified
+  input_address: 1 Rue Francis Perrin, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s10_moulon_shared_parcel
+  review: BAN links CP0220 from Rue Francis Perrin, Rue Pierre Potier and Route 128.
+    This is a parcel-selection trap in Moulon; no PLU sub-zone is asserted from a
+    rough coordinate heuristic.
+- id: s20_unknown_address
+  category: unknown_address
+  status: verified
+  input_address: 999999 Rue des Licornes Inexistantes, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s20_unknown_address

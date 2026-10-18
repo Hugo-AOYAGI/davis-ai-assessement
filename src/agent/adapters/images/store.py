@@ -1,8 +1,8 @@
 import hashlib
-import os
 import re
-import tempfile
 from pathlib import Path
+
+from agent.adapters.files import publish
 
 _NAME = re.compile(r"[0-9a-f]{64}\.png")
 _SUFFIX = ".png"
@@ -46,11 +46,7 @@ class ImageStore:
         name = hashlib.sha256(png).hexdigest() + _SUFFIX
         target = self._directory / name
         if not target.is_file():
-            self._directory.mkdir(parents=True, exist_ok=True)
-            handle, temporary = tempfile.mkstemp(dir=self._directory, suffix=".tmp")
-            with os.fdopen(handle, "wb") as file:
-                file.write(png)
-            Path(temporary).replace(target)
+            publish(target, png)
         return self._prefix + name
 
     def owns(self, url: str) -> bool:

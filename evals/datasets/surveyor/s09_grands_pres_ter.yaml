@@ -1,0 +1,24 @@
+id: s09_grands_pres_ter
+level: surveyor
+tests: 2, 2bis and 2ter Chemin des Grands Prés have different linked parcels; retain
+  the ter suffix.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 2ter Chemin des Grands Prés, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000CK0122
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 355.55
+  tolerance: 0.02
+  source: cadastre
+- key: choice.parcel_ids
+  expect_none_of:
+  - 91272000CK0119
+  - 91272000CK0120
+  critical: true
+  source: ban

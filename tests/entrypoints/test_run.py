@@ -86,6 +86,7 @@ def test_summary_of_accepted_study(verified):
         ("RJA", Verdict.CONDITIONAL),
     ]
     envelope = summary.study.envelope
+    assert envelope is not None
     assert envelope.site_area_m2 == pytest.approx(1200)
     assert envelope.max_footprint_ratio is None
     assert envelope.min_green_ratio == 0.2
@@ -108,6 +109,25 @@ def test_summary_without_study():
     summary = run_summary(METRICS, None)
     assert not summary.accepted
     assert summary.study is None
+
+
+def test_summary_of_prohibited_study(verified):
+    decisions = tuple(
+        entry.model_copy(update={"verdict": Verdict.PROHIBITED})
+        for entry in verified.study.admissibility
+    )
+    negative = verified.model_copy(
+        update={
+            "study": verified.study.model_copy(update={"admissibility": decisions}),
+            "envelope": None,
+        }
+    )
+    summary = run_summary(METRICS, negative)
+    assert summary.accepted
+    assert summary.study is not None
+    assert summary.study.envelope is None
+    assert all(entry.verdict is Verdict.PROHIBITED for entry in summary.study.admissibility)
+    assert RunSummary.model_validate_json(summary.model_dump_json()) == summary
 
 
 def test_pass_rate_none_without_checkable_citations():
@@ -152,7 +172,9 @@ def test_run_study_offline(monkeypatch, verified):
         return fake
 
     monkeypatch.setattr(run, "build", fake_build)
-    case = Case(address="1 rue X", program="Two buildings", corpus_id="c@1", facts=("120 rooms",))
+    case = Case(
+        address="1 rue X", program="Two buildings", corpus_id=cfg.corpus.id, facts=("120 rooms",)
+    )
     result, messages, study = run.run_study(cfg, case, ["case=reference"])
     assert study == verified
     assert messages == MESSAGES
@@ -199,3 +221,11 @@ def test_missing_crop_is_skipped(tmp_path, verified, caplog):
 def test_write_outputs_without_study(tmp_path):
     run.write_outputs(tmp_path, run_summary(METRICS, None), None, max_quote_chars=50, root=tmp_path)
     assert sorted(path.name for path in tmp_path.iterdir()) == ["run_summary.json"]
+
+
+def test_run_study_rejects_a_mismatched_case_before_model_creation(monkeypatch):
+    cfg = load_config()
+    monkeypatch.setattr(run, "build", lambda *args: pytest.fail("graph must not be built"))
+    case = Case(address="Somewhere", program="Housing", corpus_id="different@version")
+    with pytest.raises(ValueError, match="differs from configured corpus"):
+        run.run_study(cfg, case, [])

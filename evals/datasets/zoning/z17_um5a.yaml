@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z17_um5a.oracle.json
+id: z17_um5a
+level: zoning
+tests: UM5a sector; retain lower-case suffix
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 10 Rue Francis Perrin, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CP0128
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UM5a
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

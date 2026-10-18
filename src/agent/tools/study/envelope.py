@@ -8,7 +8,7 @@ from agent.contracts.base import Contract
 from agent.contracts.envelope import EnvelopeStudy, layout_errors
 from agent.contracts.evidence import Citation
 from agent.contracts.findings.notes import DocNotes
-from agent.contracts.study import Study
+from agent.contracts.study import Study, Verdict
 from agent.runtime.citations.collect import collect_citations
 from agent.runtime.citations.normalise import normalise
 from agent.tools.study.inputs import Findings, StudyInputs
@@ -30,7 +30,7 @@ def envelope_errors(study: Study, findings: Findings, inputs: StudyInputs) -> li
     `destinations`, or a label re-asked such as `rules_parking`), every citation of the layout's
     OAP choices one of the ``oap`` notes (same document, page and quote, compared after
     normalisation). The layout must name the buildings of the rules, each no taller than its
-    maximum, and the rules' buildings must be those of the study's admissibility.
+    maximum, and the rules' buildings must be the study's non-prohibited buildings.
 
     Args:
         study: The submitted study.
@@ -41,6 +41,8 @@ def envelope_errors(study: Study, findings: Findings, inputs: StudyInputs) -> li
         One ``field.path: message`` line per problem, empty when the envelope is consistent.
     """
     envelope = findings.envelope
+    if envelope is None:
+        return []
     producer = inputs.envelope.producer
     every_key = f"a `{inputs.notes_key('<label>')}` artifact"
     oap_key = f"`{inputs.notes_key(inputs.oap_label)}`"
@@ -84,14 +86,16 @@ def _labels(labels: Iterable[str]) -> str:
 
 
 def _building_errors(study: Study, envelope: EnvelopeStudy, producer: str) -> list[str]:
-    """Require the envelope's buildings to be the study's admissibility buildings."""
-    studied = [entry.building for entry in study.admissibility]
+    """Require exactly the study's non-prohibited buildings in the envelope."""
+    studied = [
+        entry.building for entry in study.admissibility if entry.verdict is not Verdict.PROHIBITED
+    ]
     limited = [limits.building for limits in envelope.rules.buildings]
     if sorted(studied) == sorted(limited):
         return []
     return [
-        f"envelope.rules.buildings: buildings {_labels(limited)} do not match admissibility "
-        f"buildings {_labels(studied)}. Use the same labels in admissibility and in the task "
-        f"given to {producer}, one entry per building, and delegate to {producer} again if its "
-        "labels must change."
+        f"envelope.rules.buildings: buildings {_labels(limited)} do not match eligible "
+        f"admissibility buildings {_labels(studied)}. Give {producer} only buildings whose "
+        "uses are not prohibited, with the same labels as admissibility, and delegate again "
+        "if its buildings must change."
     ]

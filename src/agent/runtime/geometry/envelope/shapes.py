@@ -82,6 +82,33 @@ def largest_part(geometry: BaseGeometry, min_area_m2: float) -> tuple[ShapelyPol
     return parts[0], len(parts) > 1
 
 
+def trim_area(polygon: ShapelyPolygon, target_m2: float, tolerance_m: float) -> BaseGeometry:
+    """Keep at most a target area by clipping from the polygon's western side.
+
+    Intersections preserve containment even for concave polygons and holes. Bisection retains
+    the smaller side of the target; the positional tolerance can leave a small unused area.
+
+    Args:
+        polygon: The footprint to reduce.
+        target_m2: Maximum area to retain.
+        tolerance_m: Precision of the clipping line.
+
+    Returns:
+        The clipped geometry, possibly disconnected or empty.
+    """
+    if target_m2 <= 0:
+        return ShapelyPolygon()
+    if target_m2 >= polygon.area:
+        return polygon
+    x_min, y_min, x_max, y_max = polygon.bounds
+    low, high = x_min, x_max
+    while high - low > tolerance_m:
+        middle = (low + high) / 2
+        clipped = polygon.intersection(shapely.box(x_min, y_min, middle, y_max))
+        low, high = (middle, high) if clipped.area <= target_m2 else (low, middle)
+    return cast("BaseGeometry", polygon.intersection(shapely.box(x_min, y_min, low, y_max)))
+
+
 def _ring(coords: Iterable[tuple[float, ...]]) -> tuple[Point, ...]:
     """Convert shapely ring coordinates to a closed tuple of points."""
     points = tuple((float(x), float(y)) for x, y, *_ in coords)

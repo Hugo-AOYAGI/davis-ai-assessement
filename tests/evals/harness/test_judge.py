@@ -128,9 +128,9 @@ def test_from_config_builds_the_judge_node(monkeypatch, tmp_path):
 
 def test_judge_model_is_priced():
     cfg = load_config()
-    assert cfg.models.nodes.judge.model == "claude-opus-5-5"
-    price = load_pricing(cfg.models)["claude-opus-5-5"]
-    assert (price.input, price.output) == (5.0, 25.0)
+    assert cfg.models.nodes.judge.model == "claude-sonnet-5-5"
+    price = load_pricing(cfg.models)[cfg.models.nodes.judge.model]
+    assert (price.input, price.output) == (2.0, 10.0)
 
 
 @pytest.mark.parametrize("setting", ["max_tokens", "structured_output"])

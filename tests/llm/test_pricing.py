@@ -1,7 +1,7 @@
 import pytest
 from langchain_core.messages.ai import UsageMetadata
 
-from agent.llm.pricing import ModelPrice, TokenCounts, cost_usd, find_price
+from agent.llm.pricing import ModelPrice, TokenCounts, find_price
 
 SONNET = ModelPrice(input=2.0, output=10.0, cache_read=0.2, cache_write=2.5)
 
@@ -16,14 +16,16 @@ def usage(input_tokens: int, output_tokens: int, **details: int) -> UsageMetadat
 
 
 def test_cost_without_cache():
-    assert cost_usd(usage(1_000_000, 100_000), SONNET) == pytest.approx(2.0 + 1.0)
+    assert TokenCounts.from_usage(usage(1_000_000, 100_000)).cost(SONNET) == pytest.approx(
+        2.0 + 1.0
+    )
 
 
 def test_cached_tokens_are_priced_at_cache_rates():
     call = usage(1_000_000, 0, cache_read=600_000, cache_creation=300_000)
     counts = TokenCounts.from_usage(call)
     assert counts == TokenCounts(input=100_000, output=0, cache_read=600_000, cache_write=300_000)
-    assert cost_usd(call, SONNET) == pytest.approx(0.2 + 0.12 + 0.75)
+    assert counts.cost(SONNET) == pytest.approx(0.2 + 0.12 + 0.75)
 
 
 def test_ttl_split_cache_writes_are_summed():

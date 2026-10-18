@@ -1,0 +1,92 @@
+# Source audit: surveyor s01 and archived-2021 zoning z01 for CR0247; doc items d05 (UMG
+# heights, footprint, art. 13 exemption), d06 (green roofs); regulation PDF pp5-6, 320-321,
+# 324-331, 376 and OAP p36, read directly for the office program.
+# Geometry oracle: cadastre area 5951.6 m2, green minimum = area * 0.20.
+# Proposal volume varies with freely chosen cut, shares, heights and windows;
+# no single proposal volume is asserted. Harness recomputes the actual proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e03_reference_offices
+level: e2e
+tests: same site as e01 with an office program; the "other uses" height of 18 m (not the housing 20 m / R+5), office parking 1 per 50 m2 (not housing norms or the Titre I cap), UMG 13 green space that excludes green roofs
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: One office building.
+  facts: []
+from_items: [s01_joliot_curie, z01_joliot_curie, d06_umg_green_roofs]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CR0247]
+    critical: true
+    source: hand
+  - key: site.choice.parcel_ids
+    expect_none_of: [91272000CR0249]
+    critical: true
+    source: hand
+  - key: study.regime.zone
+    expect: UMG
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    critical: true
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    evidence: [{doc: plu_reglement, page: 320, quote: "Sont interdites les occupations et utilisations du sol suivantes"}]
+  - key: envelope.rules.buildings.max_height_m
+    expect: 18
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326, quote: "Pour les constructions ayant une autre destination : la hauteur maximale des constructions est limitée à 18 mètres."}]
+  - key: envelope.rules.buildings.max_storeys
+    expect: null
+    evidence: [{doc: plu_reglement, page: 326, quote: "avec un nombre de niveaux limité à R+5"}]
+  - key: envelope.rules.max_footprint_ratio
+    expect: null
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326, quote: "L’emprise au sol des constructions n’est pas réglementée"}]
+  - key: envelope.rules.min_green_ratio
+    expect: 0.20
+    critical: true
+    evidence: [{doc: plu_reglement, page: 331, quote: "En espace vert 20% au moins de la superficie du terrain."}]
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 6
+    evidence: [{doc: plu_reglement, page: 325, quote: "à 6 mètres pour les façades ou parties de façade comportant des vues"}]
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 3
+    evidence: [{doc: plu_reglement, page: 325, quote: "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue"}]
+  - key: envelope.rules.setbacks[kind=rear].with_windows.min_m
+    expect: 6
+    evidence: [{doc: plu_reglement, page: 325, quote: "à 6 mètres pour les façades ou parties de façade comportant des vues"}]
+  - key: envelope.rules.setbacks[kind=rear].without_windows.min_m
+    expect: 3
+    evidence: [{doc: plu_reglement, page: 325, quote: "à 3 mètres pour les façades ou parties de façade ne comportant pas de vue"}]
+  - key: study.parking[basis=floor_area_m2].per
+    expect: 50
+    critical: true
+    evidence: [{doc: plu_reglement, page: 327, quote: "Pour les constructions à destination de bureaux : - 1 place de stationnement par tranche de 50 m² de surface de plancher"}]
+  - key: study.parking[basis=floor_area_m2].spaces
+    expect: 1
+    evidence: [{doc: plu_reglement, page: 327, quote: "1 place de stationnement par tranche de 50 m² de surface de plancher"}]
+  - key: site.area_m2
+    expect: 5951.6
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.site_area_m2
+    expect: 5951.6
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: 1190.32
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - UMG article 13.1 excludes vegetated roofs (toitures végétalisées) from green space while the lexique entry on espaces végétalisés weights roof planting with at least 30 cm of earth at 0.5; the regulation does not say which prevails, so the contribution of a green roof to the 20 percent minimum is an open point.
+must_not:
+  - States or applies the housing height of 20 m or the R+5 storey limit to the office building, or the 25 m public-interest height.
+  - Applies housing parking norms (1 space per 35 m2 within 2 per dwelling, 1 per dwelling, 1 per 150 m2 student residence) or the Titre I cap of one space per dwelling to the offices.
+  - States that UMG article 9 imposes a numeric maximum footprint ratio.
+  - Uses parcel CR0249 as the study site instead of CR0247.
+  - Counts vegetated roofs toward the UMG article 13 minimum green area without noting that article 13.1 excludes them.
+  - States that the UMG article 13 quantitative green-space requirements do not apply to the offices (the exemption covers only public services and collective-interest facilities).

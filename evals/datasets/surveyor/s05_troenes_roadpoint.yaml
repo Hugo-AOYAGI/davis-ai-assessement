@@ -1,0 +1,18 @@
+id: s05_troenes_roadpoint
+level: surveyor
+tests: Certified entrance-position point is 12.69 m outside its linked parcel; the
+  address point is not the site polygon.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 13 Allée des Troènes, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000CO0036
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 375.31
+  tolerance: 0.02
+  source: cadastre

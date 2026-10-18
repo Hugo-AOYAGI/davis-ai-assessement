@@ -1,0 +1,130 @@
+# Source audit: zoning z03 (CO0051, UH, partial EBC, no PPRi, no OAP surface; archived 2021
+# GPU) and doc d11 (Vallée UH repealed articles 5 and 14, footprint, heights); further
+# regulation pages 99, 107, 109-110, 116, 118-119 read directly. Sector established
+# independently: the plain GPU label UH belongs to the Vallée UH chapter (PDF pp99-120), not
+# to Chevry UH (PDF pp256-268, only sectors UHa / UHb); see evals/fixtures/e2e/e08_uh_housing.md.
+# Geometry oracle: cadastre polygon 3818.8 m2; green minimum = area * 0.70.
+# No single proposal volume is asserted: the layout (heights, windows, cut) is the
+# architect's choice and the harness recomputes the submitted proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e08_uh_housing
+level: e2e
+tests: Vallée UH housing on a parcel partly in an EBC; footprint, heights and setbacks of the Vallée UH chapter, not the Chevry UH values; repealed articles 5 and 14 (no minimum plot size, no COS)
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 5 Chemin de Moulon, 91190 Gif-sur-Yvette
+  program: One detached single-family house.
+  facts:
+    - The project is new construction of one dwelling for one household, with no shop, office or other use.
+from_items: [z03_ebc, d11_repealed_articles]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CO0051]
+    critical: true
+    source: ban
+  - key: study.regime.zone
+    expect: UH
+    critical: true
+    source: gpu_2021
+  - key: study.regime.overlays
+    present:
+      - Espaces Boisés Classés
+    absent:
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+      - Zone humide
+    critical: true
+    source: gpu_2021
+    evidence:
+      - doc: plu_reglement
+        page: 118
+        quote: "le classement interdit tout changement d'affectation, ou tout mode d'occupation du sol de nature à compromettre la conservation, la protection ou la création du boisement"
+  - key: study.regime.oap_applicable
+    expect: false
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    evidence:
+      - doc: plu_reglement
+        page: 99
+        quote: "La zone UH de la Vallée, correspond aux zones à caractère résidentiel"
+  - key: envelope.rules.max_footprint_ratio
+    expect: 0.2
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 112
+        quote: "au plus 20% de la superficie du terrain dans la zone pour les constructions principales"
+  - key: envelope.rules.buildings.max_height_m
+    any_of: [7, 10]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "7 mètres à l’égout du toit ou à l’acrotère."
+      - doc: plu_reglement
+        page: 113
+        quote: "10 mètres au faîtage, faîte ou hauteur plafond"
+  - key: envelope.rules.buildings.max_storeys
+    any_of: [2, 3]
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "Avec un nombre de niveaux limité à R+1+combles."
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 8
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.setbacks[kind=side].without_windows.height_ratio
+    expect: 0.5
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "la moitié de la hauteur de la façade ou partie de façade intéressée de la construction (L=H/2)"
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "avec un minimum de 2 mètres si celle-ci ne comporte pas de vues"
+  - key: envelope.rules.setbacks[kind=rear].with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 110
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.min_green_ratio
+    expect: 0.7
+    evidence:
+      - doc: plu_reglement
+        page: 119
+        quote: "70% de la superficie du terrain en UH, UHe et UHf"
+  - key: study.parking[basis=unit].spaces
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 116
+        quote: "en zone UH hors secteur UHf : 2 places par logement dont une couverte"
+  - key: envelope.site_area_m2
+    expect: 3818.8
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: 2673.2
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - About 39 percent of the parcel (1475 m2) is covered by an Espace Boisé Classé, which UH13.1 protects from any occupation compromising the woodland; the buildable ground is reduced and this partial overlay must be raised.
+  - UH article 6 sets the road setback at 5 m from the alignment when the road right-of-way is 8 m or more, or 9 m from the road axis when it is under 8 m, and eases it along chemins and sentes (6.4); the right-of-way width of the Chemin de Moulon is not in the corpus and the applicable alternative must be established or raised.
+  - UH article 7 restricts main buildings to a 25 m constructibility band measured from the roads serving the plot, beyond which only terraces and annexes are allowed; the study must raise how this band limits the usable ground.
+must_not:
+  - States a minimum plot size (superficie minimale des terrains constructibles) as a rule applying in UH.
+  - States a COS (coefficient d'occupation du sol) or a floor-area ratio as a rule applying in UH.
+  - States that the footprint limit is one third of the site area, that the road setback is 4 m, or that heights or levels follow UHa or UHb (Chevry UH values), or cites the Chevry - UH chapter (regulation PDF pages 256 to 268) as the source of the rules.
+  - Applies the values of sector UHc, UHd, UHe or UHf (for example 25 or 30 percent footprint, 11 m height, 15 m road setback) to the site.
+  - Treats the site as free of the Espaces Boisés Classés, or places the proposed building or its footprint on the EBC part of the parcel.
+  - States that the PPRi flood-risk zone or a wetland applies to the site.
+  - Uses a parcel other than CO0051 (for example the neighbouring CO0050, CO0052 or CO0054) as the study site.

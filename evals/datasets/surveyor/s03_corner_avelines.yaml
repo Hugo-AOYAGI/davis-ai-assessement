@@ -1,0 +1,18 @@
+id: s03_corner_avelines
+level: surveyor
+tests: Corner parcel beside Chemin des Avelines and Rue de la Fontaine; do not extend
+  the site into either street.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 3 Chemin des Avelines, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000BK0330
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 295.86
+  tolerance: 0.02
+  source: cadastre

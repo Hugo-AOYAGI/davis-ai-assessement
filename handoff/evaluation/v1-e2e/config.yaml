@@ -1,0 +1,730 @@
+models:
+  pricing:
+    claude-sonnet-5-5:
+      input: 2.0
+      output: 10.0
+      cache_read: 0.2
+      cache_write: 2.5
+    claude-opus-5-5:
+      input: 5.0
+      output: 25.0
+      cache_read: 0.5
+      cache_write: 6.25
+    claude-haiku-5-5:
+      input: 0.1
+      output: 0.5
+      cache_read: 0.01
+      cache_write: 0.125
+  nodes:
+    surveyor:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 16000
+      max_retries: 3
+      timeout: 300
+      tags:
+      - nostream
+    zoning_analyst:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 16000
+      max_retries: 3
+      timeout: 300
+      tags:
+      - nostream
+    orchestrator:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 32000
+      max_retries: 3
+      timeout: 300
+      tags: []
+    doc_analyst:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 32000
+      max_retries: 3
+      timeout: 300
+      tags:
+      - nostream
+    architect:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 16000
+      max_retries: 3
+      timeout: 300
+      tags:
+      - nostream
+    ingest_classifier:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-haiku-5-5
+      max_tokens: 1024
+      max_retries: 3
+      timeout: 60
+      tags:
+      - nostream
+    judge:
+      _target_: langchain_anthropic.ChatAnthropic
+      model: claude-sonnet-5-5
+      max_tokens: 2000
+      max_retries: 3
+      timeout: 300
+      tags: []
+agent:
+  prompt: prompts/orchestrator/system.md
+  model: orchestrator
+  general_purpose_subagent: false
+  language: English
+  recursion_limit: 300
+  playbooks:
+    study:
+      description: 'Full buildability study of an address for a construction program:
+        site and zone, the rules and OAP notes, decisions and ambiguities, then submit_study.'
+      path: prompts/playbooks/study.md
+  request: prompts/orchestrator/request.md
+  no_facts: '- none given'
+  tools:
+  - _target_: agent.tools.submit.reader.read_artifact_tool
+  - _target_: agent.tools.study.gate.submit_study_tools
+    name: submit_study
+    artifact: study
+    corpus:
+      _target_: agent.adapters.corpus.store.load_corpus
+      _partial_: true
+      directory:
+        _target_: agent.agents.config.project_path
+        relative: ${corpus.dir}
+    citations:
+      _target_: agent.tools.study.checks.citation_rules
+      policy: ${policies.citations.policy}
+      min_score: ${policies.citations.min_score}
+      neighbour_pages: ${policies.citations.neighbour_pages}
+      max_quote_chars: ${policies.citations.max_quote_chars}
+      check_raster: ${policies.citations.check_raster}
+    inputs:
+      _target_: agent.tools.study.inputs.StudyInputs
+      site:
+        artifact: site
+        producer: surveyor
+      zone:
+        artifact: zone
+        producer: zoning_analyst
+      notes:
+        artifact: notes.{label}
+        producer: doc_analyst
+      envelope:
+        artifact: envelope
+        producer: architect
+      labels: ${policies.study.required_notes}
+      oap_label: oap
+    geometry: ${geo.edge_labels}
+    envelope: ${policies.envelope.settings}
+    images: ${images.pages}
+    crops_dir:
+      _target_: agent.agents.config.project_path
+      relative: ${policies.evidence.crops_dir}
+case:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: One Résidence Sociale Étudiante (RSE) and one Résidence Jeunes Actifs,
+    in two separate buildings.
+  corpus_id: ${corpus.id}
+  facts: []
+policies:
+  ask_user:
+    mode: disabled
+  citations:
+    policy: reject
+    min_score: 0.9
+    neighbour_pages: 0
+    max_quote_chars: 160
+    check_raster: false
+  envelope:
+    quad_segs: 8
+    min_area_m2: 1.0
+    level_step_m: 1.0
+    cut_tolerance_m: 0.01
+    settings:
+      _target_: agent.runtime.geometry.envelope.study.EnvelopeSettings
+      level_step_m: ${policies.envelope.level_step_m}
+      quad_segs: ${policies.envelope.quad_segs}
+      min_area_m2: ${policies.envelope.min_area_m2}
+      cut_tolerance_m: ${policies.envelope.cut_tolerance_m}
+  study:
+    required_notes:
+    - rules
+    - oap
+    - destinations
+  evidence:
+    crops_dir: data/crops
+  tracing:
+    enabled: ${oc.decode:${oc.env:AGENT_TRACING,true}}
+    project: davis-assessment
+    endpoint: http://localhost:6006/v1/traces
+    hide_images: true
+    base64_max_chars: 1000
+  logging:
+    level: INFO
+  server:
+    graph_cache_size: 8
+  report:
+    max_quote_chars: 200
+corpus:
+  id: gif-sur-yvette@2021-07-06
+  dir: data/${corpus.id}
+  documents:
+  - id: plu_reglement
+    path: ressources/plu_reglement_91272_20210706.pdf
+    legal_force: conformity
+  - id: plu_reglement_graphique
+    path: ressources/plu_reglement_graphique_91272_20210706.pdf
+    legal_force: conformity
+  - id: oap
+    path: ressources/oap_91272_20210706.pdf
+    legal_force: compatibility
+  classifier:
+    model: ingest_classifier
+    prompt: prompts/ingest/classifier.md
+    sample_pages: 3
+    sample_chars: 1500
+  search:
+    stopwords:
+    - le
+    - la
+    - les
+    - l
+    - de
+    - des
+    - du
+    - d
+    - un
+    - une
+    - et
+    - en
+    - a
+    - au
+    - aux
+    - pour
+    - par
+    - sur
+    - dans
+    - est
+    - sont
+    - ou
+    - que
+    - qui
+    - ne
+    - pas
+    - se
+    - ce
+    - ces
+    - cet
+    - cette
+    - il
+    - elle
+    - ils
+    - elles
+    - son
+    - sa
+    - ses
+    - leur
+    - leurs
+    - avec
+    - sans
+    - être
+    - etre
+    - peut
+    - peuvent
+    - doit
+    - doivent
+    - 'y'
+    - s
+    - 'n'
+    - qu
+  splitter:
+    regulatory_text:
+      levels:
+      - titre
+      - sector
+      - zone
+      - article
+      - part
+      - term
+      header_max_y: 70
+      footer_min_y: 785
+      footer: ^Modification n°1 et révision allégée n°1( approuvées le .*)?$
+      max_continuation: 2
+      preamble: Préambule
+      rules:
+      - level: titre
+        pattern: ^TITRE (?P<number>I{1,3}) :$
+        font: Bold
+        min_size: 20
+        key: titre-{number}
+        continuation: ^[^a-zà-ÿ]+$
+      - level: sector
+        scope: header
+        inside: titre/titre-ii
+        pattern: ^(?P<sector>[^\W\d_]+)( - [A-Za-z]+)?$
+        font: Bold
+        min_size: 20
+        key: '{sector}'
+        title: '{sector}'
+      - level: zone
+        scope: header
+        inside: titre/titre-ii
+        pattern: ^(?P<sector>[^\W\d_]+) - (?P<zone>[A-Za-z]+)$
+        font: Bold
+        min_size: 20
+        key: '{zone}'
+      - level: article
+        inside: zone
+        pattern: ^(ARTICLE|Article)\s*[-–]?\s*(?P<article>\d+)\s*[-–]\s*zone\s+(?P<zone>[A-Za-z]+)\s*[-–]
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        continuation: ^(?!(ARTICLE|Article)\b)(?![A-Z]{0,4} ?\d)[^a-zà-ÿ]*[A-Z]{2}[^a-zà-ÿ]*$
+      - level: article
+        inside: zone
+        pattern: ^(ARTICLE|Article)?\s*[-–]?\s*(?P<zone>UMG|UME|UED|AURc|U[A-Z]|NF|NE|N|A)\s?(?P<article>\d{1,2})\s*[-–]
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        continuation: ^(?!(ARTICLE|Article)\b)(?![A-Z]{0,4} ?\d)[^a-zà-ÿ]*[A-Z]{2}[^a-zà-ÿ]*$
+        continuation_min_size: 10.5
+      - level: article
+        inside: titre/titre-i
+        pattern: ^Article (?P<article>\d+)\s*[-–]
+        font: Bold
+        min_size: 11.5
+        key: '{article}'
+        continuation: ^(?!(ARTICLE|Article)\b)(?![A-Z]{0,4} ?\d)[^a-zà-ÿ]*[A-Z]{2}[^a-zà-ÿ]*$
+      - level: part
+        inside: titre/titre-iii
+        pattern: ^L ?E ?X ?I ?Q ?U ?E$
+        font: Bold
+        min_size: 16
+        title: Lexique
+      - level: part
+        inside: titre/titre-iii
+        pattern: ^[A-ZÀ-Þ][^a-zà-ÿ]+$
+        font: ^CenturyGothic-Bold$
+        min_size: 13.5
+        max_size: 14.5
+        continuation: ^[^a-zà-ÿ]+$
+      - level: part
+        inside: titre/titre-iii
+        pattern: ^[A-ZÀ-Þ][^a-zà-ÿ]+$
+        font: ^TimesNewRoman.*Bold
+        min_size: 11.5
+      - level: part
+        inside: titre/titre-iii
+        pattern: ^[A-ZÀ-Þ][^a-zà-ÿ]+$
+        font: JimmySans
+        min_size: 12.5
+        max_size: 13.5
+      - level: part
+        inside: titre/titre-iii
+        pattern: ^ANNEXES :$
+        font: Bold
+        min_size: 20
+        title: Annexes
+      - level: term
+        inside: part/lexique
+        field: lead
+        pattern: ^(?P<title>[^:]+?)\s*:?$
+        font: ^ArialNarrow-Bold$
+        min_size: 10.5
+        max_size: 11.2
+        title: '{title}'
+    oap:
+      levels:
+      - chapter
+      header_max_y: 50
+      footer_min_y: 790
+      max_continuation: 1
+      preamble: Préambule
+      rules:
+      - level: chapter
+        pattern: ^(?P<number>\d)\s{3,}(?P<title>\S.*)$
+        font: Bold
+        min_size: 20
+        key: chapitre-{number}
+        title: '{number} {title}'
+      - level: chapter
+        pattern: ^[A-ZÀ-Þ][^a-zà-ÿ]+$
+        font: Italic
+        min_size: 30
+        continuation: ^[^a-zà-ÿ]+$
+geo:
+  crs: EPSG:2154
+  geographic_crs: EPSG:4326
+  decimals: 2
+  max_results: 5
+  search_radius_m: 50
+  edges:
+    snap_tolerance_m: 0.5
+    min_shared_ratio: 0.5
+    collinear_angle_deg: 20
+  edge_labels:
+    _target_: agent.tools.envelope.compute.GeometrySettings
+    snap_tolerance_m: ${geo.edges.snap_tolerance_m}
+    collinear_angle_deg: ${geo.edges.collinear_angle_deg}
+  http:
+    _target_: agent.adapters.http.CachedHttp
+    cache_dir:
+      _target_: agent.agents.config.project_path
+      relative: data/cache/geo
+    timeout_s: 30
+  geocoder:
+    _target_: agent.adapters.geo.geocoder.AddressGeocoder
+    url: https://data.geopf.fr/geocodage/search
+    http: ${geo.http}
+  cadastre:
+    _target_: agent.adapters.geo.cadastre.CadastreClient
+    url: https://apicarto.ign.fr/api/cadastre/parcelle
+    http: ${geo.http}
+    page_size: 500
+  imagery:
+    _target_: agent.adapters.geo.imagery.ImageryClient
+    url: https://data.geopf.fr/wms-r/wms
+    http: ${geo.http}
+    version: 1.3.0
+    crs: ${geo.crs}
+    media_type: image/png
+    layers:
+      map: GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2
+      aerial: ORTHOIMAGERY.ORTHOPHOTOS
+    source: IGN Géoplateforme WMS
+  surveyor:
+    _target_: agent.adapters.geo.survey.SiteSurveyor
+    geocoder: ${geo.geocoder}
+    cadastre: ${geo.cadastre}
+    settings:
+      _target_: agent.adapters.geo.records.SurveySettings
+      crs: ${geo.crs}
+      geographic_crs: ${geo.geographic_crs}
+      decimals: ${geo.decimals}
+      grid_size_m: 0.05
+      max_sliver_area_m2: 1.0
+      neighbour_buffer_m: 2.0
+      snap_tolerance_m: ${geo.edges.snap_tolerance_m}
+      min_shared_ratio: ${geo.edges.min_shared_ratio}
+      geocoder_source: geoplateforme-geocodage
+      cadastre_source: apicarto-cadastre
+  site_view:
+    _target_: agent.tools.geo.view.site_view_tool
+    surveyor: ${geo.surveyor}
+    imagery: ${geo.imagery}
+    store: ${images.store}
+    half_widths_m:
+      town: 1500
+      neighbourhood: 250
+    parcel_margin_ratio: 0.3
+    min_half_width_m: 40
+    image_px: 1024
+    style:
+      _target_: agent.adapters.geo.imagery.OutlineStyle
+      rgb:
+      - 230
+      - 0
+      - 0
+      width_px: 3
+      font_px: 14
+      label_background_rgb:
+      - 255
+      - 255
+      - 255
+images:
+  pages:
+    _target_: agent.adapters.images.shared.page_images
+    documents: ${corpus.documents}
+    root:
+      _target_: agent.agents.config.project_path
+      relative: .
+    render_dpi: 200
+    scan_min_coverage: 0.8
+    max_image_px: 2000
+    max_upscale: 2.0
+    ruler_step_px: 100
+    crop_max_px: 3000
+    cache_size: 2
+  store:
+    _target_: agent.adapters.images.store.ImageStore
+    directory:
+      _target_: agent.agents.config.project_path
+      relative: data/images
+    url_prefix: /images
+retrieval:
+  mode: full_sections
+  corpus:
+    _target_: agent.tools.documents.source.CorpusSource
+    directory:
+      _target_: agent.agents.config.project_path
+      relative: ${corpus.dir}
+    stopwords: ${corpus.search.stopwords}
+  max_chars: 120000
+  max_pages: 4
+  search_k: 8
+  snippet_chars: 300
+subagents:
+  surveyor:
+    description: 'Turns the case address into the site under study. Give it the address
+      and the program (only context to judge which parcels plausibly form the plot).
+      It geocodes the address, inspects the nearby cadastral parcels and chooses one
+      parcel or several adjacent ones; code then builds the `site` artifact: parcels,
+      union polygon (Lambert-93), area, and every edge with what lies across it (another
+      parcel or public land), with geometric citations. A neighbouring strip it judges
+      to be pavement or verge is declared public land, with its evidence. It reports
+      the choice, its rationale and assumptions. Facts only: no zone, no legal labelling
+      of limits.'
+    prompt: prompts/subagents/surveyor.md
+    model: surveyor
+    tools:
+    - _target_: agent.tools.geo.geocode.geocode_tool
+      geocoder: ${geo.geocoder}
+      max_results: ${geo.max_results}
+    - _target_: agent.tools.geo.parcels.find_parcels_tool
+      surveyor: ${geo.surveyor}
+      radius_m: ${geo.search_radius_m}
+    - _target_: agent.tools.geo.parcels.describe_parcels_tool
+      surveyor: ${geo.surveyor}
+    - ${geo.site_view}
+    - _target_: agent.tools.submit.factory.submit_tools
+      name: submit_parcel
+      artifact: site
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.findings.site.ParcelChoice
+      finalize:
+        _target_: agent.tools.geo.site.parcel_finalizer
+        surveyor: ${geo.surveyor}
+      summarize:
+        _target_: hydra.utils.get_method
+        path: agent.tools.geo.site.summarize_site
+  zoning_analyst:
+    description: 'Reads the zoning plan for the site: finds the site on the plan by
+      eye, reads its zone and checks every legend item (overlays, perimeters, protections)
+      as applying or not. Needs the site first (surveyor''s `site` artifact): give
+      it the address and the parcel ids. Delivers the artifact `zone`.'
+    prompt: prompts/subagents/zoning_analyst.md
+    model: zoning_analyst
+    tools:
+    - _target_: agent.tools.documents.navigate.list_documents_tool
+      corpus: ${retrieval.corpus}
+      documents: ${corpus.documents}
+    - ${geo.site_view}
+    - _target_: agent.tools.images.view.view_image_tool
+      pages: ${images.pages}
+      store: ${images.store}
+    - _target_: agent.tools.images.view.zoom_tool
+      pages: ${images.pages}
+      store: ${images.store}
+    - _target_: agent.tools.submit.factory.submit_tools
+      name: submit_zone
+      artifact: zone
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.findings.zone.ZoneFindings
+      finalize:
+        _target_: agent.tools.images.zone.zone_finalizer
+        images: ${images.pages}
+  doc_analyst:
+    description: Reads the planning documents (regulation, OAP, diagrams) for one
+      aim and returns what they say as cited notes, one or more per topic, plus the
+      open points they leave; it extracts, it does not decide. Give it a `label` (lowercase
+      id naming this run, e.g. `rules`), the `aim`, the `topics` checklist (may be
+      empty), the `context` you already know (zone, legend items, parcel ids, program)
+      and, optionally, the `documents` it may read. Delivers the artifact `notes.<label>`.
+    prompt: prompts/subagents/doc_analyst.md
+    model: doc_analyst
+    tools:
+    - _target_: agent.tools.documents.navigate.list_documents_tool
+      corpus: ${retrieval.corpus}
+      documents: ${corpus.documents}
+    - _target_: agent.tools.documents.navigate.list_sections_tool
+      corpus: ${retrieval.corpus}
+    - _target_: agent.tools.documents.navigate.read_section_tool
+      corpus: ${retrieval.corpus}
+      mode: ${retrieval.mode}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.documents.lookup.search_tool
+      corpus: ${retrieval.corpus}
+      k: ${retrieval.search_k}
+      snippet_chars: ${retrieval.snippet_chars}
+    - _target_: agent.tools.documents.navigate.read_pages_tool
+      corpus: ${retrieval.corpus}
+      max_pages: ${retrieval.max_pages}
+      max_chars: ${retrieval.max_chars}
+    - _target_: agent.tools.images.view.view_image_tool
+      pages: ${images.pages}
+      store: ${images.store}
+    - _target_: agent.tools.images.view.zoom_tool
+      pages: ${images.pages}
+      store: ${images.store}
+    - ${geo.site_view}
+    - _target_: agent.tools.submit.factory.submit_tools
+      name: submit_notes
+      artifact: notes.{label}
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.findings.notes.DocNotes
+      finalize:
+        _target_: agent.tools.documents.notes.notes_finalizer
+        corpus: ${retrieval.corpus}
+        images: ${images.pages}
+        policy: ${policies.citations.policy}
+        min_score: ${policies.citations.min_score}
+        neighbour_pages: ${policies.citations.neighbour_pages}
+        max_quote_chars: ${policies.citations.max_quote_chars}
+        check_raster: ${policies.citations.check_raster}
+  architect:
+    description: 'Produces the capacity study: turns the cited rules of the notes
+      into envelope inputs (setbacks per limit kind, a height per building, spacing
+      between buildings, footprint and green caps), places the program''s buildings
+      on the site, checks the layout on a plan preview, and submits; code computes
+      the bounds and the proposal. It reads no document. Needs the `site` and the
+      notes first (`notes.rules`, `notes.oap`, `notes.destinations`). Give it the
+      program text; each building with the label you use in admissibility and the
+      destination you decided for it; whether the OAP applies; and any extra notes
+      artifact to read (e.g. `notes.rules_spacing`, after an open point). Rules missing
+      from the notes come back as open points. Delivers the artifact `envelope`.'
+    prompt: prompts/subagents/architect.md
+    model: architect
+    tools:
+    - _target_: agent.tools.submit.reader.read_artifact_tool
+    - _target_: agent.tools.envelope.preview.preview_envelope_tool
+      site: site
+      store: ${images.store}
+      geometry: ${geo.edge_labels}
+      settings: ${policies.envelope.settings}
+      imagery: ${geo.imagery}
+      plan:
+        _target_: agent.tools.envelope.plan.PlanSettings
+        kind: map
+        parcel_margin_ratio: ${geo.site_view.parcel_margin_ratio}
+        min_half_width_m: ${geo.site_view.min_half_width_m}
+        image_px: ${geo.site_view.image_px}
+        style: ${geo.site_view.style}
+        fill_opacity: 0.45
+        limit_rgbs:
+          road:
+          - 0
+          - 90
+          - 220
+          side:
+          - 240
+          - 130
+          - 0
+          rear:
+          - 150
+          - 0
+          - 170
+        setback_rgb:
+        - 230
+        - 0
+        - 0
+        building_rgbs:
+        - - 0
+          - 160
+          - 70
+        - - 0
+          - 170
+          - 200
+        - - 200
+          - 170
+          - 0
+        - - 120
+          - 80
+          - 40
+        gap_rgb:
+        - 0
+        - 0
+        - 0
+    - _target_: agent.tools.submit.factory.submit_tool
+      name: submit_envelope
+      artifact: envelope
+      contract:
+        _target_: hydra.utils.get_class
+        path: agent.contracts.envelope.EnvelopeSubmission
+      finalize:
+        _target_: agent.tools.envelope.submit.envelope_finalizer
+        site: site
+        geometry: ${geo.edge_labels}
+        settings: ${policies.envelope.settings}
+      summarize:
+        _target_: hydra.utils.get_method
+        path: agent.runtime.geometry.envelope.summary.describe_envelope
+eval:
+  eval_tasks:
+    subagents:
+      surveyor: surveyor
+      zoning: zoning_analyst
+      doc: doc_analyst
+    artifacts:
+      surveyor: site
+      zoning: zone
+      doc: notes.{label}
+    templates:
+      surveyor: prompts/evals/tasks/surveyor.md
+      zoning: prompts/evals/tasks/zoning.md
+      doc: prompts/evals/tasks/doc.md
+    texts:
+      none: none
+      no_program: not given
+      all_documents: every corpus document
+    recursion_limit: 100
+    max_rejection_chars: 300
+  judge:
+    model: judge
+    structured_output: json_schema
+    system: prompts/evals/judge/system.md
+    questions:
+      must_flag: prompts/evals/judge/assertions/must_flag.md
+      must_not: prompts/evals/judge/assertions/must_not.md
+      covers: prompts/evals/judge/assertions/covers.md
+      hedging: prompts/evals/judge/quality/hedging.md
+      deferral: prompts/evals/judge/quality/deferral.md
+      invented_rule: prompts/evals/judge/reasoning/invented_rule.md
+      restating: prompts/evals/judge/quality/restating.md
+      inconsistency: prompts/evals/judge/reasoning/inconsistency.md
+      unflagged_gap: prompts/evals/judge/reasoning/unflagged_gap.md
+    cache_dir: data/cache/judge
+    views:
+      max_quote_chars: 400
+      crops_link_base: evidence
+    validation:
+      limit: max_height_m
+      shift: 3
+      hedge: Depending on the reading, the maximum is between {low:g} and {high:g}
+        m.
+      contradiction: '
+
+
+        In short, buildings may rise to {value:g} m.'
+      invented_topic: appearance
+      invented_rule: Every roof must be covered with red clay tiles and every facade
+        rendered in white lime.
+  dataset: e2e
+  datasets_dir: evals/datasets
+  statuses:
+  - verified
+  items: []
+  rescore: null
+  tolerances:
+    envelope: 0.02
+    quad_segs: ${policies.envelope.settings.quad_segs}
+    min_area_m2: ${policies.envelope.settings.min_area_m2}
+    level_step_m: ${policies.envelope.settings.level_step_m}
+    cut_tolerance_m: ${policies.envelope.settings.cut_tolerance_m}
+  confidence: 0.95
+  bootstrap:
+    resamples: 2000
+    seed: 0
+  phoenix:
+    enabled: false
+    base_url: http://localhost:6006
+    timeout_s: 3600
+    retries: 0
+  max_cost_usd: 35
+  concurrency: 4
+  output_dir: outputs/evals

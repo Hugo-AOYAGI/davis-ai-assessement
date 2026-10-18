@@ -53,9 +53,7 @@ listed: `submit_notes` requires one note per topic and no note outside the list.
   the lexique). For an applying legend item that points to another document (e.g. the OAP
   perimeter), report only what the regulation itself says about it: the OAP is read by the `oap`
   task.
-- topics: `access`, `networks`, `setback_road`, `setback_side`, `setback_rear`,
-  `distance_between_buildings`, `footprint`, `height`, `appearance`, `parking`, `green_space`,
-  `definitions`, `other`.
+- topics: $rules_topics.
   - Each `setback_*` topic gives every option the regulation leaves for that kind of edge:
     whether building on the limit is allowed, the distance with windows (*vues*) and without,
     and any distance that depends on the height (e.g. H/2 with a minimum), with their
@@ -72,8 +70,7 @@ listed: `submit_notes` requires one note per topic and no note outside the list.
 - label: `oap`
 - aim: whether an OAP covers the site, and what it prescribes for the program.
 - documents: the OAP document, plus the zoning plan and `site_view` only to check the perimeter.
-- topics: `perimeter`, `general_orientations`, `building_form`, `mobility_access`,
-  `landscape_green`, `programming`, `other`. The `perimeter` note says whether the site lies
+- topics: $oap_topics. The `perimeter` note says whether the site lies
   inside the OAP perimeter, comparing the OAP diagrams with `site_view`.
 
 **Task `destinations`**
@@ -83,8 +80,8 @@ listed: `submit_notes` requires one note per topic and no note outside the list.
   say what the zone allows for it.
 - documents: the written regulation only (règlement: the general provisions defining the
   destinations, the zone chapter, the lexique).
-- topics: `destination_definitions`, then one topic per building named after it in lowercase
-  (e.g. `residence_sociale_etudiante`, `residence_jeunes_actifs`), then `special_rules`.
+- topics: $destination_topics, plus one topic per building named after it in lowercase
+  (e.g. `residence_sociale_etudiante`, `residence_jeunes_actifs`).
   - `destination_definitions`: how the PLU defines the destinations and sub-destinations that
     could fit the program (housing, hosted accommodation, collective-interest facilities...).
   - Each building topic: the candidate destinations, the one that fits and why, and what the
@@ -134,8 +131,14 @@ Work through this checklist, in order:
 The study holds no envelope figures: the `architect` delivers the `envelope` artifact, and
 `submit_study` reads it and recomputes its bounds and proposal.
 
-1. Call `architect` once step 4 is done. Its task text: the buildings, each with its label and
-   the destination and sub-destination you retained; the program with its facts; whether the
+If every building's use is prohibited, skip this step and submit the cited negative study.
+The gate omits the envelope in that case: never invent a height or a buildable proposal for
+a prohibited program. For a mixed program, keep every building in `admissibility`, but give
+the architect only buildings whose uses are permitted, conditional or restricted. Do not
+invent heights or allocate a footprint to prohibited buildings.
+
+1. Call `architect` once step 4 is done. Its task text: the non-prohibited buildings, each with
+   its label and the destination and sub-destination retained; the program facts; whether the
    OAP applies. It reads `site`, `notes.rules` and, when the OAP applies, `notes.oap` itself:
    do not copy them into the task.
 2. Read its reply. For each open point it returns (a rule it needs that the notes lack, such as
@@ -174,9 +177,9 @@ exactly as the gate returned them, parking, and the main ambiguities with your c
 - `regime`: the retained `zone`; `overlays`: the legend items of `zone` that apply (`applies`
   true), copied as they are; `oap_applicable` and `oap_prescriptions` from the `oap` notes;
   `citations` for the zone, from the `rules` notes citing the zone chapter.
-- `admissibility`: one entry per building of the program, `building` being its label (the same
-  labels as in the `architect`'s task), with the destination retained and citations from the
-  `destinations` notes.
+- `admissibility`: one entry per building of the program, `building` being its label (reuse
+  these labels for non-prohibited buildings in the `architect`'s task), with the destination
+  retained and citations from the `destinations` notes.
 - `parking` and `conditions`: as decided in step 4.
 - `ambiguities`: every open point of the notes and of the `architect` (question copied
   verbatim), the ambiguities of `zone`, and those you recorded. `resolved_by` is `user` only for

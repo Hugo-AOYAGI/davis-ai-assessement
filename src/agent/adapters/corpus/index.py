@@ -31,6 +31,7 @@ class CorpusIndex:
         Args:
             corpus: The ingested corpus.
             stopwords: Words ignored by keyword search.
+        expected_id: Configured corpus identity, checked before indexing.
         """
         self._corpus = corpus
         self._documents = {document.id: document for document in corpus.documents}
@@ -125,14 +126,17 @@ class CorpusIndex:
 
 
 @cache
-def load_index(directory: Path, stopwords: tuple[str, ...]) -> CorpusIndex:
+def load_index(
+    directory: Path, stopwords: tuple[str, ...], expected_id: str | None = None
+) -> CorpusIndex:
     """Load a corpus directory into a shared, cached index.
 
     Args:
         directory: Corpus directory written by ``ingest``.
         stopwords: Words ignored by keyword search.
+        expected_id: Configured corpus identity, checked before indexing.
 
     Returns:
         The same index for the same arguments (clear with ``load_index.cache_clear()``).
     """
-    return CorpusIndex(load_corpus(directory), stopwords)
+    return CorpusIndex(load_corpus(directory, expected_id), stopwords)

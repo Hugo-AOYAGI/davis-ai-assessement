@@ -8,7 +8,7 @@ from agent.contracts.findings.site import ParcelChoice, Site
 from agent.contracts.findings.zone import ZoneFindings
 from agent.contracts.geometry import Boundary, BoundaryKind
 from agent.contracts.inputs.clarification import ClarificationRequest
-from agent.contracts.study import Study, VerifiedStudy
+from agent.contracts.study import Study, Verdict, VerifiedStudy
 
 SUBMITTED = (
     ParcelChoice,
@@ -47,6 +47,27 @@ def test_verified_study_json_round_trip(
 def test_stored_crop_rejects_empty_pixels(zone: ZoneFindings):
     with pytest.raises(ValueError, match="not a box"):
         StoredCrop(region=zone.region, pixels=(5, 5, 5, 9), path="x.png")
+
+
+@pytest.mark.parametrize("prohibited", [False, True])
+def test_envelope_presence_matches_program(study, site, zone, envelope, prohibited):
+    if prohibited:
+        study = study.model_copy(
+            update={
+                "admissibility": tuple(
+                    entry.model_copy(update={"verdict": Verdict.PROHIBITED})
+                    for entry in study.admissibility
+                )
+            }
+        )
+    fields = dict(study=study, site=site, zone=zone, boundaries=(), citation_checks=(), evidence=())
+    assert study.requires_envelope is not prohibited
+    accepted = VerifiedStudy.model_validate(
+        {**fields, "envelope": None if prohibited else envelope}
+    )
+    assert VerifiedStudy.model_validate_json(accepted.model_dump_json()) == accepted
+    with pytest.raises(ValueError, match="envelope must be absent exactly"):
+        VerifiedStudy.model_validate({**fields, "envelope": envelope if prohibited else None})
 
 
 def test_region_schema_is_described():

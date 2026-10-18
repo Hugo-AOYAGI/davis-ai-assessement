@@ -1,0 +1,30 @@
+# Independent source checks: evals/fixtures/zoning/z05_emplacement_reserve.oracle.json
+id: z05_emplacement_reserve
+level: zoning
+tests: partial reserved land along an otherwise UH parcel
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 26 Avenue des Charmes, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000BE0321
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UH
+- key: overlays
+  present:
+  - Emplacements réservés pour équipements et aménagements divers, création ou amélioration
+    de voirie
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_flag:
+- The emplacement réservé covers only part of the parcel (about 8%); it is not a whole-parcel
+  reservation.

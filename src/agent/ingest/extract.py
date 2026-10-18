@@ -43,7 +43,6 @@ def _line(spans: Sequence[_Span], page: int, bbox: Sequence[float]) -> Line | No
     return Line(
         page=page,
         text="".join(texts).rstrip(),
-        x0=bbox[0],
         y0=bbox[1],
         size=size if isinstance(size, float) else 0.0,
         font=font,

@@ -72,7 +72,7 @@ class BuildingMassing(Contract):
     footprint: Polygon | None
     """Its ground footprint; ``None`` when nothing remains for it."""
     footprint_area_m2: float = Field(ge=0)
-    """Ground area, after any cap scaling."""
+    """Area of the ground footprint, after any trimming to respect an area cap."""
     max_height_m: float = Field(gt=0)
     levels: tuple[Level, ...]
     """One slice for a prism, several when setbacks grow with the height."""

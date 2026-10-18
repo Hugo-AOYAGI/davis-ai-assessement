@@ -1,0 +1,141 @@
+# Ten random items including preserved s02. Sampling aid sectors are not zoning claims.
+# Selection is seeded and conditioned on independent source quality; not a uniform sample.
+# Excluded: CP0154 absent from API Carto; AE0072 area differs by >2%.
+- id: s02_croix_de_fer
+  tests: commune-certified BAN address linked to one parcel; ordinary single-parcel
+    selection
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s02_croix_de_fer.yaml
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 7 --n 3
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s02_croix_de_fer.sources.json
+- id: s11_longs_reages
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s11_longs_reages.yaml
+  address: 40 Allee des Longs Réages, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AK0119
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s11_longs_reages.sources.json
+  caveats: []
+- id: s12_clairiere
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s12_clairiere.yaml
+  address: 105 Allee de la Clairiere, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AK0493
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 3
+  sources: evals/fixtures/surveyor/s12_clairiere.sources.json
+  caveats: []
+- id: s13_salmouille
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s13_salmouille.yaml
+  address: 60 All Graviers de la Salmouille, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AC0353
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 7
+  sources: evals/fixtures/surveyor/s13_salmouille.sources.json
+  caveats: []
+- id: s14_voltaire
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s14_voltaire.yaml
+  address: 60 Avenue Voltaire, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BL0045
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s14_voltaire.sources.json
+  caveats: []
+- id: s15_hoche
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s15_hoche.yaml
+  address: 6 Avenue Hoche, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BL0060
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 3
+  sources: evals/fixtures/surveyor/s15_hoche.sources.json
+  caveats: []
+- id: s16_paul_bert
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s16_paul_bert.yaml
+  address: 5 Avenue Paul Bert, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BM0057
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 4
+  sources: evals/fixtures/surveyor/s16_paul_bert.sources.json
+  caveats: []
+- id: s17_mail_potier
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s17_mail_potier.yaml
+  address: 25 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CR0213
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 5
+  sources: evals/fixtures/surveyor/s17_mail_potier.sources.json
+  caveats: []
+- id: s18_rue_potier
+  tests: commune-certified BAN single-parcel link; sub-metre address-point offset
+    must not override explicit parcel link
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s18_rue_potier.yaml
+  address: 4 Rue Pierre Potier, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CP0220
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 7
+  sources: evals/fixtures/surveyor/s18_rue_potier.sources.json
+  caveats:
+  - Certified BAN point is 0.703 m outside linked cadastral polygon.
+- id: s19_blanc_lapierre
+  tests: commune-certified BAN single-parcel link; sub-metre address-point offset
+    must not override explicit parcel link
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s19_blanc_lapierre.yaml
+  address: 16 Rue André Blanc-Lapierre, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CP0068
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 10
+  sources: evals/fixtures/surveyor/s19_blanc_lapierre.sources.json
+  caveats:
+  - Certified BAN point is 0.391 m outside linked cadastral polygon.

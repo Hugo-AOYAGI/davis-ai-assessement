@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from functools import cache
 from pathlib import Path
 
 import pymupdf
@@ -61,7 +62,22 @@ def make_classifier(
     Returns:
         A function mapping a text sample (see :func:`text_sample`) to a classification.
     """
-    structured = build_model(models_cfg, node).with_structured_output(Classification)
+
+    @cache
+    def model() -> Callable[[str], Classification]:
+        """Create the model only when a document needs inferred metadata."""
+        structured = build_model(models_cfg, node).with_structured_output(Classification)
+
+        def invoke(sample: str) -> Classification:
+            """Classify a sample with the shared structured-output client."""
+            result = structured.invoke([SystemMessage(prompt), HumanMessage(sample)])
+            return (
+                result
+                if isinstance(result, Classification)
+                else Classification.model_validate(result)
+            )
+
+        return invoke
 
     def classify(sample: str) -> Classification:
         """Classify one document from its text sample.
@@ -72,9 +88,6 @@ def make_classifier(
         Returns:
             The model's classification.
         """
-        result = structured.invoke([SystemMessage(prompt), HumanMessage(sample)])
-        if isinstance(result, Classification):
-            return result
-        return Classification.model_validate(result)
+        return model()(sample)
 
     return classify

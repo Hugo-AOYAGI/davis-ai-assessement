@@ -1,0 +1,55 @@
+# Site: BAN point of 16 Impasse de la Gourdillerie lies inside cadastral parcel CC0193
+# (evals.gt.site ban / near); no surveyor item exists, parcel and zone come from z07_natural_zone.
+# Zone N (Vallée chapter) and the prohibition: z07_natural_zone and d20_n_housing, quotes re-checked
+# on regulation PDF pp193-194.
+# Geometry oracle: cadastre polygon area 129.4 m2 (declared contenance 113 m2). The study's site area
+# is the polygon area (Site.area_m2).
+# No envelope or proposal-volume oracle: the program is prohibited, so a buildable envelope is an
+# anti-pattern (must_not), not an expected figure.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e10_n_housing
+level: e2e
+tests: negative case, plain natural zone N (Vallée); new housing is prohibited, the trap is a buildable envelope for it
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 16 Impasse de la Gourdillerie, 91190 Gif-sur-Yvette
+  program: One new detached house (a single new dwelling).
+  facts: []
+from_items: [z07_natural_zone, d20_n_housing]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CC0193]
+    critical: true
+    source: cadastre
+  - key: study.regime.zone
+    expect: N
+    critical: true
+    source: gpu_2021
+  - key: study.regime.overlays
+    present:
+      - Emplacements réservés pour équipements et aménagements divers, création ou amélioration de voirie
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    expect: prohibited
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 193
+        quote: "Les constructions nouvelles, ouvrages ou travaux à destination d’habitation, d’hébergement hôtelier, de bureaux, d’artisanat, de commerces, d’industrie, d’entrepôt, autres que ceux admis en N2."
+      - doc: plu_reglement
+        page: 194
+        quote: "L’extension des habitations existantes à la date d’approbation du présent PLU, dans la limite de 15% de leur surface de plancher."
+  - key: site.area_m2
+    expect: 129.4
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - The emplacement réservé covers only part of the parcel (about 58%), not the whole parcel.
+  - The only housing item admitted in zone N is the extension of dwellings existing at the PLU approval date (15% of floor area); the program states no existing dwelling on the parcel, so it must not be assumed.
+must_not:
+  - States or implies that the new house is permitted, conditional or restricted in zone N, or delivers a buildable envelope, height or footprint for it as if it were allowed.
+  - Treats the N2 extension of existing dwellings as permission to build a new dwelling.
+  - Applies the figures of the sectors Nc, Nca or NL to plain zone N (20% extension, 15% footprint, 10 m ridge height, 8 m spacing between buildings).
+  - Uses the zone N rules of the Chevry chapter instead of the Vallée chapter.
+  - Uses a neighbouring parcel (CC0199, CC0198, CC0152 or CC0201) as the study site instead of CC0193.

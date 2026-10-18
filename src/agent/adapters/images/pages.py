@@ -7,7 +7,7 @@ import pymupdf
 from pydantic import Field, PositiveFloat, PositiveInt
 
 from agent.adapters.images.load import page_count, page_image
-from agent.adapters.images.render import RULER_BAND_PX, crop_png, render_view
+from agent.adapters.images.render import RULER_BAND_PX, Overlay, crop_png, render_within
 from agent.contracts.base import Contract
 from agent.contracts.evidence import ImageRegion, StoredCrop
 from agent.runtime.images.boxes import OverviewScale, PixelBox, Size, fit_size, output_size
@@ -39,6 +39,7 @@ class _Settings(Contract):
     crop_max_px: PositiveInt
     cache_size: PositiveInt
     scan_min_coverage: float = Field(gt=0, le=1)
+    max_image_bytes: PositiveInt
 
 
 class PageImages:
@@ -61,6 +62,7 @@ class PageImages:
         crop_max_px: int,
         cache_size: int,
         scan_min_coverage: float,
+        max_image_bytes: int,
     ) -> None:
         """Index the documents and validate the knobs.
 
@@ -75,6 +77,8 @@ class PageImages:
             crop_max_px: Upper bound of the long edge of a saved crop.
             cache_size: Number of decoded page images kept in memory.
             scan_min_coverage: Share of the page an image must cover to make the page a scan.
+            max_image_bytes: Upper bound of a returned PNG's size; larger views are redrawn
+                smaller.
         """
         self._settings = _Settings(
             render_dpi=render_dpi,
@@ -84,6 +88,7 @@ class PageImages:
             crop_max_px=crop_max_px,
             cache_size=cache_size,
             scan_min_coverage=scan_min_coverage,
+            max_image_bytes=max_image_bytes,
         )
         self._root = root
         self._paths = {str(document["id"]): root / str(document["path"]) for document in documents}
@@ -114,6 +119,36 @@ class PageImages:
             content_px = self._settings.max_image_px - RULER_BAND_PX
             size = output_size(box, content_px, self._settings.max_upscale)
             return self._render(image, box, scale, size)
+
+    def outlined(
+        self, region: ImageRegion, overlay: Overlay, *, max_upscale: float, max_px: int | None
+    ) -> RenderedImage:
+        """A zoom with rings drawn over it, enlarged at most ``max_upscale`` times.
+
+        Args:
+            region: The region, in overview coordinates.
+            overlay: Rings drawn over it.
+            max_upscale: Upper bound of the enlargement of full-resolution pixels.
+            max_px: Long edge of the image, rulers included, when below ``max_image_px``.
+
+        Raises:
+            RegionError: If the document, page or region does not exist.
+        """
+        long_edge = min(max_px or self._settings.max_image_px, self._settings.max_image_px)
+        with self._lock:
+            image, scale, box = self._locate(region)
+            size = output_size(box, long_edge - RULER_BAND_PX, max_upscale)
+            return self._render(image, box, scale, size, overlay)
+
+    def scale(self, doc: str, page: int) -> OverviewScale:
+        """Full-resolution and overview sizes of a page.
+
+        Raises:
+            RegionError: If the document or page does not exist.
+        """
+        with self._lock:
+            self._check_page(doc, page)
+            return self._load(doc, page)[1]
 
     def check(self, region: ImageRegion) -> None:
         """Make sure a region lies on an existing page's overview.
@@ -199,10 +234,24 @@ class PageImages:
         return image, OverviewScale(full=full, overview=overview)
 
     def _render(
-        self, image: pymupdf.Pixmap, box: PixelBox, scale: OverviewScale, size: Size
+        self,
+        image: pymupdf.Pixmap,
+        box: PixelBox,
+        scale: OverviewScale,
+        size: Size,
+        overlay: Overlay | None = None,
     ) -> RenderedImage:
-        """Render a full-resolution box at ``size`` with rulers in overview coordinates."""
-        png = render_view(image, box, scale.rulers(box, size), step_px=self._settings.ruler_step_px)
+        """Render a full-resolution box at ``size`` (or smaller, to fit the byte budget)."""
+        settings = self._settings
+        png, size = render_within(
+            image,
+            box,
+            scale,
+            size,
+            step_px=settings.ruler_step_px,
+            max_bytes=settings.max_image_bytes,
+            overlay=overlay,
+        )
         return RenderedImage(
             png=png,
             image_size=(size[0] + RULER_BAND_PX, size[1] + RULER_BAND_PX),

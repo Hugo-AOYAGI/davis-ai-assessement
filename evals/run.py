@@ -1,4 +1,4 @@
-"""Hydra entrypoint of the eval harness (``docs/EVALS.md`` §7).
+"""Hydra entrypoint of the eval harness (``evals/README.md``§7).
 
 Usage: ``uv run python -m evals.run [overrides...]``, e.g. ``eval.dataset=surveyor``,
 ``eval.items=[s01_joliot_curie]``, ``eval.phoenix.enabled=false``, or any agent knob such as
@@ -138,7 +138,7 @@ def main(cfg: DictConfig) -> None:
         scores = run_pass(cfg, harness, overrides=overrides, client=client)
     for level in scores.levels:
         logger.info("%s: %d/%d items passed", level.level, level.passed, level.items)
-    logger.info("pass done: $%.2f spent, files in %s", budget.spent_usd, run_dir)
+    logger.info("pass done: $%.4f spent, files in %s", budget.spent_usd, run_dir)
 
 
 if __name__ == "__main__":

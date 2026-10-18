@@ -1,0 +1,17 @@
+id: s20_unknown_address
+level: surveyor
+tests: Deliberately nonexistent street and house number absent from the commune BAN
+  export; finish with an explicit lookup refusal rather than submitting an unrelated
+  parcel.
+status: verified
+built_by: codex_ban_absence_review
+input:
+  address: 999999 Rue des Licornes Inexistantes, 91190 Gif-sur-Yvette
+facts: []
+expected_refusal:
+  reason_pattern: (?is)(?:(?:cannot|can\x27t|could not|couldn\x27t|unable to|failed
+    to)\s+(?:reliably\s+|confidently\s+)?(?:find|locate|identify|resolve|geocode|verify|establish|determine|match).{0,150}(?:address|parcel|site)|(?:address|parcel|site).{0,120}(?:not
+    found|could not be (?:found|located|identified|resolved)|cannot be (?:found|located|identified|resolved)|does
+    not exist)|no\s+(?:matching|reliable|valid|exact)\s+(?:address|parcel|location))
+  required_tools:
+  - geocode

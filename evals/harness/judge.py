@@ -1,4 +1,4 @@
-"""The yes/no judge (``docs/EVALS.md`` §4): one question per call, a verdict and a short reason.
+"""The yes/no judge (``evals/README.md``§4): one question per call, a verdict and a short reason.
 
 No 1-10 scores: every question is answered ``yes`` or ``no``. The model is the ``judge`` node of
 ``models.nodes``, built by ``agent.llm``; answers are cached on disk under a hash of the model,

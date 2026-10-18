@@ -1,0 +1,25 @@
+# Independent source checks: evals/fixtures/zoning/z13_ugd.oracle.json
+id: z13_ugd
+level: zoning
+tests: UGd sub-sector
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 89 Rue Juliette Adam, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000BI0058
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UGd
+- key: overlays
+  present: []
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

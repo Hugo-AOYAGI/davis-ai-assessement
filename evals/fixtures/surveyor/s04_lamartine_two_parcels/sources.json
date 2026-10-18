@@ -1,0 +1,793 @@
+{
+  "id": "s04_lamartine_two_parcels",
+  "reviewed_utc": "2026-10-17T21:06:09.116072+00:00",
+  "review_method": "Codex manual BAN/cadastre source and rendered map inspection; no agent runs or model API calls",
+  "selection": {
+    "ban_id": "91272_1650_00018",
+    "category": "multiparcel",
+    "rationale": "BAN explicitly links BM0417 and BM0419. Their metric union is one Polygon. The entrance point is outside both, nearer BM0417; nearest-only selection loses BM0419.",
+    "query": "exact BAN id from department CSV"
+  },
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "cached_utc": "2026-10-17T19:14:43.943727+00:00",
+    "sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "row": {
+      "id": "91272_1650_00018",
+      "id_fantoir": "91272_1650",
+      "numero": "18",
+      "rep": "",
+      "nom_voie": "Avenue Lamartine",
+      "code_postal": "91190",
+      "code_insee": "91272",
+      "nom_commune": "Gif-sur-Yvette",
+      "code_insee_ancienne_commune": "",
+      "nom_ancienne_commune": "",
+      "x": "636664.17",
+      "y": "6843439.95",
+      "lon": "2.139572",
+      "lat": "48.688006",
+      "type_position": "entrée",
+      "alias": "",
+      "nom_ld": "",
+      "libelle_acheminement": "GIF SUR YVETTE",
+      "nom_afnor": "AVENUE LAMARTINE",
+      "source_position": "commune",
+      "source_nom_voie": "commune",
+      "certification_commune": "1",
+      "cad_parcelles": "91272000BM0417|91272000BM0419"
+    },
+    "related_rows": [
+      {
+        "id": "91272_1650_00018",
+        "id_fantoir": "91272_1650",
+        "numero": "18",
+        "rep": "",
+        "nom_voie": "Avenue Lamartine",
+        "code_postal": "91190",
+        "code_insee": "91272",
+        "nom_commune": "Gif-sur-Yvette",
+        "code_insee_ancienne_commune": "",
+        "nom_ancienne_commune": "",
+        "x": "636664.17",
+        "y": "6843439.95",
+        "lon": "2.139572",
+        "lat": "48.688006",
+        "type_position": "entrée",
+        "alias": "",
+        "nom_ld": "",
+        "libelle_acheminement": "GIF SUR YVETTE",
+        "nom_afnor": "AVENUE LAMARTINE",
+        "source_position": "commune",
+        "source_nom_voie": "commune",
+        "certification_commune": "1",
+        "cad_parcelles": "91272000BM0417|91272000BM0419"
+      }
+    ]
+  },
+  "cadastre": {
+    "api": "https://apicarto.ign.fr/api/cadastre/parcelle",
+    "features": [
+      {
+        "type": "Feature",
+        "id": "parcelle.58866692",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13896507,
+                  48.68787047
+                ],
+                [
+                  2.13954101,
+                  48.68803312
+                ],
+                [
+                  2.13959692,
+                  48.68794618
+                ],
+                [
+                  2.13947183,
+                  48.68791083
+                ],
+                [
+                  2.13940003,
+                  48.68789052
+                ],
+                [
+                  2.13906128,
+                  48.68779489
+                ],
+                [
+                  2.13903654,
+                  48.68778778
+                ],
+                [
+                  2.13902626,
+                  48.68778519
+                ],
+                [
+                  2.13902004,
+                  48.68778326
+                ],
+                [
+                  2.13896507,
+                  48.68787047
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 57838497,
+          "numero": "0417",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0417",
+          "contenance": 483,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.58999379",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13970164,
+                  48.68778287
+                ],
+                [
+                  2.13912337,
+                  48.68762182
+                ],
+                [
+                  2.13902004,
+                  48.68778326
+                ],
+                [
+                  2.13902626,
+                  48.68778519
+                ],
+                [
+                  2.13903654,
+                  48.68778778
+                ],
+                [
+                  2.13906128,
+                  48.68779489
+                ],
+                [
+                  2.13940003,
+                  48.68789052
+                ],
+                [
+                  2.13947183,
+                  48.68791083
+                ],
+                [
+                  2.13959692,
+                  48.68794618
+                ],
+                [
+                  2.13970164,
+                  48.68778287
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 57975475,
+          "numero": "0419",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0419",
+          "contenance": 898,
+          "code_insee": "91272"
+        }
+      }
+    ],
+    "neighbor_features": [
+      {
+        "type": "Feature",
+        "id": "parcelle.93858003",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14030802,
+                  48.68705217
+                ],
+                [
+                  2.140025,
+                  48.68698842
+                ],
+                [
+                  2.13997343,
+                  48.6869768
+                ],
+                [
+                  2.13978569,
+                  48.68737285
+                ],
+                [
+                  2.13982941,
+                  48.68738225
+                ],
+                [
+                  2.14007319,
+                  48.68743681
+                ],
+                [
+                  2.1401119,
+                  48.68744555
+                ],
+                [
+                  2.14014155,
+                  48.68738567
+                ],
+                [
+                  2.14030802,
+                  48.68705217
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 94092183,
+          "numero": "0098",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0098",
+          "contenance": 1183,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.59398766",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13970164,
+                  48.68778287
+                ],
+                [
+                  2.13988712,
+                  48.6874916
+                ],
+                [
+                  2.13987797,
+                  48.68746967
+                ],
+                [
+                  2.1393098,
+                  48.68733865
+                ],
+                [
+                  2.13930846,
+                  48.68733793
+                ],
+                [
+                  2.13912337,
+                  48.68762182
+                ],
+                [
+                  2.13970164,
+                  48.68778287
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 58390937,
+          "numero": "0421",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0421",
+          "contenance": 1639,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.62205389",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14041674,
+                  48.68779414
+                ],
+                [
+                  2.14020158,
+                  48.68772567
+                ],
+                [
+                  2.14029323,
+                  48.68756352
+                ],
+                [
+                  2.14003704,
+                  48.68750392
+                ],
+                [
+                  2.13998924,
+                  48.68751914
+                ],
+                [
+                  2.13984908,
+                  48.68773122
+                ],
+                [
+                  2.14027544,
+                  48.6878524
+                ],
+                [
+                  2.14037023,
+                  48.68787926
+                ],
+                [
+                  2.1403834,
+                  48.68785498
+                ],
+                [
+                  2.14041674,
+                  48.68779414
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 61295714,
+          "numero": "0453",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0453",
+          "contenance": 870,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.58599135",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14027544,
+                  48.6878524
+                ],
+                [
+                  2.13984908,
+                  48.68773122
+                ],
+                [
+                  2.13979514,
+                  48.68781377
+                ],
+                [
+                  2.14021731,
+                  48.68793366
+                ],
+                [
+                  2.14027544,
+                  48.6878524
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 57562255,
+          "numero": "0413",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0413",
+          "contenance": 345,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.58733134",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14021731,
+                  48.68793366
+                ],
+                [
+                  2.13979514,
+                  48.68781377
+                ],
+                [
+                  2.13965088,
+                  48.68803554
+                ],
+                [
+                  2.13968819,
+                  48.68807988
+                ],
+                [
+                  2.14003668,
+                  48.68818647
+                ],
+                [
+                  2.14021731,
+                  48.68793366
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 57700723,
+          "numero": "0415",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0415",
+          "contenance": 1014,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.43531699",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13943394,
+                  48.6881993
+                ],
+                [
+                  2.13954101,
+                  48.68803312
+                ],
+                [
+                  2.13896507,
+                  48.68787047
+                ],
+                [
+                  2.13885452,
+                  48.68804157
+                ],
+                [
+                  2.13885383,
+                  48.68804256
+                ],
+                [
+                  2.13943394,
+                  48.6881993
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 41945760,
+          "numero": "0283",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0283",
+          "contenance": 910,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.1469396",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13932826,
+                  48.68836306
+                ],
+                [
+                  2.13943394,
+                  48.6881993
+                ],
+                [
+                  2.13885383,
+                  48.68804256
+                ],
+                [
+                  2.1387508,
+                  48.68820219
+                ],
+                [
+                  2.13875972,
+                  48.68820469
+                ],
+                [
+                  2.13894067,
+                  48.68825511
+                ],
+                [
+                  2.13932826,
+                  48.68836306
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 41729388,
+          "numero": "0281",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0281",
+          "contenance": 905,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.64070547",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14011799,
+                  48.68837235
+                ],
+                [
+                  2.14016415,
+                  48.68830801
+                ],
+                [
+                  2.13964255,
+                  48.68814539
+                ],
+                [
+                  2.13957873,
+                  48.68815186
+                ],
+                [
+                  2.13954063,
+                  48.68821329
+                ],
+                [
+                  2.14011799,
+                  48.68837235
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 63226895,
+          "numero": "0476",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0476",
+          "contenance": 406,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.64184120",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.14005917,
+                  48.68845423
+                ],
+                [
+                  2.14011799,
+                  48.68837235
+                ],
+                [
+                  2.13954063,
+                  48.68821329
+                ],
+                [
+                  2.13948732,
+                  48.68829899
+                ],
+                [
+                  2.14005917,
+                  48.68845423
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 63344042,
+          "numero": "0478",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0478",
+          "contenance": 466,
+          "code_insee": "91272"
+        }
+      },
+      {
+        "type": "Feature",
+        "id": "parcelle.1452957",
+        "geometry": {
+          "type": "MultiPolygon",
+          "coordinates": [
+            [
+              [
+                [
+                  2.13932826,
+                  48.68836306
+                ],
+                [
+                  2.13894067,
+                  48.68825511
+                ],
+                [
+                  2.13875972,
+                  48.68820469
+                ],
+                [
+                  2.1387508,
+                  48.68820219
+                ],
+                [
+                  2.13858819,
+                  48.68844892
+                ],
+                [
+                  2.13916361,
+                  48.68861841
+                ],
+                [
+                  2.13932826,
+                  48.68836306
+                ]
+              ]
+            ]
+          ]
+        },
+        "geometry_name": "geom",
+        "properties": {
+          "gid": 41210188,
+          "numero": "0279",
+          "feuille": 1,
+          "section": "BM",
+          "code_dep": "91",
+          "nom_com": "Gif-sur-Yvette",
+          "code_com": "272",
+          "com_abs": "000",
+          "code_arr": "000",
+          "idu": "91272000BM0279",
+          "contenance": 1395,
+          "code_insee": "91272"
+        }
+      }
+    ],
+    "section_requests": [
+      {
+        "url": "https://apicarto.ign.fr/api/cadastre/parcelle?code_insee=91272&section=BM&_limit=1000",
+        "cached_utc": "2026-10-17T21:02:30.172917+00:00"
+      }
+    ]
+  },
+  "geometry": {
+    "crs": "EPSG:2154",
+    "area_m2": 1390.0539728127706,
+    "shape": "Polygon",
+    "point_distance_m": 0.9176693525019255,
+    "point_inside": false,
+    "boundary_not_within_neighbor_buffer_m": 58.23124242601004,
+    "neighbor_buffer_m": 0.5,
+    "touching_neighbors_m": [
+      [
+        "91272000BM0421",
+        47.179809584386405
+      ],
+      [
+        "91272000BM0283",
+        47.09095990457698
+      ]
+    ]
+  },
+  "limitations": [
+    "Current BAN and cadastre snapshot, not a historical 2021 parcel-ownership record.",
+    "Parcel address links and geometry do not establish land ownership, legal public frontage or access easements."
+  ],
+  "visual_review": "Saved map.png actually inspected with tools.view_image on 2026-10-17."
+}

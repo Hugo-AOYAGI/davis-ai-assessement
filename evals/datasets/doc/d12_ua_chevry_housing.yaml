@@ -1,0 +1,102 @@
+id: d12_ua_chevry_housing
+level: doc
+tests: zone x program grid, Chevry UA housing (site of z08_chevry); the Chevry UA chapter (PDF pages 210-221) differs from the Vallée UA chapter (pages 13-30) on footprint, height, road setback, side setbacks and parking
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The zone is UA of the Chevry plateau.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UA
+    parcel_ids: [91272000AH0198]
+    legend_items:
+      - Secteur à Orientation d'Aménagement et de Programmation
+    program: new housing (ordinary dwellings)
+facts:
+  - statement: In zone UA of Chevry, the footprint of main constructions (excluding garages and car parks built under a landscaped slab) must not exceed 50 percent of the site area.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "ne dépassera pas 50% de la superficie des terrains."
+  - statement: In zone UA of Chevry, the maximum height of a building is 12 metres at the eaves.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "12 mètres à l’égout du toit"
+  - statement: In zone UA of Chevry, the maximum height is 15 metres at the ridge (faîtage, faîte or ceiling height).
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "15 mètres au faîtage, faîte ou hauteur plafond"
+  - statement: In zone UA of Chevry, the number of levels is limited to R+3, including converted attics.
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "un nombre de niveaux limités à R+3 (y compris sous combles aménagés)"
+  - statement: In zone UA of Chevry, constructions may be set either at the alignment or set back from it; there is no minimum road setback and no obligation to build on the alignment.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 215
+        quote: "Les constructions peuvent être implantées à l’alignement ou en retrait."
+  - statement: In zone UA of Chevry, constructions may be built on a lateral boundary or set back from it.
+    evidence:
+      - doc: plu_reglement
+        page: 215
+        quote: "Les constructions pourront être implantées en limite séparative latérale ou en retrait."
+  - statement: In zone UA of Chevry, a construction set back from the side boundary must be at a distance at least equal to its height measured at the eaves (at the highest point of the ground), with no distinction between facades with and without views.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 215
+        quote: "Dans le cas de constructions en retrait, elles seront implantées à une distance au moins égale à la hauteur de la construction mesurée à l’égout du toit"
+  - statement: In zone UA of Chevry, two buildings on the same property must be separated by at least the height at the eaves of the taller building, and not less than 4 metres where the facing facades have no views or 8 metres otherwise.
+    evidence:
+      - doc: plu_reglement
+        page: 216
+        quote: "4 mètres lorsque les façades concernées ne comportent pas de vues"
+      - doc: plu_reglement
+        page: 216
+        quote: "8 mètres dans le cas contraire"
+  - statement: Housing in zone UA of Chevry requires 2 parking spaces per dwelling.
+    evidence:
+      - doc: plu_reglement
+        page: 219
+        quote: "2 places par logement"
+  - statement: In zone UA of Chevry, at least 50 percent of the parking spaces attached to dwellings must be built in the basement or on the ground floor of the buildings.
+    evidence:
+      - doc: plu_reglement
+        page: 219
+        quote: "Une proportion d’au moins 50% du nombre de places attachés aux logements devra être construite en sous-sol ou rez de chaussée des immeubles."
+  - statement: In zone UA of Chevry, the facades of residential buildings may not exceed 25 metres in a single vertical plane.
+    evidence:
+      - doc: plu_reglement
+        page: 218
+        quote: "Les façades des immeubles d’habitation ne pourront excéder 25 mètres dans un même plan vertical."
+must_not:
+  - States that the maximum footprint in UA is 60 percent of the site area (Vallée UA value).
+  - States that the maximum height in UA is 9 metres at the eaves or the acroterion, 12 metres at the ridge, or R+2+combles (Vallée UA values).
+  - States that constructions in UA must be built on the current or projected alignment (Vallée UA rule); the Chevry rule allows the alignment or a setback.
+  - States that the side setback in UA is 8 metres with views and half the height (L=H/2, 2 metre minimum) without views (Vallée UA rule) instead of a distance at least equal to the eaves height.
+  - States that 40 percent of the housing parking must be covered or underground (Vallée UA rule) instead of at least 50 percent in basement or ground floor.
+  - Cites the Vallée - UA chapter (PDF pages 13 to 30) as the source of the applicable UA rules.
+must_flag: []

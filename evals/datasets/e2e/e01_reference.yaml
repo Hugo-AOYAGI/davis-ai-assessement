@@ -1,0 +1,62 @@
+# Source audit: surveyor s01 and archived-2021 zoning z01 for CR0247;
+# regulation PDF pp320,325-326,330-331; OAP pp33-36, checked directly.
+# Geometry oracle: cadastre area 5951.6 m2, green minimum = area * 0.20.
+# Proposal volume varies with freely chosen cut, shares, heights and windows;
+# no single proposal volume is asserted. Harness recomputes the actual proposal.
+# Actual review: Codex source inspection, not two Opus drafts or human sign-off.
+id: e01_reference
+level: e2e
+tests: reference two-residence study; parcel strip trap, UMG rules, OAP and parking reconciliation
+status: verified
+built_by: codex_independent_source_review
+input:
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: One Résidence Sociale Étudiante (RSE) and one Résidence Jeunes Actifs, in two separate buildings.
+  facts: []
+from_items: [s01_joliot_curie, z01_joliot_curie]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CR0247]
+    critical: true
+    source: hand
+  - key: site.choice.parcel_ids
+    expect_none_of: [91272000CR0249]
+    critical: true
+    source: hand
+  - key: study.regime.zone
+    expect: UMG
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    critical: true
+    source: gpu_2021
+  - key: envelope.rules.buildings[building~"Sociale"].max_height_m
+    expect: 20
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326, quote: "20 mètres"}]
+  - key: envelope.rules.buildings[building~"Sociale"].max_storeys
+    expect: 6
+    evidence: [{doc: plu_reglement, page: 326, quote: "R+5"}]
+  - key: envelope.rules.max_footprint_ratio
+    expect: null
+    critical: true
+    evidence: [{doc: plu_reglement, page: 326}]
+  - key: envelope.rules.min_green_ratio
+    expect: 0.20
+    evidence: [{doc: plu_reglement, page: 331, quote: "En espace vert 20% au moins de la superficie du terrain."}]
+  - key: envelope.site_area_m2
+    expect: 5951.6
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: 1190.32
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - The classification of Résidence Jeunes Actifs is not explicitly defined in the corpus and needs a justified interpretation.
+  - Student-residence parking must reconcile UMG 12 with the Titre I cap, including its applicability conditions (regulation PDF pages 5-6).
+must_not:
+  - States that UMG article 9 imposes a numeric maximum footprint ratio.
+  - Uses parcel CR0249 as the study site instead of CR0247.
+  - Counts vegetated roofs toward the UMG article 13 minimum green area.

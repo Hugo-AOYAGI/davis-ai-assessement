@@ -1,0 +1,62 @@
+id: d11_repealed_articles
+level: doc
+tests: UH articles 5 (minimum plot size) and 14 (COS) are repealed by the ALUR law; no minimum plot size and no COS may be stated, only the footprint and height that apply
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is the UH chapter of the Vallée sector of the regulation.
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UH
+    legend_items: ["Espaces Boisés Classés"]
+    parcel_ids: [91272000CO0051]
+    program: housing (new dwellings)
+facts:
+  - statement: Article UH5 (minimum size of buildable plots) of the UH zone chapter is repealed by the ALUR law of 24 March 2014, so the regulation sets no minimum plot size in UH.
+    critical: true
+    evidence:
+      # PDF p106 (printed p105): the article heading is followed only by the repeal mention.
+      - doc: plu_reglement
+        page: 106
+        quote: "ARTICLE UH5 - SUPERFICIE MINIMALE DES TERRAINS CONSTRUCTIBLES Abrogé par la loi ALUR du 24 mars 2014"
+  - statement: Article UH14 (coefficient d'occupation du sol, COS) of the UH zone chapter is repealed by the ALUR law of 24 March 2014, so the regulation sets no COS or floor-area ratio in UH.
+    critical: true
+    evidence:
+      # PDF p119 (printed p118).
+      - doc: plu_reglement
+        page: 119
+        quote: "ARTICLE - UH14 - COEFFICIENT D'OCCUPATION DU SOL Abrogé par la loi ALUR du 24 mars 2014"
+  - statement: In UH, the footprint of main constructions must not exceed 20 percent of the site area in the zone.
+    critical: true
+    evidence:
+      # PDF p112 (printed p111), article UH9, general rule "En UH et UHe et UHf".
+      - doc: plu_reglement
+        page: 112
+        quote: "au plus 20% de la superficie du terrain dans la zone pour les constructions principales"
+  - statement: In UH outside sector UHf, the height of a main construction must not exceed 7 metres at the eaves or at the acroterion.
+    evidence:
+      # PDF p113 (printed p112), article UH10.2.
+      - doc: plu_reglement
+        page: 113
+        quote: "mètres à l’égout du toit ou à l’acrotère."
+  - statement: In UH outside sector UHf, the height of a main construction must not exceed 10 metres at the ridge or ceiling height.
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "10 mètres au faîtage, faîte ou hauteur plafond"
+  - statement: In UH outside sector UHf, the number of levels of a main construction is limited to ground floor plus one storey plus attic (R+1+combles).
+    evidence:
+      - doc: plu_reglement
+        page: 113
+        quote: "Avec un nombre de niveaux limité à R+1+combles."
+  - statement: In UH, land classified as Espaces Boisés Classés on the graphic documents is governed by article L.130-1 of the Code de l'urbanisme, and the classement forbids any change of use or occupation of the land that would compromise the conservation, protection or creation of the woodland.
+    evidence:
+      # PDF p118 (printed p117), article UH13.1.
+      - doc: plu_reglement
+        page: 118
+        quote: "le classement interdit tout changement d'affectation, ou tout mode d'occupation du sol de nature à compromettre la conservation, la protection ou la création du boisement."
+must_not:
+  - States a minimum plot size (superficie minimale des terrains constructibles) as a rule applying in UH.
+  - States a COS (coefficient d'occupation du sol) or a floor-area ratio as a rule applying in UH.

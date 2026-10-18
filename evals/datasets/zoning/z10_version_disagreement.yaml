@@ -1,0 +1,29 @@
+# Independent source checks: evals/fixtures/zoning/z10_version_disagreement.oracle.json
+id: z10_version_disagreement
+level: zoning
+tests: 2021 UM5 differs from 2026 UM5b on a vacant parcel
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 'Parcelle ZQ0134, secteur Moulon, Gif-sur-Yvette (repère BAN voisin : 1
+    Rue Raimond Castaing, à 51 m)'
+  parcel_ids:
+  - 91272000ZQ0134
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UM5
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_not:
+- Treats UM5b as the zone applicable under the 2021 corpus.

@@ -1,4 +1,4 @@
-"""Eval item schema (``docs/EVALS.md`` §2) and the YAML loader of a dataset directory."""
+"""Eval item schema (``evals/README.md``§2) and the YAML loader of a dataset directory."""
 
 import re
 from collections.abc import Collection
@@ -11,6 +11,7 @@ from pydantic import Discriminator, Field, Tag, ValidationError, model_validator
 
 from agent.contracts.base import Contract
 from evals.harness.extract import parse_key
+from evals.harness.refusals import ExpectedRefusal
 
 type Scalar = str | int | float | bool | None
 type Value = Scalar | tuple[Scalar, ...]
@@ -174,6 +175,7 @@ class Item(Contract):
     must_not: tuple[str, ...] = ()
     from_items: tuple[str, ...] = ()
     """Component items an end-to-end item's facts are composed from."""
+    expected_refusal: ExpectedRefusal | None = None
 
     @model_validator(mode="before")
     @classmethod
@@ -190,6 +192,12 @@ class Item(Contract):
         if self.from_items and self.level is not Level.E2E:
             msg = "from_items is only for e2e items"
             raise ValueError(msg)
+        if self.expected_refusal is not None and (
+            self.level is not Level.SURVEYOR or self.facts or self.must_flag or self.must_not
+        ):
+            raise ValueError(
+                "expected_refusal requires a surveyor item without facts or judge assertions"
+            )
         if self.level is not Level.DOC and any(isinstance(f, StatementFact) for f in self.facts):
             msg = "statement facts are only for doc items"
             raise ValueError(msg)
@@ -206,17 +214,7 @@ class ItemError(ValueError):
 
 
 def load_item(path: Path) -> Item:
-    """Read and validate one item file.
-
-    Args:
-        path: A YAML file holding one item.
-
-    Returns:
-        The item.
-
-    Raises:
-        ItemError: Naming the file, when it is not valid YAML or not a valid item.
-    """
+    """Read a YAML item, raising ``ItemError`` with its path on invalid content."""
     try:
         return Item.model_validate(yaml.safe_load(path.read_text(encoding="utf-8")))
     except (yaml.YAMLError, ValidationError) as error:

@@ -1,0 +1,25 @@
+# Independent source checks: evals/fixtures/zoning/z12_uga.oracle.json
+id: z12_uga
+level: zoning
+tests: UGa sub-sector
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 10 allée de la Ferme Rose, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CA0160
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UGa
+- key: overlays
+  present: []
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

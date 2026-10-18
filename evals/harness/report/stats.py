@@ -1,4 +1,4 @@
-"""Interval estimates for the eval report (``docs/EVALS.md`` §6): Wilson and bootstrap."""
+"""Interval estimates for the eval report (``evals/README.md``§6): Wilson and bootstrap."""
 
 import math
 import random

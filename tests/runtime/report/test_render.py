@@ -1,5 +1,6 @@
 from agent.contracts.evidence import Citation, CitationCheck, Limit, SourceKind
 from agent.contracts.findings.site import PublicParcel
+from agent.contracts.study import Verdict
 from agent.runtime.report.render import render_report
 
 
@@ -30,6 +31,19 @@ def test_headings_in_order(verified):
     lines = render(verified).splitlines()
     positions = [lines.index(heading) for heading in HEADINGS]
     assert positions == sorted(positions)
+
+
+def test_prohibited_program_explains_missing_envelope(verified):
+    study = verified.study.model_copy(
+        update={
+            "admissibility": tuple(
+                entry.model_copy(update={"verdict": Verdict.PROHIBITED})
+                for entry in verified.study.admissibility
+            )
+        }
+    )
+    result = verified.model_copy(update={"study": study, "envelope": None})
+    assert "No envelope computed: every proposed building use is prohibited." in render(result)
 
 
 def test_header_summary_and_site(verified):

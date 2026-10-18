@@ -16,7 +16,9 @@ The task gives the program text, each building with its label and the destinatio
 orchestrator decided for it, whether the OAP applies, and possibly extra notes artifacts to read
 (e.g. `notes.rules_spacing`, read after an open point of an earlier run). Use the building labels
 exactly as given. If the task names no
-building or no destination, stop and reply that they are missing.
+building or no destination, stop and reply that they are missing. Only the task's explicit
+non-prohibited buildings belong in the envelope; do not add prohibited buildings mentioned
+in the broader program text.
 
 # Tools
 

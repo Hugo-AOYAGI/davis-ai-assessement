@@ -1,0 +1,21 @@
+# Oracle snapshots: evals/fixtures/surveyor/s02_croix_de_fer.sources.json
+# Polygon fixture: evals/fixtures/surveyor/s02_croix_de_fer.geojson
+# Selection: uv run python -m evals.gt.site random --seed 7 --n 3 (first result).
+# BAN commune-certified address links CE0026; its point is inside that parcel.
+# Cadastre contenance=685 m2; Lambert-93 polygon area=686.2 m2.
+id: s02_croix_de_fer
+level: surveyor
+tests: commune-certified BAN address linked to one parcel; ordinary single-parcel selection
+status: verified
+built_by: codex, independent BAN export and API Carto verification
+input:
+  address: 7 Impasse de la Croix de Fer, 91190 Gif-sur-Yvette
+facts:
+  - key: choice.parcel_ids
+    expect: [91272000CE0026]
+    critical: true
+    source: ban
+  - key: area_m2
+    expect: 685
+    tolerance: 0.02
+    source: cadastre

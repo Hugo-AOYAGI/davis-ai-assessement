@@ -1,0 +1,16 @@
+{
+  "id": "s20_unknown_address",
+  "reviewed_utc": "2026-10-17T21:06:09.116072+00:00",
+  "selection": "deliberately invented address: no exact street and no house number 999999 in commune BAN export",
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "cached_utc": "2026-10-17T19:14:43.943727+00:00",
+    "sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "commune_rows": 5775,
+    "exact_street_matches": 0,
+    "house_number_matches": 0
+  },
+  "limitations": [
+    "BAN absence alone is not a legal declaration of nonexistence; this deliberately synthetic string is for clean lookup refusal."
+  ]
+}

@@ -94,7 +94,6 @@ class FakeRunner:
             level=item.level,
             output=self.outputs[item.level],
             cost=RunCost(cost_usd=self.cost, wall_time_s=2.0),
-            wall_time_s=2.0,
         )
 
 

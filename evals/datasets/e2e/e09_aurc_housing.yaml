@@ -1,0 +1,127 @@
+# Source audit: zoning z15 (BD0231, AURc, OAP perimeter) and doc d03 (AURc defers to UR for
+# articles 3, 4, 7, 8, 10, 11; sets its own articles 6, 9, 12); additional pages read directly:
+# regulation PDF pp184-191 (AURc), pp154-160 (UR), OAP PDF p14 (chapter 4, Damiette).
+# Geometry oracle: cadastre polygon 3406 m2 (contenance 3413 m2); green minimum = area * 0.75;
+# maximum footprint (not a scored key: the contract has no capped-footprint field) is 0.20 * area.
+# No single proposal volume is asserted: the layout (heights, windows, cut) is the architect's
+# choice and the harness recomputes the submitted proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e09_aurc_housing
+level: e2e
+tests: AURc (Damiette) housing; articles 10-11 defer to zone UR but footprint, road setback, parking and green space are AURc's own; the Damiette OAP (chapter 4) applies
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 59bis Route de Damiette, 91190 Gif-sur-Yvette
+  program: One collective housing building.
+  facts:
+    - The building is new construction of ordinary dwellings (logements collectifs), with no shops or offices.
+from_items: [z15_aurc, d03_aurc_defers_to_ur]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000BD0231]
+    critical: true
+    source: cadastre
+  - key: study.regime.zone
+    expect: AURc
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    critical: true
+    source: gpu_2021
+  - key: study.regime.overlays
+    present:
+      - Secteur à Orientation d'Aménagement et de Programmation
+    absent:
+      - Espaces Boisés Classés
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+      - Zone humide
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 185
+        quote: "Les constructions à usage d’habitation"
+  - key: envelope.rules.max_footprint_ratio
+    expect: 0.2
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 188
+        quote: "L’emprise au sol des constructions doit être au plus égale à 20 % de la superficie totale du terrain dans la zone."
+  - key: envelope.rules.buildings.max_height_m
+    any_of: [7, 10]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 189
+        quote: "Les règles applicables sont celles de la zone UR."
+      - doc: plu_reglement
+        page: 159
+        quote: "– 10 mètres au faîtage, faîte ou hauteur plafond ;"
+  - key: envelope.rules.buildings.max_storeys
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 159
+  - key: envelope.rules.setbacks[kind=road].on_limit_allowed
+    expect: false
+    evidence:
+      - doc: plu_reglement
+        page: 186
+        quote: "Les constructions doivent être implantées avec un retrait au moins égal à"
+  - key: envelope.rules.setbacks[kind=side].on_limit_allowed
+    expect: false
+    evidence:
+      - doc: plu_reglement
+        page: 156
+        quote: "Les constructions doivent être implantées en retrait des limites séparatives avec un minimum de 4 mètres."
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 156
+        quote: "– 8 mètres lorsque la façade ou partie de façade concernée comporte de vues ;"
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 4
+    evidence:
+      - doc: plu_reglement
+        page: 156
+        quote: "– 4 mètres dans le cas contraire."
+  - key: envelope.rules.min_green_ratio
+    expect: 0.75
+    evidence:
+      - doc: plu_reglement
+        page: 191
+        quote: "Au minimum 75% de la superficie du terrain doivent être aménagées en espaces végétalisés."
+  - key: study.parking[basis=unit].spaces
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 189
+        quote: "2 places par logement dont une couverte."
+  - key: envelope.site_area_m2
+    expect: 3406
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: 2554.5
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - AURc article 2 authorises an operation only if its site covers at least 9000 m2, waived for residual plots not integrated in a partial development; the parcel (about 3400 m2, part of a zone of about 34000 m2) is below the threshold and the documents do not settle whether it counts as a residual plot or whether the operation compromises the coherent development of the zone.
+  - UR article 10 (referred to by AURc10) gives two heights, 7 m at the eaves or acrotere and 10 m at the ridge; the single height used for the envelope depends on the roof form and must be stated as a choice or open point.
+  - The AURc6 road setback is 5 m when the road right-of-way is 8 m or more and 6 m otherwise; the right-of-way width of Route de Damiette is not in the corpus.
+  - The Damiette OAP (chapter 4) gives qualitative orientations (about 15 dwellings, view corridor, green strip to be kept unbuilt, access from Route de Damiette) on a perimeter far larger than the parcel; how they bind this parcel and a single collective building needs a justified reading.
+must_not:
+  - States that AURc has no height rule, or that no height limit applies to the building, or gives a height figure without saying that article AURc10 refers to the rules of zone UR.
+  - States that the maximum height of a main building in AURc is 10 metres at the eaves or acrotere, or 7 metres at the ridge.
+  - States that the AURc footprint limit is 10 percent (UR) or 13 percent (URa), or that AURc defers to UR for footprint.
+  - Applies the UR road setback (10 m from the alignment, 14 m from the axis) to AURc, or states that AURc defers to UR for the road setback.
+  - States that AURc imposes no numeric minimum for planted or green space, or applies a 20 percent green figure from another zone.
+  - States that no OAP applies to the site, or relies on another OAP chapter (for example chapter 5 Rougemonts) instead of chapter 4 Damiette (AURc).
+  - States without qualification that the operation meets the AURc2 minimum site area of 9000 m2.
+  - Uses a parcel other than BD0231 (for example the neighbouring BD0021, BD0225 or BD0263) as the study site.

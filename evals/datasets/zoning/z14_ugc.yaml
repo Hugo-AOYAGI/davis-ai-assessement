@@ -1,0 +1,25 @@
+# Independent source checks: evals/fixtures/zoning/z14_ugc.oracle.json
+id: z14_ugc
+level: zoning
+tests: UGc sub-sector
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 31 Rue Fernand Léger, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CA0081
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UGc
+- key: overlays
+  present: []
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

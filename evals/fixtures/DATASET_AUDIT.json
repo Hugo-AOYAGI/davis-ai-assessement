@@ -1,0 +1,86 @@
+{
+  "checked_utc": "2026-10-17T21:14:41.245561+00:00",
+  "levels": {
+    "surveyor": {
+      "verified": 20,
+      "facts": 42,
+      "expected_refusals": 1,
+      "yaml_sha256": {
+        "evals/datasets/surveyor/s01_joliot_curie.yaml": "7fd6b864e1d412bce0f1b0e655883a0c597796d0abf66a8a33d51b0f4429e9f0",
+        "evals/datasets/surveyor/s02_croix_de_fer.yaml": "0c65cb3c81f518ed6b3d011008857006827a75f231b244a9d0bc5734b5318ea3",
+        "evals/datasets/surveyor/s03_corner_avelines.yaml": "be602f622e85f6b90183871c767818e7fc31d2d71137cc7a3418262faf7366cf",
+        "evals/datasets/surveyor/s04_lamartine_two_parcels.yaml": "d6a638f00edb96721728494a1c611fefb8470654db7dab95b7b2ad4f48048e36",
+        "evals/datasets/surveyor/s05_troenes_roadpoint.yaml": "9f5585a613c2bfc70ef1d52fe52ea394381525d972280e8b48c91be4988dc322",
+        "evals/datasets/surveyor/s06_clairiere_hamlet.yaml": "6db9746d88d27a8445c4e73cb6d11f9f6eb1bd03f85b3f3ec51d5bf3f90883b5",
+        "evals/datasets/surveyor/s07_fontaine_commune_collision.yaml": "f81b2a2a8db4e57ec72525a3a448d255d0ed1f88fcf2efefb743917849a40e1a",
+        "evals/datasets/surveyor/s08_couvent_enclosed.yaml": "efdb892923930c876a485411ae42d91df0be03e42fb3e48a784ca6577da3a87b",
+        "evals/datasets/surveyor/s09_grands_pres_ter.yaml": "129d47e936593f455ed0b1475f31a631976fa3265aaf77cee468e9a4d10a43d4",
+        "evals/datasets/surveyor/s10_moulon_shared_parcel.yaml": "971ce0886a8d0040c1558f0514bc900e9e1a524cd72253fcb3ca75227f9ca76f",
+        "evals/datasets/surveyor/s11_longs_reages.yaml": "9c8a77afb4a4d1ad6ba43de34fc31173d2c07c932202f5e1e2e1fdbda5348aa2",
+        "evals/datasets/surveyor/s12_clairiere.yaml": "a6e2c498aee78027989119a55183573edf28702897e1f39eb8c7c6d46d961d71",
+        "evals/datasets/surveyor/s13_salmouille.yaml": "6142ee6fa136f40f2533b9314814db3a41e3ed85bff2a13e96949fdfcb1303b3",
+        "evals/datasets/surveyor/s14_voltaire.yaml": "c30006e12d563bf70c058625df1386738cd3c533084ffd5bfa3e6d6586b35c7f",
+        "evals/datasets/surveyor/s15_hoche.yaml": "6848314667021ad51196c9835d07c7299045b6b5426a4f8605a3828b18fd1654",
+        "evals/datasets/surveyor/s16_paul_bert.yaml": "0b211a93c44489657342bee27e10d260f8e7b6f057910df16254c625a992a2b8",
+        "evals/datasets/surveyor/s17_mail_potier.yaml": "2b69acc476b1dae8eb957f021595839c1f54173226e963bc8ccb5fb0f90b8ae4",
+        "evals/datasets/surveyor/s18_rue_potier.yaml": "d5f23e536dba4efc9e3b67f574326e56adea4072aaa5c50736c992f4ae1cd1dc",
+        "evals/datasets/surveyor/s19_blanc_lapierre.yaml": "8593bb615b08149cb940bb4a2cb184678f25914890b64b3108646bc3bd817b18",
+        "evals/datasets/surveyor/s20_unknown_address.yaml": "4630325eb9892fc8cf6fd2a1bc2acb43e31fb4d3560b03f8a8705e492d79a719"
+      }
+    },
+    "zoning": {
+      "verified": 20,
+      "facts": 40,
+      "expected_refusals": 0,
+      "yaml_sha256": {
+        "evals/datasets/zoning/z01_joliot_curie.yaml": "5f94d90867f9e0a338d8fad7babcdb7393070b79a318a504f4be250985a73780",
+        "evals/datasets/zoning/z02_zone_boundary.yaml": "295233090b81c8b47045d8420f1f856610920d390a11d3b29946b209f803b6af",
+        "evals/datasets/zoning/z03_ebc.yaml": "48e83e067105ff09a1fdba7287736334eb22efe1ee8bad22076cf81c900f2548",
+        "evals/datasets/zoning/z04_ppri.yaml": "cd9a12269e6f3d8fc4b1598154c0a4fbe59c4829a627f2e66e87a09474e9d562",
+        "evals/datasets/zoning/z05_emplacement_reserve.yaml": "23516d0219041f5676d8227dd0ce1bc5338b756d5ce2e095f69dea4a13199369",
+        "evals/datasets/zoning/z06_retail_frontage.yaml": "3e10d04c796d095488393e4c34d9ef5292741a33841198dadf7c753719627757",
+        "evals/datasets/zoning/z07_natural_zone.yaml": "64a02f5148b42d1e0ffff5fb98a3bd2b34e4b6ba5eda7acf711f4e2d4f6d9c9f",
+        "evals/datasets/zoning/z08_chevry.yaml": "678fbdc26fc9cd5ecf57ec7f2a4f1c6d413a664a7dac56e54f6ccdc49c8039d7",
+        "evals/datasets/zoning/z09_uxc.yaml": "571332e1bde266e9bf525f051d647ff26cfae999e37c27b2e3af29ea8a31c4b3",
+        "evals/datasets/zoning/z10_version_disagreement.yaml": "346f2e81b0bcf3d1133872e489340bace72f7716c72a31a84b0a860f918685e0",
+        "evals/datasets/zoning/z11_vallee_ua.yaml": "2d82c5dc8cc45afd1da9eb34c0f9b3dcfc00cd9c61b5d3a630842e6465e6adb7",
+        "evals/datasets/zoning/z12_uga.yaml": "2099e3d5367e8ee3032cfa14af9413f00ff23f5fa7d9aabbbd41a39feee19bf6",
+        "evals/datasets/zoning/z13_ugd.yaml": "c5df899752a3df076f8f015de398a78c8432d93822a59fb114f17976f2e5225f",
+        "evals/datasets/zoning/z14_ugc.yaml": "6c9ecb215b7959366cf3912f03512c01c94ffd50b1748d6d1fc1c27fff0f58b2",
+        "evals/datasets/zoning/z15_aurc.yaml": "a9fe83e87d300bda29429d8c2a3f24c6fe2e432b5a63680fe84f822de7a57f1a",
+        "evals/datasets/zoning/z16_um4.yaml": "baf812222a5c27f0650f91547a4772040a2373b903354e054befec069204891f",
+        "evals/datasets/zoning/z17_um5a.yaml": "4b4ee4f8f735869799c71db0f22255e13eb968aea2083125a830b4eaca69bc81",
+        "evals/datasets/zoning/z18_ume.yaml": "778fbf2d734ca279517f9c7d04c2b9d9b076f8e806c64f4b2ef232979d94e5d2",
+        "evals/datasets/zoning/z19_uhe.yaml": "d6b6ca597016d084ae0a36a630814850666202b74cf6990d9884d9ec05a7dfb6",
+        "evals/datasets/zoning/z20_uec.yaml": "9557de984754f764e0ce1c6e922b2a29055032fd48341047d8f5930535b69f9b"
+      },
+      "zone_codes": [
+        "AURc",
+        "N",
+        "UA",
+        "UAa",
+        "UCa",
+        "UD",
+        "UEc",
+        "UGa",
+        "UGc",
+        "UGd",
+        "UH",
+        "UHe",
+        "UM4",
+        "UM5",
+        "UM5a",
+        "UME",
+        "UMG",
+        "UXc"
+      ]
+    }
+  },
+  "experiments_launched": false,
+  "zoning_spatial_audit": "20/20 passed; recomputed original 2021 layers",
+  "limits": [
+    "Cadastral enclosure is not proof of legal landlocking.",
+    "Zoning raster registration is approximate.",
+    "Zoning grounded accuracy equals answer accuracy under the current output contract."
+  ]
+}

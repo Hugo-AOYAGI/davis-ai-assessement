@@ -19,6 +19,7 @@ def page_images(  # noqa: PLR0913 - one argument per config knob
     crop_max_px: int,
     cache_size: int,
     scan_min_coverage: float,
+    max_image_bytes: int,
 ) -> PageImages:
     """Return the one ``PageImages`` for these settings, building it on first request.
 
@@ -28,7 +29,7 @@ def page_images(  # noqa: PLR0913 - one argument per config knob
     """
     paths = tuple((str(document["id"]), str(document["path"])) for document in documents)
     knobs = (render_dpi, max_image_px, max_upscale, ruler_step_px, crop_max_px, cache_size)
-    key = (paths, str(root), *knobs, scan_min_coverage)
+    key = (paths, str(root), *knobs, scan_min_coverage, max_image_bytes)
     with _SHARED_LOCK:
         if key not in _SHARED:
             _SHARED[key] = PageImages(
@@ -41,5 +42,6 @@ def page_images(  # noqa: PLR0913 - one argument per config knob
                 crop_max_px=crop_max_px,
                 cache_size=cache_size,
                 scan_min_coverage=scan_min_coverage,
+                max_image_bytes=max_image_bytes,
             )
         return _SHARED[key]

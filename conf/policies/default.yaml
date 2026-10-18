@@ -19,7 +19,14 @@ envelope:
     min_area_m2: ${policies.envelope.min_area_m2}
     cut_tolerance_m: ${policies.envelope.cut_tolerance_m}
 study:
-  required_notes: [rules, oap, destinations]  # doc_analyst labels submit_study requires, read from notes.<label>
+  required_notes: [rules, oap, destinations]  # doc_analyst labels read from notes.<label>
+  required_topics:  # minimum coverage independently enforced by the study gate
+    rules: [access, networks, setback_road, setback_side, setback_rear,
+      distance_between_buildings, footprint, height, appearance, parking, green_space,
+      definitions, other]
+    oap: [perimeter, general_orientations, building_form, mobility_access,
+      landscape_green, programming, other]
+    destinations: [destination_definitions, special_rules]
 evidence:
   crops_dir: data/crops  # where submit_study saves the evidence crops, relative to the project root
 tracing:

@@ -13,47 +13,47 @@ it gives no parcel ids, stop and reply that the site must be located first; neve
 
 - `list_documents` lists the corpus documents: find the zoning plan's document id and page there
   (marked `image only`).
-- `site_view(ids, kind, scale)` shows the real world around the parcels, with their outlines and
-  ids drawn on it: `kind` `map` (street names) or `aerial` (photo), `scale` `town`,
-  `neighbourhood` or `parcel`.
+- `plan_site(ids)` shows the site on the zoning plan, its parcels outlined in red: a close-up
+  crop and a wider context crop, each with its `region` and the outline's position uncertainty
+  in metres. You do not have to find the site by eye.
 - `view_image(doc, page)` shows a whole page (the overview), with pixel rulers on the top and
   left edges. All coordinates you use are overview coordinates read on these rulers.
-- `zoom(doc, page, region)` shows `region` = `[x0, y0, x1, y1]` (overview coordinates) in detail.
-  Zoom images carry the same overview rulers: read a smaller region on them and zoom again.
+- `zoom(doc, page, region)` shows `region` = `[x0, y0, x1, y1]` (overview coordinates) in detail,
+  without the red outline. Zoom images carry the same overview rulers: read a smaller region on
+  them and zoom again.
+- `site_view(ids, kind, scale)` (optional) shows the real world around the parcels (`kind` `map`
+  or `aerial`), only to understand the surroundings.
 - `submit_zone` delivers your result. Your task ends only when it replies `zone accepted`.
 
-The plan has no coordinates, street names or parcel numbers: you find the site by eye, matching
-the plan against the real map. Small labels and hatchings are only legible after zooming.
+Small labels and hatchings are only legible after zooming.
 
 # Method
 
-1. **See the site in the real world**: `site_view` with `kind="map"`, `scale="town"`, then
-   `scale="neighbourhood"`. Note the landmarks around the site: main roads and their shape,
-   junctions, rail lines, rivers, parks, large buildings, the commune limit and the names of
-   neighbouring communes.
-2. **Look at the whole plan** with `view_image`: find the legend, the commune outline, the
-   landmarks you noted (neighbouring commune names printed outside the outline help), and the
-   likely area of the site.
-3. **Read the legend** with `zoom` on it, enough to read every label: the zones with their colour
-   and code, and every other item (perimeters, hatchings, protected elements, setback lines,
-   reserved sites, risk areas...).
-4. **Find the site**: zoom on the likely area, then closer, matching the road layout and landmarks
-   with `site_view`, until you can point to the parcel. Then read its zone: the zone code printed
-   inside the same continuous area, bounded by zone limits (zoom out or pan if the label is outside
-   your crop; do not rely on colour alone). Check every legend item other than the zones against
-   the site: does its hatching, symbol or line cover, cross or touch the site, or does its
-   perimeter enclose it? Perimeters are often much larger than the site: follow a line until you
-   see on which side the site lies.
-5. **Submit** with `submit_zone`:
+1. **Read the legend**: `view_image` on the plan, then `zoom` on the legend, enough to read every
+   label: the zones with their colour and code, and every other item (perimeters, hatchings,
+   protected elements, setback lines, reserved sites, risk areas...). Keep it short.
+2. **See the site**: `plan_site` with the parcel ids. Note both regions and the stated
+   uncertainty.
+3. **Read the zone** printed in the continuous area, bounded by zone limits, that holds the red
+   outline: zoom until the code is legible character by character, suffix included (`UH` and
+   `UHf`, `UM5` and `UM5a` are different zones with different rules). Neighbouring sub-sectors
+   share a colour, so never infer the code from the colour; if the label lies outside the crop,
+   pan along the area until you reach it.
+4. **Check every legend item** other than the zones against the outline: hatching or symbols
+   inside or touching it, lines crossing or running along it. For perimeters (OAP magenta
+   dotted line, PPRi dashed blue line...), use the context crop and follow the line all the way
+   round to see whether the outline is inside: perimeters often cover a whole district.
+5. **Note ambiguities**: when a zone limit or an overlay line passes within the stated
+   uncertainty of the outline, you cannot tell which side the site is on: record it.
+6. **Submit** with `submit_zone`:
    - `zone`: the code exactly as printed, e.g. `UMG`.
    - `overlays`: one entry per legend item other than the zones, none skipped, with `item` the
      label exactly as printed, `applies` true or false, and `note` saying what you saw.
-   - `rationale`: how you found the site (landmarks, road layout) and read the zone.
-   - `region`: the last region you zoomed on, holding the site, as `{doc, page, region}`. It is
-     saved as the evidence of your reading, so it must show the site and its zone label.
-   - `ambiguities`: when the site straddles a zone limit, when a perimeter or line passes along
-     the site so you cannot tell which side it is on, or when you could not pin the site down
-     with confidence: the question, the options, the one you chose and why
+   - `rationale`: what the outline sits in and where you read the zone label.
+   - `region`: the close-up region given by `plan_site`, as `{doc, page, region}`. It is saved as
+     the evidence of your reading.
+   - `ambiguities`: when the site straddles a zone limit, or a perimeter or line passes within
+     the uncertainty of the outline: the question, the options, the one you chose and why
      (`resolved_by: agent`).
 
 If `submit_zone` is rejected, fix every listed error with `revise_zone`, sending only the changed

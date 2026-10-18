@@ -12,6 +12,7 @@ from agent.contracts.findings.notes import DocNotes, OpenPoint
 from agent.contracts.findings.site import Site
 from agent.contracts.findings.zone import ZoneFindings
 from agent.contracts.study import Study
+from agent.runtime.submissions.keys import placeholders
 from agent.tools.study.messages import describe_missing_artifact, describe_missing_notes
 from agent.tools.submit.artifacts import ArtifactData, read_artifact
 from agent.tools.submit.factory import SubmissionRejected
@@ -35,14 +36,17 @@ class StudyInputs(Contract):
     envelope: Delivery
     labels: tuple[str, ...]
     """Labels of the notes every study needs, e.g. ``rules``, ``oap`` and ``destinations``."""
+    required_topics: dict[str, tuple[str, ...]] = Field(default_factory=dict)
+    """Trusted minimum topic coverage per standard label; extra notes remain allowed."""
     oap_label: str
     """Label of the notes every citation of the layout's OAP choices must come from."""
 
     @model_validator(mode="after")
     def _notes_key_has_label(self) -> Self:
         """Reject a notes key template that cannot tell labels apart."""
-        if "{label}" not in self.notes.artifact:
-            msg = f"notes artifact {self.notes.artifact!r} must hold the {{label}} placeholder"
+        fields = placeholders(self.notes.artifact, ("label",))
+        if fields != ("label",) or self.notes.artifact.count("{") != 1:
+            msg = f"notes artifact {self.notes.artifact!r} needs exactly one {{label}} placeholder"
             raise ValueError(msg)
         return self
 
@@ -83,15 +87,18 @@ class Findings(NamedTuple):
     zone: ZoneFindings
     notes: tuple[DocNotes, ...]
     """Every notes artifact present: the required labels in order, then the others by label."""
-    envelope: EnvelopeStudy
+    envelope: EnvelopeStudy | None
 
 
-def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) -> Findings:
-    """Read the site, the zone, every notes artifact and the envelope from the artifacts.
+def read_findings(
+    artifacts: Mapping[str, ArtifactData], inputs: StudyInputs, *, require_envelope: bool = True
+) -> Findings:
+    """Read the site, zone, notes and, for an admissible program, the envelope.
 
     Args:
         artifacts: The ``artifacts`` value of the graph state.
         inputs: Where each artifact is stored and who delivers it.
+        require_envelope: Whether any proposed use remains admissible and needs geometry.
 
     Returns:
         The findings.
@@ -102,11 +109,17 @@ def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) ->
     """
     site = read_artifact(artifacts, inputs.site.artifact, Site)
     zone = read_artifact(artifacts, inputs.zone.artifact, ZoneFindings)
-    envelope = read_artifact(artifacts, inputs.envelope.artifact, EnvelopeStudy)
+    envelope = (
+        read_artifact(artifacts, inputs.envelope.artifact, EnvelopeStudy)
+        if require_envelope
+        else None
+    )
     others = sorted(set(inputs.notes_labels(artifacts)) - set(inputs.labels))
     keys = {label: inputs.notes_key(label) for label in (*inputs.labels, *others)}
     notes = {label: read_artifact(artifacts, key, DocNotes) for label, key in keys.items()}
-    deliveries = ((inputs.site, site), (inputs.zone, zone), (inputs.envelope, envelope))
+    deliveries = [(inputs.site, site), (inputs.zone, zone)]
+    if require_envelope:
+        deliveries.append((inputs.envelope, envelope))
     errors = [
         describe_missing_artifact(delivery.artifact, delivery.producer)
         for delivery, found in deliveries
@@ -117,7 +130,23 @@ def read_findings(artifacts: Mapping[str, ArtifactData], inputs: StudyInputs) ->
         for label, found in notes.items()
         if found is None
     ]
-    if errors or site is None or zone is None or envelope is None:
+    errors += [
+        f"{keys[label]}: label {note.label!r} must match artifact label {label!r}. "
+        f"Delegate to {inputs.notes.producer} again."
+        for label, note in notes.items()
+        if note is not None and note.label != label
+    ]
+    errors += [
+        f"{keys[label]}: missing required topics {missing}. Delegate to {inputs.notes.producer}."
+        for label, note in notes.items()
+        if note is not None
+        and (
+            missing := sorted(
+                set(inputs.required_topics.get(label, ())) - {n.topic for n in note.notes}
+            )
+        )
+    ]
+    if errors or site is None or zone is None:
         raise SubmissionRejected(errors)
     found = tuple(doc_notes for doc_notes in notes.values() if doc_notes is not None)
     return Findings(site, zone, found, envelope)
@@ -171,7 +200,8 @@ def open_points(findings: Findings, inputs: StudyInputs) -> dict[str, tuple[Open
         The open points by artifact key.
     """
     points = {inputs.notes_key(notes.label): notes.open_points for notes in findings.notes}
-    points[inputs.envelope.artifact] = findings.envelope.open_points
+    if findings.envelope is not None:
+        points[inputs.envelope.artifact] = findings.envelope.open_points
     return points
 
 

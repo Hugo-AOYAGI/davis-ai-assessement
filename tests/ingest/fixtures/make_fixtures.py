@@ -25,8 +25,7 @@ def dump(pdf: Path, pages: list[int]) -> list[dict[str, object]]:
     with pymupdf.open(pdf) as document:
         lines = [line for number in pages for line in page_lines(document[number - 1], number)]
     return [
-        {**line.model_dump(), "x0": round(line.x0, 2), "y0": round(line.y0, 2)}
-        | {"size": round(line.size, 2)}
+        {**line.model_dump(), "y0": round(line.y0, 2)} | {"size": round(line.size, 2)}
         for line in lines
     ]
 

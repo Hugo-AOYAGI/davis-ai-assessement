@@ -1,0 +1,14 @@
+- eval.dataset=all
+- eval.phoenix.enabled=false
+- eval.concurrency=4
+- eval.max_cost_usd=80
+- models.nodes.surveyor.model=claude-sonnet-5-5
+- +models.nodes.surveyor.effort=medium
+- models.nodes.orchestrator.model=claude-sonnet-5-5
+- +models.nodes.orchestrator.effort=medium
+- models.nodes.doc_analyst.model=claude-sonnet-5-5
+- +models.nodes.doc_analyst.effort=medium
+- models.nodes.architect.model=claude-sonnet-5-5
+- +models.nodes.architect.effort=medium
+- models.nodes.zoning_analyst.model=claude-sonnet-5-5
+- models.nodes.zoning_analyst.effort=medium

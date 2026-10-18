@@ -1,0 +1,67 @@
+# Source audit: zoning z16_um4 (zone UM4, OAP legend item) and doc d13_um4_housing for
+# parcel CP0123; regulation PDF pp306,310-313,315,318; OAP PDF pp25-26, checked directly.
+# Parcel link: BAN row 91272_2077_00008 (8 Mail Pierre Potier) -> cad_parcelles CP0123.
+# Geometry oracle: cadastre polygon area 3431.5 m2 (contenance 3429), green minimum = area * 0.20.
+# Proposal volume varies with the freely chosen layout and height; no single proposal volume
+# is asserted. The harness recomputes the actual proposal from the submitted layout.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e04_um4_housing
+level: e2e
+tests: Moulon UM4 housing; heights set per sub-sector (UM3/UM4/UM5) and destination, UMG chapter is a different zone; OAP R+4 average vs PLU R+5 ceiling
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 8 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  program: One collective housing building.
+  facts: []
+from_items: [z16_um4, d13_um4_housing]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CP0123]
+    critical: true
+    source: ban
+  - key: site.choice.parcel_ids
+    expect_none_of: [91272000CP0220, 91272000CR0213]
+    source: ban
+  - key: study.regime.zone
+    expect: UM4
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    critical: true
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    evidence: [{doc: plu_reglement, page: 306, quote: "des constructions à destination d'habitation"}]
+  - key: envelope.rules.buildings.max_height_m
+    expect: 20
+    critical: true
+    evidence: [{doc: plu_reglement, page: 313, quote: "la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5"}]
+  - key: envelope.rules.buildings.max_storeys
+    expect: 6
+    evidence: [{doc: plu_reglement, page: 313, quote: "avec un nombre de niveaux limité à R+5"}]
+  - key: envelope.rules.max_footprint_ratio
+    expect: null
+    critical: true
+    evidence: [{doc: plu_reglement, page: 312, quote: "L’emprise au sol des constructions n’est pas réglementée"}]
+  - key: envelope.rules.min_green_ratio
+    expect: 0.20
+    evidence: [{doc: plu_reglement, page: 318, quote: "En espace vert 20% au moins de la superficie du terrain."}]
+  - key: envelope.site_area_m2
+    expect: 3431.5
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: 686.3
+    tolerance: 0.02
+    source: geometry
+must_flag:
+  - The OAP sets an average of R+4 for the UM zone, while article 10 allows R+5 and 20 m for UM4 housing as a ceiling; compatibility with the OAP is a judgment (OAP PDF p25).
+  - The parking requirement depends on whether the dwellings are financed with a State-aided loan (1 space per dwelling, Titre I cap on regulation PDF pp5-6) or not (1 space per 35 m2 of floor area, at most 2 per dwelling); the program does not say.
+must_not:
+  - States a maximum height other than 20 m for UM4 housing (15 m is UM3, 18 m is another destination in UM4, 24 m and 25 m are UM5, 31 m is the UM5a hotel).
+  - Applies the UMG rules (Joliot-Curie chapter, regulation PDF pp320-332) instead of the UM chapter.
+  - States that zone UM article 9 imposes a numeric maximum footprint ratio.
+  - Counts vegetated roofs or surface parking areas toward the UM article 13 minimum green area.
+  - Uses a parcel other than CP0123 (for example CP0220 or CR0213) as the study site.

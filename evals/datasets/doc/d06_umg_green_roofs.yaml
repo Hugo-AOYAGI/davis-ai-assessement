@@ -1,0 +1,61 @@
+id: d06_umg_green_roofs
+level: doc
+tests: UMG article 13 does not count green roofs as green space while the lexique weights roof planting at 0.5; the two texts conflict and the conflict must be reported
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is the sector UMG (Moulon).
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UMG
+    legend_items: []
+    program: offices
+facts:
+  - statement: In sector UMG, a new construction project must treat at least 20 percent of the site area as green space (espace vert) under article 13.3.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 331
+        quote: "En espace vert 20% au moins de la superficie du terrain."
+  - statement: In sector UMG, a new construction project must treat at least 10 percent of the site area as full-ground space (pleine terre) under article 13.3.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 331
+        quote: "En espace de pleine terre 10% au moins de la superficie du terrain."
+  - statement: UMG article 13.1 states that vegetated roofs (toitures végétalisées) are not counted as green space (espaces verts).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 330
+        quote: "les toitures végétalisées ne sont pas comptabilisées en espaces verts."
+  - statement: The lexique, entry espaces végétalisés (application des articles 13), applies a coefficient of 0.5 to vegetated spaces on a slab or on a roof with at least 30 cm of planted earth cover.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 376
+        quote: "Un coefficient de 0,5 pour : - Les espaces végétalisés sur dalle ou sur toiture avec couverture de terre végétale d’au moins 30 cm"
+  - statement: UMG article 13.1 counts as green space only planted parts of the plot with at least 60 cm of planted earth thickness (terre végétale).
+    evidence:
+      - doc: plu_reglement
+        page: 330
+        quote: "les parties de terrain plantées disposant d’au moins 60 cm d’épaisseur de terre végétale."
+  - statement: UMG article 13.1 counts as full-ground space (pleine terre) only land free of any infrastructure and superstructure, including projections (saillies).
+    evidence:
+      - doc: plu_reglement
+        page: 330
+        quote: "les terrains vierges de toute infrastructure et superstructure (y compris saillies)."
+  - statement: The lexique entry for espaces végétalisés requires that at least 50 percent of the required vegetated spaces be full-ground space.
+    evidence:
+      - doc: plu_reglement
+        page: 376
+        quote: "A minima 50% des espaces végétalisés exigés sont composés de pleine terre."
+must_flag:
+  - Reports both the UMG 13.1 exclusion of green roofs from green space and the lexique 0.5 coefficient for roof planting, and the tension between them (whichever the output says prevails).
+must_not:
+  - States that a green roof counts as green space in UMG, in full or at a 0.5 coefficient, without noting that article 13.1 excludes toitures végétalisées.
+  - States that a green roof counts towards the 10 percent full-ground space requirement in UMG.
+  - Applies the 0.5 roof coefficient to the UMG green-space minimum without noting the article 13.1 exclusion.
+  - States that the UMG green-space requirement is a percentage other than 20 percent of the site area, or the full-ground requirement a percentage other than 10 percent.

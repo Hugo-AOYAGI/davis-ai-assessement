@@ -240,5 +240,8 @@ def _evaluator(field: str) -> Evaluator:
 
 def _expected(item: Item) -> dict[str, JsonValue]:
     """The expected answers of an item, shown as the example's reference output."""
-    data = item.model_dump(mode="json", include={"facts", "must_flag", "must_not"})
-    return {key: data[key] for key in ("facts", "must_flag", "must_not")}
+    fields = {"facts", "must_flag", "must_not"}
+    if item.expected_refusal is not None:
+        fields.add("expected_refusal")
+    data = item.model_dump(mode="json", include=fields)
+    return {key: data[key] for key in fields}

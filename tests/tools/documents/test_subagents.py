@@ -10,7 +10,15 @@ from agent.agents.config import load_config
 from agent.agents.subagents import build_subagent
 from agent.tools.submit.factory import DONE
 
-ZONING_TOOLS = {"list_documents", "site_view", "view_image", "zoom", "submit_zone", "revise_zone"}
+ZONING_TOOLS = {
+    "list_documents",
+    "plan_site",
+    "site_view",
+    "view_image",
+    "zoom",
+    "submit_zone",
+    "revise_zone",
+}
 DOC_TOOLS = {
     "list_documents",
     "list_sections",
@@ -78,7 +86,9 @@ def run(cfg, name, replies, monkeypatch):
 
 
 def test_doc_analyst_reads_and_submits_through_graph(corpus_dir, monkeypatch):
-    cfg = load_config([f"retrieval.corpus.directory.relative='{corpus_dir.as_posix()}'"])
+    cfg = load_config(
+        ["corpus.id=test", f"retrieval.corpus.directory.relative='{corpus_dir.as_posix()}'"]
+    )
     replies = [
         call("read_section", {"section_id": "plu_reglement/titre-ii/moulon/umg/10"}, "r1"),
         call("submit_notes", notes("une citation inventée de toutes pièces"), "s1"),

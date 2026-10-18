@@ -1,4 +1,4 @@
-"""Citation validity of an output (``docs/EVALS.md`` §4), deterministic only."""
+"""Citation validity of an output (``evals/README.md``§4), deterministic only."""
 
 from collections.abc import Sequence
 
@@ -8,7 +8,6 @@ from agent.contracts.base import Contract
 from agent.contracts.evidence import Citation, CitationCheck, SourceKind
 from agent.runtime.citations.collect import collect_citations, collect_json_citations
 from evals.harness.extract import Output
-from evals.harness.items import Fact
 from evals.harness.matching.grounding import CitationMatcher
 from evals.harness.scorers.facts import FactScore
 
@@ -88,29 +87,4 @@ def score_citations(
         facts_with_evidence=len(with_evidence),
         facts_cited=cited,
         share_facts_cited=cited / len(with_evidence) if with_evidence else None,
-    )
-
-
-def check_evidence(facts: Sequence[Fact], matcher: CitationMatcher) -> tuple[CitationCheck, ...]:
-    """Check the quotes of an item's evidence on their pages, to validate ground truth.
-
-    Args:
-        facts: The item's facts.
-        matcher: Citation checks against the corpus.
-
-    Returns:
-        One check per evidence entry that has a quote, in item order.
-    """
-    return tuple(
-        matcher.check(
-            Citation(
-                doc=item.doc,
-                page=item.page,
-                quote=item.quote,
-                source_kind=SourceKind.REGULATORY,
-            )
-        )
-        for fact in facts
-        for item in fact.evidence
-        if item.quote is not None
     )

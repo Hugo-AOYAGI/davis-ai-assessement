@@ -69,7 +69,11 @@ def read_playbooks(nodes: DictConfig) -> dict[str, Playbook]:
         The playbooks by name, with their text.
     """
     return {
-        str(name): Playbook(description=node.description, text=read_prompt(node.path))
+        str(name): Playbook(
+            description=node.description,
+            text=read_prompt(node.path),
+            lists={key: tuple(values) for key, values in node.get("lists", {}).items()},
+        )
         for name, node in nodes.items()
     }
 

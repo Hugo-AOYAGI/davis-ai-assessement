@@ -1,0 +1,42 @@
+# Independent benchmark-authoring sources; not agent runtime settings.
+ban_url: https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz
+carto_url: https://apicarto.ign.fr/api/cadastre/parcelle
+commune_code: "91272"
+commune_name: Gif-sur-Yvette
+ban_cache: data/cache/eval/adresses-91.csv.gz
+timeout_s: 60
+neighbour_m: 0.5
+max_listed: 8
+carto_limit: 500
+random_count: 6
+near_radius_m: 50
+geographic_crs: EPSG:4326
+metric_crs: EPSG:2154
+sectors:
+  moulon_min_lon: 2.15
+  moulon_min_lat: 48.70
+  chevry_max_lon: 2.14
+  chevry_max_lat: 48.695
+gpu_archive: data/gpu_2021
+gpu_version: 91272_PLU_20210706
+shape_template: "91272_{layer}_20210706.shp"
+reference_parcel: tests/adapters/geo/fixtures/cadastre_CR0247.json
+zone_layers: [ZONE_URBA, PRESCRIPTION_SURF, PRESCRIPTION_LIN]
+min_zone_area_m2: 0.1
+min_linear_length_m: 1.0
+plan_pdf: ressources/plu_reglement_graphique_91272_20210706.pdf
+raster:
+  min_crop_half_px: 90
+  crop_extent_ratio: 0.7
+  nearby_m: 450
+  render_scale: 2
+  zone_line_width: 0.25
+  parcel_line_width: 0.7
+pages:
+  snippet_chars: 70
+  search_limit: 15
+  max_chars: 6000
+  boilerplate:
+    - '^GIF-SUR-YVETTE\s*-\s*Plan Local d.Urbanisme\s*$'
+    - '^Modification n°1 et révision allégée n°1 approuvées le 6 juillet 2021\s*$'
+    - '^\s*\d{1,3}\s*$'

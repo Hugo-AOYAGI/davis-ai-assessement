@@ -1,0 +1,31 @@
+# Independent source checks: evals/fixtures/zoning/z07_natural_zone.oracle.json
+id: z07_natural_zone
+level: zoning
+tests: N parcel with partial reserved land; do not infer admissibility from existing
+  address
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 16 Impasse de la Gourdillerie, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CC0193
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: N
+- key: overlays
+  present:
+  - Emplacements réservés pour équipements et aménagements divers, création ou amélioration
+    de voirie
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_flag:
+- The emplacement réservé covers only part of the parcel (about 58%); it is not a
+  whole-parcel reservation.

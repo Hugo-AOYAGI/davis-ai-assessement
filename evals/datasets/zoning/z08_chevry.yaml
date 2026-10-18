@@ -1,0 +1,28 @@
+# Independent source checks: evals/fixtures/zoning/z08_chevry.oracle.json
+id: z08_chevry
+level: zoning
+tests: Chevry UA must not be interpreted as Vallee UA
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 9 Allée du Pré Chevalier, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000AH0198
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UA
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true
+must_not:
+- Locates the parcel in the Vallée sector rather than Chevry.

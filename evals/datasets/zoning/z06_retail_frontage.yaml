@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z06_retail_frontage.oracle.json
+id: z06_retail_frontage
+level: zoning
+tests: protected commercial frontage intersects a UAa parcel
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 2bis Cours du Four, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000CM0031
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UAa
+- key: overlays
+  present:
+  - Linéaire identifié pour la sauvegarde du commerce
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

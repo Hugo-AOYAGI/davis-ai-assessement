@@ -1,0 +1,73 @@
+# Case list of the end-to-end level (evals/README.md §2). One entry per item to write.
+# Brief fields: address (the case input), program (as the user would state it), from_items (the
+# component items that already fix the parcel, the zone and the rules for this site), focus,
+# trap. Expected values come from those items and from the corpus, never from agent output.
+- id: e01_reference
+  tests: the brief's case; CR0249 strip; "jeunes actifs" undefined in the corpus; Titre I parking cap
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs, two separate buildings
+  from_items: [s01_joliot_curie, z01_joliot_curie, d04_umg_student_parking_titre1, d08_oap_joliot_curie]
+  status: verified (already written; do not rewrite)
+
+- id: e02_reference_public_facility
+  tests: same site as e01, public-interest facility; its own UMG height; UMG 13 green-space rules do not apply
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: one public-interest facility (équipement d'intérêt collectif), one building
+  from_items: [s01_joliot_curie, z01_joliot_curie, d05_umg_public_interest]
+  trap: the housing height; applying the UMG 13 green ratio
+
+- id: e03_reference_offices
+  tests: same site as e01, offices; the "other uses" height and office parking norms; green roofs not counted by UMG 13
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: one office building
+  from_items: [s01_joliot_curie, z01_joliot_curie, d06_umg_green_roofs]
+  trap: housing height or housing parking; counting green roofs as green space
+
+- id: e04_um4_housing
+  tests: Moulon UM4 housing; height set for the sub-sector
+  address: 8 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  program: one collective housing building
+  from_items: [z16_um4, d13_um4_housing]
+  trap: UMG or another UM sub-sector height
+
+- id: e05_vallee_ua_housing
+  tests: Vallée UA housing; footprint, heights, alignment and setbacks of the Vallée UA chapter; no OAP applies
+  address: 192 Avenue du Général Leclerc, 91190 Gif-sur-Yvette
+  program: one collective housing building
+  from_items: [z11_vallee_ua, d01_ua_vallee_vs_chevry, d09_outside_oap]
+  trap: Chevry UA values
+
+- id: e06_chevry_ua_housing
+  tests: Chevry UA housing; same zone code as e05 with different values
+  address: 9 Allée du Pré Chevalier, 91190 Gif-sur-Yvette
+  program: one collective housing building
+  from_items: [z08_chevry, d12_ua_chevry_housing]
+  trap: Vallée UA values
+
+- id: e07_uga_housing
+  tests: Vallée UGa housing; 15 % footprint; struck-through height on PDF p.91 (7 m retained, 10 m struck)
+  address: 10 allée de la Ferme Rose, 91190 Gif-sur-Yvette
+  program: one detached house
+  from_items: [z12_uga, d02_uga_height]
+  trap: the struck-through 10 m; the general UG 30 % footprint
+
+- id: e08_uh_housing
+  tests: UH housing with a non-trivial envelope (footprint, road and side setbacks); repealed articles 5 and 14
+  address: choose one UH site among z03_ebc, z04_ppri, z05_emplacement_reserve (prefer one without PPRi; check its sector and use its address)
+  program: one detached house
+  from_items: [the chosen zoning item, d07_uh_chevry_housing or d11_repealed_articles when they match the site's sector]
+  trap: stating a minimum plot size or COS; ignoring the overlay on the chosen site
+
+- id: e09_aurc_housing
+  tests: AURc (Damiette) housing; articles 10-11 defer to zone UR; the Damiette OAP applies
+  address: 59bis Route de Damiette, 91190 Gif-sur-Yvette
+  program: one collective housing building
+  from_items: [z15_aurc, d03_aurc_defers_to_ur]
+  trap: stating AURc sets no height; missing the OAP
+
+- id: e10_n_housing
+  tests: negative case, natural zone N; new housing is prohibited or tightly restricted
+  address: 16 Impasse de la Gourdillerie, 91190 Gif-sur-Yvette
+  program: one new detached house
+  from_items: [z07_natural_zone, d20_n_housing]
+  trap: delivering a buildable envelope for new housing as if permitted

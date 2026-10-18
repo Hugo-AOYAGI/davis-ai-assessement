@@ -1,0 +1,26 @@
+# Independent source checks: evals/fixtures/zoning/z15_aurc.oracle.json
+id: z15_aurc
+level: zoning
+tests: AURc zone inside an OAP perimeter
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 59bis Route de Damiette, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000BD0231
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: AURc
+- key: overlays
+  present:
+  - Secteur à Orientation d'Aménagement et de Programmation
+  absent:
+  - Espaces Boisés Classés
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  - Zone humide
+  source: gpu_2021
+  critical: true

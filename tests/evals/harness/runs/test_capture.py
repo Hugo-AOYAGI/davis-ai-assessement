@@ -7,7 +7,7 @@ from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.runnables import RunnableLambda
 from langchain_core.tools import tool
 
-from evals.harness.runs.capture import SubagentCapture
+from evals.harness.runs.capture import RunCapture
 
 
 class ScriptedModel(GenericFakeChatModel):
@@ -42,7 +42,7 @@ def test_captures_each_delegated_run_with_its_messages():
             graph.invoke({"messages": [HumanMessage(task)]})
         return "ok"
 
-    capture = SubagentCapture(["surveyor", "doc_analyst"])
+    capture = RunCapture(["surveyor", "doc_analyst"])
     RunnableLambda(orchestrator).invoke(None, config={"callbacks": [capture], "run_name": "study"})
     runs = capture.runs
     assert [run.name for run in runs] == ["surveyor", "doc_analyst"]
@@ -54,7 +54,7 @@ def test_captures_each_delegated_run_with_its_messages():
     assert reply.tool_calls[0]["name"] == "read_pages"
 
 
-def test_failed_run_is_not_kept():
+def test_failed_run_keeps_its_input():
     failing = subagent("surveyor", [])
 
     def orchestrator(_):
@@ -62,6 +62,61 @@ def test_failed_run_is_not_kept():
             failing.invoke({"messages": [HumanMessage("locate")]})
         return "ok"
 
-    capture = SubagentCapture(["surveyor"])
+    capture = RunCapture(["surveyor"])
     RunnableLambda(orchestrator).invoke(None, config={"callbacks": [capture]})
+    assert len(capture.runs) == 1
+    assert capture.runs[0].name == "surveyor"
+    assert capture.runs[0].messages[0].content == "locate"
+
+
+def test_failed_graph_preserves_completed_model_and_tool_messages():
+    call = {"name": "read_pages", "args": {"doc": "d", "start": 1, "end": 2}, "id": "c1"}
+    graph = subagent("surveyor", [AIMessage("", tool_calls=[call])])
+    capture = RunCapture(["surveyor"])
+    with pytest.raises(RuntimeError, match="StopIteration"):
+        graph.invoke({"messages": [HumanMessage("locate")]}, config={"callbacks": [capture]})
     assert capture.runs == ()
+    assert [type(message) for message in capture.messages] == [HumanMessage, AIMessage, ToolMessage]
+    assert capture.messages[-1].content == "page text"
+
+
+def test_failed_delegation_keeps_completed_tool_messages_separate_from_parent():
+    call = {"name": "read_pages", "args": {"doc": "d", "start": 1, "end": 2}, "id": "c1"}
+    graph = subagent("surveyor", [AIMessage("", tool_calls=[call])])
+
+    def orchestrator(_):
+        graph.invoke({"messages": [HumanMessage("locate")]})
+
+    capture = RunCapture(["surveyor"])
+    with pytest.raises(RuntimeError, match="StopIteration"):
+        RunnableLambda(orchestrator).invoke(
+            {"messages": [HumanMessage("study")]}, config={"callbacks": [capture]}
+        )
+    assert [message.content for message in capture.messages] == ["study"]
+    assert [type(message) for message in capture.runs[0].messages] == [
+        HumanMessage,
+        AIMessage,
+        ToolMessage,
+    ]
+
+
+def test_delegation_through_a_tool_keeps_its_own_history():
+    graph = reading_agent("doc_analyst")
+
+    @tool
+    def delegate(request: str) -> str:
+        """Ask the document analyst to read."""
+        graph.invoke({"messages": [HumanMessage(request)]})
+        return "delegated"
+
+    def orchestrator(_):
+        return delegate.invoke({"request": "read rules"})
+
+    capture = RunCapture(["doc_analyst"])
+    RunnableLambda(orchestrator).invoke(
+        {"messages": [HumanMessage("study")]}, config={"callbacks": [capture]}
+    )
+    assert [message.content for message in capture.messages] == ["study"]
+    assert [run.name for run in capture.runs] == ["doc_analyst"]
+    assert capture.runs[0].messages[0].content == "read rules"
+    assert capture.runs[0].messages[-1].content == "done"

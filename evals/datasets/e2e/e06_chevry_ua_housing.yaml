@@ -1,0 +1,117 @@
+# Source audit: zoning z08 and doc d12 for AH0198 (Chevry UA); regulation PDF pp5-6, 210-221;
+# OAP Plateau de Chevry pp8-10; cadastre polygon area ~3681 m2 (contenance 3711 m2).
+# Layout-independent oracle: site area from the cadastre; footprint, height and setback
+# parameters read directly from the regulation. UA13 sets no numeric green share, so the minimum
+# green area is "not regulated". No proposal volume is asserted (volume depends on the free layout
+# and on the eaves-height-based setbacks); the harness recomputes the proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e06_chevry_ua_housing
+level: e2e
+tests: Chevry UA housing; same zone code as e05 (Vallée UA) with different values (50 %, 12 m / 15 m / R+3, alignment or setback, no numeric green share)
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 9 Allée du Pré Chevalier, 91190 Gif-sur-Yvette
+  program: One new collective housing building (apartments).
+  facts:
+    - The housing is ordinary private-market housing, not state-aided rental housing, not a student or senior residence.
+    - The building is built on the cadastral parcel of the address, taken as a free site.
+from_items: [z08_chevry, d12_ua_chevry_housing]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000AH0198]
+    critical: true
+    source: cadastre
+  - key: study.regime.zone
+    expect: UA
+    critical: true
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: true
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [conditional, permitted]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 211
+        quote: "Les constructions à usage d’habitation sous condition de s’intégrer dans l’harmonie architecturale et paysagère qui caractérise les lieux."
+  - key: envelope.rules.max_footprint_ratio
+    expect: 0.5
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "ne dépassera pas 50% de la superficie des terrains."
+  - key: envelope.rules.buildings.max_height_m
+    any_of: [12, 15]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "12 mètres à l’égout du toit"
+      - doc: plu_reglement
+        page: 217
+        quote: "15 mètres au faîtage, faîte ou hauteur plafond"
+  - key: envelope.rules.buildings.max_storeys
+    expect: 4
+    evidence:
+      - doc: plu_reglement
+        page: 217
+        quote: "un nombre de niveaux limités à R+3 (y compris sous combles aménagés)"
+  - key: envelope.rules.setbacks[kind=road].on_limit_allowed
+    expect: true
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 215
+        quote: "Les constructions peuvent être implantées à l’alignement ou en retrait."
+  - key: envelope.rules.setbacks[kind=side].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 215
+        quote: "Les constructions pourront être implantées en limite séparative latérale ou en retrait."
+  - key: envelope.rules.spacing_without_windows.min_m
+    expect: 4
+    evidence:
+      - doc: plu_reglement
+        page: 216
+        quote: "4 mètres lorsque les façades concernées ne comportent pas de vues"
+  - key: envelope.rules.spacing_with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 216
+        quote: "8 mètres dans le cas contraire"
+  - key: envelope.rules.min_green_ratio
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 220
+        quote: "Les surfaces libres de toute construction ainsi que les délaissés des aires de stationnement, seront plantées."
+  - key: study.parking[basis=unit].spaces
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 219
+        quote: "2 places par logement"
+  - key: envelope.site_area_m2
+    expect: 3681.4
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: null
+    source: geometry
+must_flag:
+  - The Plateau de Chevry OAP (PDF pp8-10) sets only qualitative orientations for collective housing (respect existing footprints, volumes and numbers of levels) with no numeric limit, so it can restrict a new building beyond the UA numeric limits.
+  - UA10.2 gives three simultaneous height limits (12 m at the eaves, 15 m at the ridge, R+3 including converted attics); the study must state which one bounds the volume.
+  - UA10.2 also caps the height of the facade on the access road by the road width (plus any setback), and the road width is not given by the corpus.
+must_not:
+  - States that the maximum footprint in UA is 60 percent of the site area (Vallée UA value).
+  - States that the maximum height in UA is 9 metres at the eaves or the acroterion, 12 metres at the ridge, or R+2+combles (Vallée UA values).
+  - States that constructions in UA must be built on the current or projected alignment (Vallée UA rule).
+  - States that the side setback in UA is 8 metres with views and half the height (2 metre minimum) without views (Vallée UA rule).
+  - Cites the Vallée - UA chapter (PDF pages 13 to 30) as the source of the applicable UA rules.
+  - States a numeric minimum share of green space or open ground for zone UA of Chevry (the 20 percent figure belongs to zone UMG).
+  - Applies the Titre I cap of one parking space per dwelling to this ordinary private-market housing.

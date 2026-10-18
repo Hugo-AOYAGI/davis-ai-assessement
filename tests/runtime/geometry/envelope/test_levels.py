@@ -3,15 +3,13 @@ from itertools import pairwise
 import pytest
 import shapely
 
-from agent.contracts.geometry import BoundaryKind, BuildingMassing, Level
+from agent.contracts.geometry import BoundaryKind
 from agent.runtime.geometry.envelope.levels import (
     Bound,
-    Cap,
     SetBackSite,
     distance_at,
     ground_cap,
     rise,
-    scale_together,
     setback_at,
     volume,
 )
@@ -94,31 +92,3 @@ def test_ground_cap_takes_the_smaller(make_rules):
     assert cap is not None
     assert cap.area_m2 == pytest.approx(300)
     assert "green" in cap.reason
-
-
-def massing(name, area_m2):
-    levels = (Level(from_m=0, to_m=10, area_m2=area_m2),)
-    return BuildingMassing(
-        building=name,
-        footprint=None,
-        footprint_area_m2=area_m2,
-        max_height_m=10,
-        levels=levels,
-        volume_m3=area_m2 * 10,
-    )
-
-
-def test_caps_scale_every_building_by_one_factor():
-    scaled, notes = scale_together([massing("A", 300), massing("B", 100)], Cap(200, "the cap"))
-    assert [m.footprint_area_m2 for m in scaled] == pytest.approx([150, 50])
-    assert [m.levels[0].area_m2 for m in scaled] == pytest.approx([150, 50])
-    assert [m.volume_m3 for m in scaled] == pytest.approx([1500, 500])
-    (note,) = notes
-    assert "exceeds the cap" in note
-    assert "0.500" in note
-
-
-def test_caps_below_the_limit_change_nothing():
-    massings = [massing("A", 100)]
-    assert scale_together(massings, Cap(200, "the cap")) == (massings, [])
-    assert scale_together(massings, None) == (massings, [])

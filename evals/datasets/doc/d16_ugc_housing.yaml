@@ -1,0 +1,142 @@
+id: d16_ugc_housing
+level: doc
+tests: UGc housing (Vallée, near the Courcelle station) falls under the general UG rules (30 % footprint, 7 m / 10 m height, 8 m or H/2 side setbacks), not the UGa/UGd 15 % footprint; the sector's own road-setback sentence gives no distance
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    the regulatory rules for the program in the zone, plus the provisions of every applying
+    legend item. The zone is the sector UGc of the Vallée zone UG.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UGc
+    legend_items: []
+    parcel_ids: [91272000CA0081]
+    program: housing
+facts:
+  - statement: In sector UGc, the construction footprint of buildings must not exceed 30 percent of the total site area in the zone (the general UG rule, which excludes only UGa, UGb and UGd).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "Dans la zone UG et ses secteurs, à l'exception des secteurs UGa, UGb et UGd"
+      - doc: plu_reglement
+        page: 90
+        quote: "L’emprise au sol des constructions ne doit pas excéder 30% de la superficie totale du terrain dans la zone."
+  - statement: In sector UGc, the footprint of ancillary constructions must not exceed 8 percent of the site area.
+    evidence:
+      - doc: plu_reglement
+        page: 90
+        quote: "En outre, l’emprise au sol des constructions annexes ne doit pas excéder 8 % de la superficie du terrain."
+  - statement: In sector UGc, the height of a main building must not exceed 7 metres at the eaves or at the acroterion (the general UG rule, which excludes UGa, UGd, UGf and UGg).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 91
+        quote: "Dans la zone UG et ses secteurs, à l'exception des secteurs UGa, UGd, UGf et UGg"
+      - doc: plu_reglement
+        page: 91
+        quote: "7 mètres à l’égout du toit ou à l’acrotère."
+  - statement: In sector UGc, the height of a main building must not exceed 10 metres at the ridge (faîtage, faîte) or at the ceiling height (hauteur plafond).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 91
+        quote: "10 mètres au faîtage, faîte ou hauteur plafond ;"
+  - statement: In sector UGc, the height of ancillary constructions must not exceed 2.50 metres at the eaves and 3 metres at the acroterion.
+    evidence:
+      - doc: plu_reglement
+        page: 91
+        quote: "2,50 mètres à l’égout du toit ;"
+      - doc: plu_reglement
+        page: 91
+        quote: "3 mètres à l’acrotère ;"
+  - statement: In sector UGc, buildings must be set back from the road alignment (the sector rule says they are built "en retrait"), so building on the alignment is not permitted there.
+    evidence:
+      - doc: plu_reglement
+        page: 86
+        quote: "Dans les secteurs UGc, UGe, UGf"
+      - doc: plu_reglement
+        page: 86
+        quote: "Les constructions seront implantées en retrait."
+  - statement: In UGc, a main building facade, or part of a facade, with views (vues) must stand at least 8 metres from the side boundary.
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues;"
+  - statement: In UGc, a facade without views must stand from the side boundary at a distance of at least half the building height measured at the eaves (L=1/2H), with a minimum of 2 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 88
+        quote: "la moitié de la hauteur de la construction (L=1/2H) mesurée à l’égout du toit, avec un minimum de 2 mètres"
+  - statement: The rear boundary (limite de fond de terrain) is treated as a separative boundary under UG article 7, so the same setback rules apply to the rear as to the sides.
+    evidence:
+      - doc: plu_reglement
+        page: 87
+        quote: "les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction"
+  - statement: In UGc, two buildings on the same property must be at least half the height of the taller building (measured at the eaves) apart, with a minimum of 4 metres, when the facing facades have no views.
+    evidence:
+      - doc: plu_reglement
+        page: 89
+        quote: "La moitié de la hauteur de la construction la plus haute mesurée à l’égout du toit (L=1/2H) avec un minimum de 4 mètres dès lors que les façades en vis-à-vis ne comportent pas de vues"
+  - statement: In UGc, two buildings on the same property must be at least the height of the taller building (measured at the eaves) apart, with a minimum of 8 metres, when one of the facing facades has views.
+    evidence:
+      - doc: plu_reglement
+        page: 89
+        quote: "La hauteur de la construction la plus haute mesurée à l’égout du toit (L=H) avec un minimum de 8 mètres"
+  - statement: In UGc, two buildings on the same property must be at least 1.5 times the height of the taller building (measured at the eaves) apart, with a minimum of 16 metres, when the facing facades have views.
+    evidence:
+      - doc: plu_reglement
+        page: 89
+        quote: "1,5 fois la hauteur de la construction la plus haute mesurée à l’égout du toit (L=1,5H) avec un minimum de 16 mètres"
+  - statement: New housing requires 2 parking spaces per dwelling under UG article 12.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 94
+        quote: "Pour les constructions à destination d'habitation : 2 places par logement;"
+  - statement: In UGc, at least 50 percent of the required parking spaces must be covered or built underground (the rule excludes only UGa and UGb), except visitor spaces and spaces for collective facilities, and does not apply in flood zones.
+    evidence:
+      - doc: plu_reglement
+        page: 95
+        quote: "Au moins 50% des places de stationnement exigibles doivent être couverts, ou réalisés en sous-sol"
+  - statement: For housing of more than three dwellings, bicycle parking requires 0.75 m² per dwelling for dwellings up to two main rooms and 1.5 m² per dwelling otherwise.
+    evidence:
+      - doc: plu_reglement
+        page: 95
+        quote: "0,75 m² par logement pour les logements jusqu’à deux pièces principales"
+      - doc: plu_reglement
+        page: 95
+        quote: "1,5 m² par logement dans les autres cas"
+  - statement: Sector UGc of the Vallée zone UG corresponds to the site near the Courcelle station.
+    evidence:
+      - doc: plu_reglement
+        page: 80
+        quote: "le secteur UGc correspond au site proche de la gare de Courcelle"
+must_flag:
+  - For the road setback, the sector sentence for UGc says only that buildings are set back ("seront implantées en retrait") and gives no distance, while the general UG rule (alignment or 9 m / 5 m depending on the road width) is not expressly excluded for UGc, so the regulation does not say whether the 9 m / 5 m minimum applies to UGc.
+  - The spacing rules between buildings on one property (UG article 8.1) give 8 metres minimum when one of the facing facades has views and 16 metres minimum when the facing facades have views, without saying how the second case differs from the first, so the case of views on both facing facades is ambiguous.
+must_not:
+  - States that the maximum construction footprint in UGc is 15 percent of the site area, or applies the UGa/UGd 15 percent rule (or the 4 percent ancillary limit) to UGc.
+  - States that the footprint in UGc is not regulated (the UGb rule).
+  - States that the maximum height of a main building in UGc is 10 metres at the eaves or the acroterion, or 13 metres at the ridge (the UGd and UGf figures), or 15 metres (UGg).
+  - States that the maximum height in UGc is 7 metres at the ridge, or applies the UGa figure of 7 metres at the acroterion for all constructions.
+  - Applies the UGa/UGd side-setback rule (L=H with a minimum of 8 metres, or L=1/2H with a minimum of 4 metres) to UGc.
+  - Applies the UGa/UGb spacing between buildings of 4 metres without views and 8 metres with views to UGc.
+  - States that buildings may be built on the road alignment in UGc, or gives a setback distance for UGc as if the sector rule stated one, without noting that it comes from the general UG rule.
+  - States that UGc is exempt from the rule that at least 50 percent of the required parking be covered or underground.

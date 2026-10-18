@@ -81,7 +81,13 @@ def run_study(
 
     Returns:
         The run's metrics, the orchestrator's messages and the accepted study, if any.
+
+    Raises:
+        ValueError: If the case names a different corpus from the configured tools.
     """
+    if case.corpus_id != cfg.corpus.id:
+        msg = f"Case corpus {case.corpus_id!r} differs from configured corpus {cfg.corpus.id!r}."
+        raise ValueError(msg)
     ledger = CostLedger(load_pricing(cfg.models))
     graph = build(cfg, ledger)
     message = case_request(case, read_prompt(cfg.agent.request), no_facts=cfg.agent.no_facts)

@@ -1,0 +1,18 @@
+# Oracle provenance: evals/fixtures/surveyor/s14_voltaire.sources.json
+id: s14_voltaire
+level: surveyor
+tests: commune-certified BAN single-parcel link; address point inside cadastral polygon
+status: verified
+built_by: codex; independent BAN export and API Carto verification
+input:
+  address: 60 Avenue Voltaire, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000BL0045
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 451
+  tolerance: 0.02
+  source: cadastre

@@ -1,0 +1,255 @@
+# Combined index; detailed sampling/source notes remain in surveyor_random.yaml and surveyor_traps.yaml.
+- id: s01_joliot_curie
+  category: reference_strip_nearest_parcel
+  status: verified
+  evidence: existing manually adjudicated reference; original item preserved
+  tests: address point on unregistered ground beside the CR0249 strip; the real site
+    is CR0247
+  dataset: evals/datasets/surveyor/s01_joliot_curie.yaml
+  kind: trap
+- id: s02_croix_de_fer
+  tests: commune-certified BAN address linked to one parcel; ordinary single-parcel
+    selection
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s02_croix_de_fer.yaml
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 7 --n 3
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s02_croix_de_fer.sources.json
+- id: s03_corner_avelines
+  category: corner
+  status: verified
+  input_address: 3 Chemin des Avelines, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s03_corner_avelines
+  review: 'OSM road centerlines are 3.8 m (Chemin des Avelines, east) and 2.7 m (Rue
+    de la Fontaine, south) from BK0330, taking the minimum across all same-name OSM
+    way segments. Saved map visually inspected: parcel occupies the corner of these
+    two streets. No legal road ownership or access assertion is made.'
+  tests: Corner parcel beside Chemin des Avelines and Rue de la Fontaine; do not extend
+    the site into either street.
+  dataset: evals/datasets/surveyor/s03_corner_avelines.yaml
+  kind: trap
+- id: s04_lamartine_two_parcels
+  category: multiparcel
+  status: verified
+  input_address: 18 Avenue Lamartine, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s04_lamartine_two_parcels
+  review: BAN explicitly links BM0417 and BM0419. Their metric union is one Polygon.
+    The entrance point is outside both, nearer BM0417; nearest-only selection loses
+    BM0419.
+  tests: One certified address links two adjoining cadastral parcels; retain both
+    rather than only the nearest parcel.
+  dataset: evals/datasets/surveyor/s04_lamartine_two_parcels.yaml
+  kind: trap
+- id: s05_troenes_roadpoint
+  category: address_point_outside_target
+  status: verified
+  input_address: 13 Allée des Troènes, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s05_troenes_roadpoint
+  review: The certified BAN row identifies CO0036. The point lies on unregistered
+    ground 12.69 m from that parcel, which is still the nearest cadastral parcel in
+    the complete commune snapshot. OSM road geometry supports the entrance/road-point
+    context; no legal public-road ownership is asserted.
+  tests: Certified entrance-position point is 12.69 m outside its linked parcel; the
+    address point is not the site polygon.
+  dataset: evals/datasets/surveyor/s05_troenes_roadpoint.yaml
+  kind: trap
+- id: s06_clairiere_hamlet
+  category: hamlet
+  status: verified
+  input_address: 118 Allee de la Clairiere, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s06_clairiere_hamlet
+  review: The certified BAN row has nom_ld Hameau de la Clairière, number 118, and
+    exactly one linked parcel AK0548. Preserve the numbered site instead of treating
+    the hamlet as an undifferentiated property.
+  tests: High house number in Hameau de la Clairière; the hamlet name is address context,
+    not a separate cadastral site.
+  dataset: evals/datasets/surveyor/s06_clairiere_hamlet.yaml
+  kind: trap
+- id: s07_fontaine_commune_collision
+  category: same_address_neighboring_commune
+  status: verified
+  input_address: 5 Rue de la Fontaine, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s07_fontaine_commune_collision
+  review: The department BAN export contains exact same number/street in Gif-sur-Yvette
+    (91272) and Saint-Aubin (91538). Only the Gif row links BK0099. The Saint-Aubin
+    row has no parcel oracle and is not used to invent a forbidden parcel id.
+  tests: 5 Rue de la Fontaine exists in both Gif-sur-Yvette and neighboring Saint-Aubin;
+    honor the requested commune.
+  dataset: evals/datasets/surveyor/s07_fontaine_commune_collision.yaml
+  kind: trap
+- id: s08_couvent_enclosed
+  category: cadastral_enclosure_proxy
+  status: verified
+  input_address: 23 Chemin du Couvent, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s08_couvent_enclosed
+  review: 'All boundary is within 0.5 m buffers of neighboring cadastral polygons.
+    This is a cadastral-enclosure proxy, NOT verified legal landlocking: registered
+    roads, private access and easements remain unknown. The planned legally landlocked
+    trap is a coverage gap.'
+  tests: Site boundary is fully surrounded by other registered parcels; distinguish
+    the selected site from its surrounding cadastral features.
+  dataset: evals/datasets/surveyor/s08_couvent_enclosed.yaml
+  kind: trap
+- id: s09_grands_pres_ter
+  category: house_number_suffix_collision
+  status: verified
+  input_address: 2ter Chemin des Grands Prés, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s09_grands_pres_ter
+  review: Three certified BAN rows distinguish plain 2 (CK0119), 2bis (CK0120) and
+    2ter (CK0122). Do not silently drop the suffix or select a neighboring entrance.
+  tests: 2, 2bis and 2ter Chemin des Grands Prés have different linked parcels; retain
+    the ter suffix.
+  dataset: evals/datasets/surveyor/s09_grands_pres_ter.yaml
+  kind: trap
+- id: s10_moulon_shared_parcel
+  category: multiple_addresses_single_parcel
+  status: verified
+  input_address: 1 Rue Francis Perrin, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s10_moulon_shared_parcel
+  review: BAN links CP0220 from Rue Francis Perrin, Rue Pierre Potier and Route 128.
+    This is a parcel-selection trap in Moulon; no PLU sub-zone is asserted from a
+    rough coordinate heuristic.
+  tests: Several addresses on different Moulon streets identify the same large parcel;
+    do not shrink the site to one entrance or building.
+  dataset: evals/datasets/surveyor/s10_moulon_shared_parcel.yaml
+  kind: trap
+- id: s11_longs_reages
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s11_longs_reages.yaml
+  address: 40 Allee des Longs Réages, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AK0119
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s11_longs_reages.sources.json
+  caveats: []
+- id: s12_clairiere
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s12_clairiere.yaml
+  address: 105 Allee de la Clairiere, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AK0493
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 3
+  sources: evals/fixtures/surveyor/s12_clairiere.sources.json
+  caveats: []
+- id: s13_salmouille
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s13_salmouille.yaml
+  address: 60 All Graviers de la Salmouille, 91190 Gif-sur-Yvette
+  parcel_id: 91272000AC0353
+  sector_selection_aid: Chevry
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Chevry
+  selected_result: 7
+  sources: evals/fixtures/surveyor/s13_salmouille.sources.json
+  caveats: []
+- id: s14_voltaire
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s14_voltaire.yaml
+  address: 60 Avenue Voltaire, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BL0045
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 1
+  sources: evals/fixtures/surveyor/s14_voltaire.sources.json
+  caveats: []
+- id: s15_hoche
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s15_hoche.yaml
+  address: 6 Avenue Hoche, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BL0060
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 3
+  sources: evals/fixtures/surveyor/s15_hoche.sources.json
+  caveats: []
+- id: s16_paul_bert
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s16_paul_bert.yaml
+  address: 5 Avenue Paul Bert, 91190 Gif-sur-Yvette
+  parcel_id: 91272000BM0057
+  sector_selection_aid: Vallee
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Vallee
+  selected_result: 4
+  sources: evals/fixtures/surveyor/s16_paul_bert.sources.json
+  caveats: []
+- id: s17_mail_potier
+  tests: commune-certified BAN single-parcel link; address point inside cadastral
+    polygon
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s17_mail_potier.yaml
+  address: 25 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CR0213
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 5
+  sources: evals/fixtures/surveyor/s17_mail_potier.sources.json
+  caveats: []
+- id: s18_rue_potier
+  tests: commune-certified BAN single-parcel link; sub-metre address-point offset
+    must not override explicit parcel link
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s18_rue_potier.yaml
+  address: 4 Rue Pierre Potier, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CP0220
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 7
+  sources: evals/fixtures/surveyor/s18_rue_potier.sources.json
+  caveats:
+  - Certified BAN point is 0.703 m outside linked cadastral polygon.
+- id: s19_blanc_lapierre
+  tests: commune-certified BAN single-parcel link; sub-metre address-point offset
+    must not override explicit parcel link
+  kind: random
+  status: verified
+  dataset: evals/datasets/surveyor/s19_blanc_lapierre.yaml
+  address: 16 Rue André Blanc-Lapierre, 91190 Gif-sur-Yvette
+  parcel_id: 91272000CP0068
+  sector_selection_aid: Moulon
+  selection_command: uv run python -m evals.gt.site random --seed 27 --n 12 --sector
+    Moulon
+  selected_result: 10
+  sources: evals/fixtures/surveyor/s19_blanc_lapierre.sources.json
+  caveats:
+  - Certified BAN point is 0.391 m outside linked cadastral polygon.
+- id: s20_unknown_address
+  category: unknown_address
+  status: verified
+  input_address: 999999 Rue des Licornes Inexistantes, 91190 Gif-sur-Yvette
+  evidence: evals/fixtures/surveyor/s20_unknown_address
+  tests: Deliberately nonexistent street and house number absent from the commune
+    BAN export; finish with an explicit lookup refusal rather than submitting an unrelated
+    parcel.
+  dataset: evals/datasets/surveyor/s20_unknown_address.yaml
+  kind: trap

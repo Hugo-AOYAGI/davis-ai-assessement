@@ -64,3 +64,16 @@ def test_classifier_validates_structured_output(monkeypatch: pytest.MonkeyPatch,
     assert model.schema is Classification
     system, human = structured.calls[0]
     assert (system.content, human.content) == ("PROMPT", "sample")
+
+
+def test_classifier_defers_model_creation_until_it_is_needed(monkeypatch):
+    calls = []
+    model = FakeModel(FakeStructured(Classification(kind=DocumentKind.OAP, title="OAP")))
+    monkeypatch.setattr(
+        classify_module, "build_model", lambda cfg, node: calls.append(node) or model
+    )
+    classify = make_classifier(load_config().models, "ingest_classifier", "PROMPT")
+    assert calls == []
+    classify("first")
+    classify("second")
+    assert calls == ["ingest_classifier"]

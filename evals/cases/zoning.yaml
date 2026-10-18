@@ -1,0 +1,202 @@
+- id: z01_joliot_curie
+  kind: trap
+  tests: reference parcel in nested OAP perimeters
+  parcel_ids:
+  - 91272000CR0247
+  address: 4 rue Joliot Curie, 91190 Gif-sur-Yvette
+  program: one Résidence Sociale Étudiante and one Résidence Jeunes Actifs, two separate
+    buildings
+  status: verified
+- id: z02_zone_boundary
+  kind: trap
+  tests: parcel split across UCa and UD
+  parcel_ids:
+  - 91272000BI0093
+  address: 9 Route de Belleville, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z02_zone_boundary.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z03_ebc
+  kind: trap
+  tests: partial EBC inside an otherwise UH parcel
+  parcel_ids:
+  - 91272000CO0051
+  address: 5 Chemin de Moulon, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z03_ebc.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z04_ppri
+  kind: trap
+  tests: PPRi entirely covers an otherwise UH parcel
+  parcel_ids:
+  - 91272000BK0007
+  address: 32 Rue du Clos, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z04_ppri.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z05_emplacement_reserve
+  kind: trap
+  tests: partial reserved land along an otherwise UH parcel
+  parcel_ids:
+  - 91272000BE0321
+  address: 26 Avenue des Charmes, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z05_emplacement_reserve.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z06_retail_frontage
+  kind: trap
+  tests: protected commercial frontage intersects a UAa parcel
+  parcel_ids:
+  - 91272000CM0031
+  address: 2bis Cours du Four, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z06_retail_frontage.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z07_natural_zone
+  kind: trap
+  tests: N parcel with partial reserved land; do not infer admissibility from existing
+    address
+  parcel_ids:
+  - 91272000CC0193
+  address: 16 Impasse de la Gourdillerie, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z07_natural_zone.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z08_chevry
+  kind: trap
+  tests: Chevry UA must not be interpreted as Vallee UA
+  parcel_ids:
+  - 91272000AH0198
+  address: 9 Allée du Pré Chevalier, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z08_chevry.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z09_uxc
+  kind: trap
+  tests: UXc sector must not be collapsed to UX
+  parcel_ids:
+  - 91272000CC0080
+  address: 123 Avenue du Génèral Leclerc, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z09_uxc.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z10_version_disagreement
+  kind: trap
+  tests: 2021 UM5 differs from 2026 UM5b on a vacant parcel
+  parcel_ids:
+  - 91272000ZQ0134
+  address: 'Parcelle ZQ0134, secteur Moulon, Gif-sur-Yvette (repère BAN voisin : 1
+    Rue Raimond Castaing, à 51 m)'
+  program: housing
+  parcel_source: evals/fixtures/zoning/z10_version_disagreement.cadastre.json
+  ban_relation: Vacant parcel has no BAN point inside. Address is explicitly a parcel
+    location description; BAN row is only a neighbouring landmark.
+  status: verified
+- id: z11_vallee_ua
+  kind: spread
+  tests: Vallee UA comparison with the Chevry UA case
+  parcel_ids:
+  - 91272000CA0005
+  address: 192 Avenue du Génèral Leclerc, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z11_vallee_ua.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z12_uga
+  kind: spread
+  tests: UGa sub-sector
+  parcel_ids:
+  - 91272000CA0160
+  address: 10 allée de la Ferme Rose, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z12_uga.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z13_ugd
+  kind: spread
+  tests: UGd sub-sector
+  parcel_ids:
+  - 91272000BI0058
+  address: 89 Rue Juliette Adam, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z13_ugd.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z14_ugc
+  kind: spread
+  tests: UGc sub-sector
+  parcel_ids:
+  - 91272000CA0081
+  address: 31 Rue Fernand Léger, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z14_ugc.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z15_aurc
+  kind: spread
+  tests: AURc zone inside an OAP perimeter
+  parcel_ids:
+  - 91272000BD0231
+  address: 59bis Route de Damiette, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z15_aurc.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z16_um4
+  kind: spread
+  tests: UM4 sector of Moulon
+  parcel_ids:
+  - 91272000CP0123
+  address: 8 Mail Pierre Potier, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z16_um4.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z17_um5a
+  kind: spread
+  tests: UM5a sector; retain lower-case suffix
+  parcel_ids:
+  - 91272000CP0128
+  address: 10 Rue Francis Perrin, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z17_um5a.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z18_ume
+  kind: spread
+  tests: UME sector of Moulon
+  parcel_ids:
+  - 91272000CP0231
+  address: 2 Allée Albert Fert, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z18_ume.cadastre.json
+  ban_relation: BAN address point lies inside parcel; no asserted BAN parcel link
+  status: verified
+- id: z19_uhe
+  kind: spread
+  tests: UHe sector and sanitary prescription perimeter
+  parcel_ids:
+  - 91272000BK0410
+  address: 7 Chemin de Bellevue, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z19_uhe.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified
+- id: z20_uec
+  kind: spread
+  tests: UEc sector in Chevry
+  parcel_ids:
+  - 91272000AI0109
+  address: 7 Allee de la Mare l’Oiseau, 91190 Gif-sur-Yvette
+  program: housing
+  parcel_source: evals/fixtures/zoning/z20_uec.cadastre.json
+  ban_relation: BAN cad_parcelles certified link and point inside parcel
+  status: verified

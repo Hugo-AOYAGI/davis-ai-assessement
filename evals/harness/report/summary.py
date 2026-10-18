@@ -26,7 +26,7 @@ def render_summary(
     lines = [
         f"# Eval pass {title}",
         "",
-        f"Agent runs: ${spending.runs_usd:.2f}; judge: ${spending.judging_usd:.2f}.",
+        f"Agent runs: ${spending.runs_usd:.4f}; judge: ${spending.judging_usd:.4f}.",
     ]
     if skipped:
         lines.append(f"Not launched (budget reached): {', '.join(skipped)}.")
@@ -50,7 +50,7 @@ def _level_table(report: LevelReport) -> list[str]:
         ("Evidence read before submitting", _number(report.read_share)),
         ("Gate rejections", str(report.rejections)),
         ("Tool calls per item", _number(report.tool_calls, digits=1)),
-        ("Cost", f"${report.cost_usd:.2f}"),
+        ("Cost", f"${report.cost_usd:.4f}"),
         ("Wall time per item", _seconds(report.wall_time_s)),
         ("Runs with an error", str(report.errors)),
     ]

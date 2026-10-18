@@ -1,0 +1,52 @@
+{
+  "date": "2026-10-18",
+  "scope": "Historical benchmark snapshots before submission cleanup; not rerun after fixes.",
+  "code_revisions": "Not captured with original runs; exact source revisions cannot be reconstructed from saved configurations alone.",
+  "ground_truth": "Model-worker source review; no human sign-off; judge not calibrated.",
+  "runs": [
+    {
+      "id": "v1-components",
+      "scores": "v1-components/scores.json",
+      "config": "v1-components/config.yaml",
+      "overrides": "v1-components/overrides.yaml",
+      "source_score_run": "2026-10-18/02-03-59",
+      "source_record_run": "2026-10-18/00-03-33",
+      "original_scores_sha256": "8b0a8a45a68645a6f5be02a540792c446bffe8ec9a10af668d01f35dadeca23d",
+      "exported_scores_sha256": "ffbe731baa50fd85b563f5aab888c30be729d0d96582a74051c5efe2363134f4",
+      "records": "Retained locally in ignored outputs; not part of the compact handoff."
+    },
+    {
+      "id": "v1-e2e",
+      "scores": "v1-e2e/scores.json",
+      "config": "v1-e2e/config.yaml",
+      "overrides": "v1-e2e/overrides.yaml",
+      "source_score_run": "2026-10-18/02-03-56",
+      "source_record_run": "2026-10-18/02-03-56",
+      "original_scores_sha256": "d21b8ea19330236fd9094ed05f1ab8da87d4ab55b27b90294346c2acc23e275e",
+      "exported_scores_sha256": "7858432362590608184fff96a16b47ad7ab9a527dc4ba4e74bbda6acab28d7b6",
+      "records": "Retained locally in ignored outputs; not part of the compact handoff."
+    },
+    {
+      "id": "v2-haiku",
+      "scores": "v2-haiku/scores.json",
+      "config": "v2-haiku/config.yaml",
+      "overrides": "v2-haiku/overrides.yaml",
+      "source_score_run": "2026-10-18/12-25-42",
+      "source_record_run": "2026-10-18/12-25-42",
+      "original_scores_sha256": "46cfc1301d7cbd09d2f2c9d2f8a4acec05a2f23e08fdfb41e9439b1657e27f19",
+      "exported_scores_sha256": "fb9ca0a4d2d3baab310e3a3d9888b6aac04425a2008bb3c8d1200a74f8a994ea",
+      "records": "Retained locally in ignored outputs; not part of the compact handoff."
+    },
+    {
+      "id": "v2-sonnet",
+      "scores": "v2-sonnet/scores.json",
+      "config": "v2-sonnet/config.yaml",
+      "overrides": "v2-sonnet/overrides.yaml",
+      "source_score_run": "2026-10-18/13-15-14",
+      "source_record_run": "2026-10-18/13-15-14",
+      "original_scores_sha256": "7807328af98adf3f51ece8c44b25da43ab5a6d2c6106dbe102b314c7cd48207b",
+      "exported_scores_sha256": "fee631b099cbc2a435b38e732dca0a40b6c0e6e1b4cb048e1ffa8468ffd3f7b7",
+      "records": "Retained locally in ignored outputs; not part of the compact handoff."
+    }
+  ]
+}

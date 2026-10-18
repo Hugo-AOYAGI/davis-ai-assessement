@@ -1,0 +1,136 @@
+# Source audit: zoning z11 (CA0005, UA, no overlay, no OAP perimeter), doc d01 (Vallée UA
+# values, regulation PDF pp18,20,22,23,27) and doc d09 (outside every OAP); additional pages
+# 13, 14, 28, 29 read directly. Parcel area recomputed from the saved cadastral polygon
+# (Lambert-93): 95.54 m2 (cadastre contenance 100 m2 is not the agent's geometry).
+# Geometry oracle: footprint cap 0.60 * 95.54 = 57.3 m2; UA13 sets no numeric green minimum.
+# No single proposal volume is asserted: the layout (heights, windows, cut) is the
+# architect's choice and the harness recomputes the submitted proposal.
+# Actual review: Claude Sonnet source inspection, not two Opus drafts or human sign-off.
+id: e05_vallee_ua_housing
+level: e2e
+tests: Vallée UA housing; footprint, heights, alignment and setbacks of the Vallée UA chapter, not the Chevry UA values; no OAP applies
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  address: 192 Avenue du Général Leclerc, 91190 Gif-sur-Yvette
+  program: One collective housing building.
+  facts:
+    - The building is new construction of ordinary dwellings (logements collectifs), with no shops or offices.
+from_items: [z11_vallee_ua, d01_ua_vallee_vs_chevry, d09_outside_oap]
+facts:
+  - key: site.choice.parcel_ids
+    expect: [91272000CA0005]
+    critical: true
+    source: ban
+  - key: study.regime.zone
+    expect: UA
+    critical: true
+    source: gpu_2021
+  - key: study.regime.overlays
+    absent:
+      - Espaces Boisés Classés
+      - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)
+      - Zone humide
+    source: gpu_2021
+  - key: study.regime.oap_applicable
+    expect: false
+    critical: true
+    source: gpu_2021
+  - key: study.admissibility.verdict
+    any_of: [permitted, conditional]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 13
+        quote: "Elle est destinée à accueillir, outre l’habitat, des activités et équipements qui lui sont complémentaires."
+  - key: envelope.rules.max_footprint_ratio
+    expect: 0.6
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 22
+        quote: "ne pourra excéder 60% de la superficie du terrain dans la zone."
+  - key: envelope.rules.buildings.max_height_m
+    any_of: [9, 12]
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 23
+        quote: "9 mètres à l’égout du toit ou à l’acrotère."
+      - doc: plu_reglement
+        page: 23
+        quote: "12 mètres au faîtage, faîte ou hauteur plafond."
+  - key: envelope.rules.buildings.max_storeys
+    any_of: [3, 4]
+    evidence:
+      - doc: plu_reglement
+        page: 23
+        quote: "Le nombre de niveaux est limité à R+2+combles."
+  - key: envelope.rules.setbacks[kind=road].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 18
+        quote: "seront implantées à l’alignement actuel ou projeté"
+  - key: envelope.rules.setbacks[kind=side].on_limit_allowed
+    expect: true
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "les constructions pourront être implantées sur les limites séparatives."
+  - key: envelope.rules.setbacks[kind=side].with_windows.min_m
+    expect: 8
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.setbacks[kind=side].without_windows.height_ratio
+    expect: 0.5
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "la moitié de la hauteur de la façade ou partie de façade intéressée de la construction (L=H/2)"
+  - key: envelope.rules.setbacks[kind=side].without_windows.min_m
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "avec un minimum de 2 mètres si celle-ci ne comporte pas de vues"
+  - key: envelope.rules.setbacks[kind=rear].with_windows.min_m
+    expect: 8
+    evidence:
+      - doc: plu_reglement
+        page: 20
+        quote: "8 mètres lorsque la façade ou partie de façade concernée comporte des vues"
+  - key: envelope.rules.min_green_ratio
+    expect: null
+    evidence:
+      - doc: plu_reglement
+        page: 29
+        quote: "Les surfaces libres de toute construction doivent être plantées ou recevoir un aménagement végétal ou minéral."
+  - key: study.parking[basis=unit].spaces
+    expect: 2
+    evidence:
+      - doc: plu_reglement
+        page: 27
+        quote: "2 places par logement"
+  - key: envelope.site_area_m2
+    expect: 95.54
+    tolerance: 0.02
+    source: cadastre
+  - key: envelope.min_green_area_m2
+    expect: null
+    source: geometry
+must_flag:
+  - UA article 10 gives two heights (9 m at the eaves or acroterion, 12 m at the ridge) with R+2+combles; the single maximum height used for the envelope depends on the roof form and must be stated as a choice or open point.
+  - The UA recalls (regulation PDF page 13) subject every construction to the opinion of the Architecte des Bâtiments de France within the 500 m monument protection perimeters, whose extent is not in the corpus.
+must_not:
+  - States that the maximum footprint in UA is 50 percent of the site area (Chevry UA value).
+  - States that the maximum height in UA is 12 metres at the eaves, 15 metres at the ridge or R+3 (Chevry UA values).
+  - States that constructions in UA may be set back freely from the road, or at the alignment or set back, instead of the Vallée rule imposing the current or projected alignment.
+  - States that the side setback in UA equals the eaves height of the construction (Chevry rule) instead of 8 m with views and H/2 with a 2 m minimum without views.
+  - Cites the Chevry - UA chapter (regulation PDF pages 210 to 221) as the source of the applicable rules.
+  - States that an OAP chapter or perimeter applies to the site, or reports OAP prescriptions as binding on the project.
+  - States that UA article 13 imposes a numeric minimum green-space or open-ground share.
+  - Uses a parcel other than CA0005 (for example the neighbouring CA0004 or CA0006) as the study site.

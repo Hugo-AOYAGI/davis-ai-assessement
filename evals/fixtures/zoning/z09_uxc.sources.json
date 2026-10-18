@@ -1,0 +1,109 @@
+{
+  "parcel_id": "91272000CC0080",
+  "cadastre": {
+    "url": "https://cadastre.data.gouv.fr/data/etalab-cadastre/latest/geojson/communes/91/91272/cadastre-91272-parcelles.json.gz",
+    "retrieved_utc": "2026-10-17",
+    "source_sha256": "54b101a25b3140b7bd500a3b6549fdf07e74a4746bd28d92f22f4ac59b726408",
+    "original_feature": {
+      "type": "Feature",
+      "id": "91272000CC0080",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.11349,
+              48.7036205
+            ],
+            [
+              2.1134861,
+              48.7036611
+            ],
+            [
+              2.1134816,
+              48.7037065
+            ],
+            [
+              2.1134767,
+              48.703758
+            ],
+            [
+              2.1134475,
+              48.7040574
+            ],
+            [
+              2.1134397,
+              48.7041365
+            ],
+            [
+              2.1128913,
+              48.7040718
+            ],
+            [
+              2.1128928,
+              48.7040152
+            ],
+            [
+              2.112899,
+              48.7038933
+            ],
+            [
+              2.112917,
+              48.7035731
+            ],
+            [
+              2.11349,
+              48.7036205
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "id": "91272000CC0080",
+        "commune": "91272",
+        "prefixe": "000",
+        "section": "CC",
+        "numero": "80",
+        "contenance": 2341,
+        "arpente": false,
+        "created": "2006-03-20",
+        "updated": "2024-09-24"
+      }
+    }
+  },
+  "ban": {
+    "url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+    "source_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+    "original_row": {
+      "id": "91272_1260_00123",
+      "id_fantoir": "91272_1260",
+      "numero": "123",
+      "rep": "",
+      "nom_voie": "Avenue du Génèral Leclerc",
+      "code_postal": "91190",
+      "code_insee": "91272",
+      "nom_commune": "Gif-sur-Yvette",
+      "code_insee_ancienne_commune": "",
+      "nom_ancienne_commune": "",
+      "x": "634746.88",
+      "y": "6845252.15",
+      "lon": "2.113251",
+      "lat": "48.704114",
+      "type_position": "entrée",
+      "alias": "",
+      "nom_ld": "",
+      "libelle_acheminement": "GIF SUR YVETTE",
+      "nom_afnor": "AVENUE DU GENERAL LECLERC",
+      "source_position": "commune",
+      "source_nom_voie": "commune",
+      "certification_commune": "0",
+      "cad_parcelles": ""
+    },
+    "relation": "BAN address point lies inside parcel; no asserted BAN parcel link"
+  },
+  "selection": {
+    "kind": "trap",
+    "tests": "UXc sector must not be collapsed to UX"
+  },
+  "address": "123 Avenue du Génèral Leclerc, 91190 Gif-sur-Yvette"
+}

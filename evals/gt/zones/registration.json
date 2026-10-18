@@ -1,0 +1,138 @@
+{
+  "matrix": [
+    0.23924,
+    0.00111,
+    -0.0011899999999999999,
+    -0.23922000000000002,
+    1346.8999999999999,
+    374.5
+  ],
+  "origin_x": 638650,
+  "origin_y": 6845800,
+  "normalized_width": 2000,
+  "fit_score": 0.46311934196437265,
+  "sample_count": 82184,
+  "palette": {
+    "UG": [
+      248,
+      104,
+      8
+    ],
+    "UL": [
+      120,
+      184,
+      248
+    ],
+    "UC": [
+      232,
+      152,
+      152
+    ],
+    "UB": [
+      248,
+      216,
+      24
+    ],
+    "UH": [
+      248,
+      216,
+      24
+    ],
+    "UA": [
+      200,
+      56,
+      24
+    ],
+    "Nc": [
+      168,
+      216,
+      8
+    ],
+    "UR": [
+      216,
+      168,
+      8
+    ],
+    "A": [
+      248,
+      248,
+      168
+    ],
+    "UM": [
+      248,
+      184,
+      184
+    ],
+    "NF": [
+      40,
+      152,
+      40
+    ],
+    "UMG": [
+      248,
+      200,
+      232
+    ],
+    "NE": [
+      216,
+      248,
+      120
+    ],
+    "UX": [
+      152,
+      120,
+      248
+    ],
+    "N": [
+      168,
+      216,
+      8
+    ],
+    "NL": [
+      104,
+      216,
+      168
+    ],
+    "AU": [
+      216,
+      168,
+      8
+    ],
+    "UD": [
+      88,
+      136,
+      184
+    ],
+    "UME": [
+      136,
+      248,
+      200
+    ],
+    "UE": [
+      152,
+      136,
+      88
+    ],
+    "UN": [
+      216,
+      216,
+      104
+    ]
+  },
+  "method": {
+    "name": "global affine registration against raster zone color fills",
+    "initialization": "UMG pale-pink boundary-band similarity fit",
+    "sample_grid_m": 12,
+    "polygon_count": 152,
+    "rgb_mode_quantization": 16,
+    "raster_color_max_channel_error": 20,
+    "optimization": "coordinate descent over six affine coefficients; scales/skews steps 0.001,0.0002,0.00005,0.00001; translation steps 3,0.7,0.2,0.04 pixels; offsets -3..3 steps per coefficient, up to15 rounds per stage",
+    "equations": [
+      "u = a*(x-638650) + b*(y-6845800) + tx",
+      "v = c*(x-638650) + d*(y-6845800) + ty"
+    ],
+    "raster": "PDF page1 rendered by PyMuPDF at width2000; same normalized coordinates then mapped to original PDFpoints for crops",
+    "limitations": "Approximate visual registration. fit_score is only raster fill classification agreement and is not a surveyed positional accuracy. All area fractions and distances use the source geometries, never these pixels. Each case requires independent visual review."
+  },
+  "plan_sha256": "9db34ecb0d0831c06860a88966f93fb1e3ed50cd2be6d1ae57ed6ab696d4b4c0"
+}

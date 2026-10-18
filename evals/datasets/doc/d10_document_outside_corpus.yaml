@@ -1,0 +1,54 @@
+id: d10_document_outside_corpus
+level: doc
+tests: a UH site wholly inside the PPRi; the regulation defers to the PPRi document, which is not in the corpus, and that gap must be flagged
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The site lies in the Vallée sector.
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UH
+    legend_items:
+      - "Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre 2006)"
+    parcel_ids: [91272000BK0007]
+    program: housing
+facts:
+  - statement: Article UH2 requires constructions built in flood-risk zones to comply with the rules and conditions fixed in the Plan de Prévention des Risques Inondations (PPRI); the regulation itself defers to that document.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 100
+        quote: "Les constructions édifiées dans les zones à risque d’inondation, doivent respecter les règles et conditions fixées dans le Plan de Prévention des Risques Inondations."
+  - statement: The general provisions state that the PPRI was approved on 26 September 2006 and is a public-utility easement (servitude d'utilité publique) applying to any construction or installation in the sectors it covers.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 6
+        quote: "Le PPRI a été approuvé le 26 septembre 2006. Il constitue une servitude d’utilité publique."
+      - doc: plu_reglement
+        page: 6
+        quote: "s’appliqueront à toute construction ou installation située dans les secteurs concernés."
+  - statement: The PPRI provisions are integrated in piece n°6.3 of the PLU file, not in the written regulation.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 6
+        quote: "Ses dispositions sont intégrées en pièce n°6.3 du PLU"
+  - statement: In UH, earth-moving (affouillements and exhaussements of more than 100 m² and more than 2 m) is admitted only if linked to authorised works and compatible with the PPRI provisions.
+    evidence:
+      - doc: plu_reglement
+        page: 100
+        quote: "dès lors qu’ils sont compatibles avec les dispositions du PPRI"
+  - statement: The additional flood conditions of article UH2 (basements limited to parking, first floor raised above the highest known water levels, fences without solid parts) are stated for the other flood-risk sectors, those not covered by the PPRI.
+    evidence:
+      - doc: plu_reglement
+        page: 100
+        quote: "Dans les autres secteurs soumis à un risque d'inondations"
+must_flag:
+  - "The PPRI of the Vallée de l'Yvette (approved 26 September 2006, piece n°6.3 of the PLU) is not part of the corpus; the regulation only defers to it, so the rules and conditions it imposes on a building on this site cannot be determined from the documents and remain an open point."
+must_not:
+  - States a PPRI figure, zone colour or condition (flood level, minimum floor height, ban on basements, no-build area, setback from the river, maximum building height or footprint) as coming from the PPRI.
+  - Presents the UH2 conditions for the other flood-risk sectors (basements, raised first floor, open fences) as the requirements of the PPRI.
+  - Ignores the deferral and treats the UH chapter alone as the complete set of rules for a site wholly inside the PPRI.

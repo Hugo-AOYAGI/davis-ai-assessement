@@ -1,6 +1,5 @@
 import inspect
 from collections.abc import Callable, Mapping, Sequence
-from string import Formatter
 from typing import cast
 
 from langchain.tools import ToolRuntime
@@ -10,6 +9,7 @@ from langgraph.types import Command
 from pydantic import JsonValue, ValidationError
 
 from agent.contracts.base import Contract
+from agent.runtime.submissions.keys import placeholders
 from agent.tools.submit.artifacts import ArtifactData, ArtifactsState
 from agent.tools.submit.replies import format_validation, rejection, reply_artifact, revise_name
 from agent.tools.submit.revise import Deliver, revise_tool
@@ -159,11 +159,7 @@ def _submit(name: str, contract: type[Contract], deliver: Deliver) -> BaseTool:
 
 def _check_placeholders(artifact: str, contract: type[Contract]) -> None:
     """Reject artifact key templates naming anything but a top-level contract field."""
-    fields = {field for _, field, _, _ in Formatter().parse(artifact) if field is not None}
-    unknown = sorted(fields - set(contract.model_fields))
-    if unknown:
-        msg = f"artifact {artifact!r} names {unknown}, not fields of {contract.__name__}"
-        raise ValueError(msg)
+    placeholders(artifact, contract.model_fields)
 
 
 def _describe(name: str, contract: type[Contract]) -> str:

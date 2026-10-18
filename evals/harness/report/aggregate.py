@@ -1,4 +1,4 @@
-"""Aggregate item results per level (``docs/EVALS.md`` §6): rates with their intervals."""
+"""Aggregate item results per level (``evals/README.md``§6): rates with their intervals."""
 
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass

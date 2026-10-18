@@ -1,0 +1,138 @@
+{
+  "retrieved_at_utc": "2026-10-17T21:02:45.071332+00:00",
+  "selection_command": "uv run python -m evals.gt.site random --seed 27 --n 12 --sector Chevry",
+  "selected_result": 7,
+  "selection_protocol": "Seeded BAN shuffle, commune-certified single links, unique streets; strata spread, reject absent parcels and >2% area discrepancies; retain sub-metre doorway offsets only with explicit certified BAN link. No agent output consulted.",
+  "sector_selection_aid": "Chevry",
+  "ban_export_url": "https://adresse.data.gouv.fr/data/ban/adresses/latest/csv/adresses-91.csv.gz",
+  "ban_export_sha256": "ffe74318cf232452706ac31ba00827ba34b2dbfeb00b74505152a8ced00959dd",
+  "ban_row": {
+    "id": "91272_1432_00060",
+    "id_fantoir": "91272_1432",
+    "numero": "60",
+    "rep": "",
+    "nom_voie": "All Graviers de la Salmouille",
+    "code_postal": "91190",
+    "code_insee": "91272",
+    "nom_commune": "Gif-sur-Yvette",
+    "code_insee_ancienne_commune": "",
+    "nom_ancienne_commune": "",
+    "x": "634740.24",
+    "y": "6842786",
+    "lon": "2.113537",
+    "lat": "48.681933",
+    "type_position": "entrée",
+    "alias": "",
+    "nom_ld": "",
+    "libelle_acheminement": "GIF SUR YVETTE",
+    "nom_afnor": "ALL GRAVIERS DE LA SALMOUILLE",
+    "source_position": "commune",
+    "source_nom_voie": "commune",
+    "certification_commune": "1",
+    "cad_parcelles": "91272000AC0353"
+  },
+  "cadastre_url": "https://apicarto.ign.fr/api/cadastre/parcelle",
+  "cadastre_parameters": {
+    "code_insee": "91272",
+    "com_abs": "000",
+    "section": "AC",
+    "numero": "0353"
+  },
+  "cadastre_feature": {
+    "type": "Feature",
+    "id": "parcelle.52208678",
+    "geometry": {
+      "type": "MultiPolygon",
+      "coordinates": [
+        [
+          [
+            [
+              2.11365332,
+              48.68195487
+            ],
+            [
+              2.1136213,
+              48.68194483
+            ],
+            [
+              2.11357753,
+              48.68193047
+            ],
+            [
+              2.11354462,
+              48.68191664
+            ],
+            [
+              2.11350624,
+              48.68189675
+            ],
+            [
+              2.11347479,
+              48.6818769
+            ],
+            [
+              2.11345185,
+              48.68186
+            ],
+            [
+              2.11344034,
+              48.68184957
+            ],
+            [
+              2.11337504,
+              48.68183937
+            ],
+            [
+              2.1131459,
+              48.68191782
+            ],
+            [
+              2.1132581,
+              48.68206248
+            ],
+            [
+              2.11355623,
+              48.68215303
+            ],
+            [
+              2.11360561,
+              48.68208468
+            ],
+            [
+              2.11367297,
+              48.68198983
+            ],
+            [
+              2.11365332,
+              48.68195487
+            ]
+          ]
+        ]
+      ]
+    },
+    "geometry_name": "geom",
+    "properties": {
+      "gid": 50939610,
+      "numero": "0353",
+      "feuille": 1,
+      "section": "AC",
+      "code_dep": "91",
+      "nom_com": "Gif-sur-Yvette",
+      "code_com": "272",
+      "com_abs": "000",
+      "code_arr": "000",
+      "idu": "91272000AC0353",
+      "contenance": 788,
+      "code_insee": "91272"
+    }
+  },
+  "checks": {
+    "ban_point_inside_parcel": true,
+    "ban_point_distance_to_parcel_m": 0.0,
+    "polygon_area_epsg2154_m2": 790.6340606081245,
+    "cadastre_contenance_m2": 788,
+    "geometry_valid": true,
+    "polygon_parts": 1
+  },
+  "review": "Explicit commune-certified BAN single-parcel link; cadastre id exists and measured area agrees within 2%. BAN point lies inside parcel. Sector is a rough sampling aid, not an evaluated zoning fact. Road frontage is not inferred."
+}

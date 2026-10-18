@@ -1,14 +1,13 @@
 import hashlib
 import json
 import mimetypes
-import os
-import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
 import httpx
 from pydantic import JsonValue, TypeAdapter, ValidationError
 
+from agent.adapters.files import publish
 from agent.observability.logs import get_logger
 
 _LOGGER = get_logger(__name__)
@@ -103,15 +102,7 @@ class CachedHttp:
     def _store(self, path: Path, body: bytes) -> None:
         """Publish a complete response atomically so concurrent readers see no partial body."""
         _LOGGER.debug("cache store %s", path.name)
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-        handle, name = tempfile.mkstemp(dir=self._cache_dir, suffix=".tmp")
-        temporary = Path(name)
-        try:
-            with os.fdopen(handle, "wb") as file:
-                file.write(body)
-            temporary.replace(path)
-        finally:
-            temporary.unlink(missing_ok=True)
+        publish(path, body)
 
     def _fetch(self, url: str, params: Mapping[str, str]) -> httpx.Response:
         """Perform the request.

@@ -1,0 +1,105 @@
+id: d20_n_housing
+level: doc
+tests: zone N (Vallée), plain sector, new housing; article N1 forbids new dwellings and N2 admits only a 15 percent extension of existing dwellings (the 20 percent extension and the 15 percent footprint belong to the sectors Nc, Nca and NL)
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The zone is N of the Vallée chapter of the regulation.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: N
+    legend_items:
+      - Emplacements réservés pour équipements et aménagements divers, création ou amélioration de voirie
+    program: new housing (new dwellings)
+facts:
+  - statement: In zone N (Vallée), article N1 prohibits, throughout the zone and its sectors, new constructions, works or structures for housing (habitation), other than those admitted by article N2.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 193
+        quote: "Les constructions nouvelles, ouvrages ou travaux à destination d’habitation, d’hébergement hôtelier, de bureaux, d’artisanat, de commerces, d’industrie, d’entrepôt, autres que ceux admis en N2."
+  - statement: In zone N (Vallée), article N2 does not admit any new dwelling in the plain zone; the only housing-related use it admits for the whole zone is the extension of dwellings existing at the approval date of the PLU, limited to 15 percent of their floor area (surface de plancher).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 194
+        quote: "L’extension des habitations existantes à la date d’approbation du présent PLU, dans la limite de 15% de leur surface de plancher."
+  - statement: In zone N (Vallée), new housing is therefore not permitted, so no buildable envelope for new dwellings exists in the plain zone N.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 193
+        quote: "Les constructions nouvelles, ouvrages ou travaux à destination d’habitation, d’hébergement hôtelier, de bureaux, d’artisanat, de commerces, d’industrie, d’entrepôt, autres que ceux admis en N2."
+      - doc: plu_reglement
+        page: 194
+        quote: "L’extension des habitations existantes à la date d’approbation du présent PLU, dans la limite de 15% de leur surface de plancher."
+  - statement: The 20 percent extension limit for existing constructions applies only in the sector Nc, not in the plain zone N.
+    evidence:
+      - doc: plu_reglement
+        page: 194
+        quote: "Les travaux d’aménagement et d’extension des constructions existantes, dans la limite de 20% de la surface de plancher existante à la date d’approbation du PLU"
+  - statement: Housing-related development linked to existing activities (aménagement d’habitat) is admitted only in the sector Nca, and only for activities authorised in existing buildings.
+    evidence:
+      - doc: plu_reglement
+        page: 195
+        quote: "En outre, dans le secteur Nca et uniquement dans ce secteur, les constructions nouvelles à usage d’activités et l’aménagement d’habitat liées aux activités autorisées dans les bâtiments existants"
+  - statement: The footprint limit of 15 percent in article N9 applies only in the sectors Nc, Nca and NL; for the other sectors, including plain zone N, it is "sans objet".
+    evidence:
+      - doc: plu_reglement
+        page: 199
+        quote: "Dans les secteurs Nc, Nca et NL : L’emprise au sol des constructions est limitée à 15%. Dans les autres secteurs : Sans objet."
+  - statement: Under article N10, the height of constructions in plain zone N is not regulated; the 10 metre ridge limit applies only in the sectors Nc, Nca and NL.
+    evidence:
+      - doc: plu_reglement
+        page: 199
+        quote: "Dans la zone N : Non réglementé. Néanmoins, dans les secteurs Nc, Nca et NL : Les hauteurs sont limitées : 10 mètres au faîtage."
+  - statement: Under article N6, constructions must be set back at least 12 metres from the axis of the road or from the limits of public land (emprise publique).
+    evidence:
+      - doc: plu_reglement
+        page: 197
+        quote: "Les constructions doivent être implantées avec un retrait au moins égal à 12 mètres de l’axe de la voie ou des limites d’emprise publique."
+  - statement: Under article N7, the setback from property boundaries (limites séparatives) must be at least 16 metres, and 8 metres only in Nca.
+    evidence:
+      - doc: plu_reglement
+        page: 198
+        quote: "Le retrait doit au moins être égal à 16 mètres et 8 mètres uniquement en Nca."
+  - statement: Under article N8, the distance between several buildings on one property is not regulated in zone N and the sector NL; the 8 metre minimum applies only in the sectors Nc and Nca.
+    evidence:
+      - doc: plu_reglement
+        page: 198
+        quote: "Dans la zone N et le secteur NL Non réglementé. Dans les secteurs Nc et Nca L’implantation de plusieurs constructions sur une même propriété est autorisée à condition que la distance les séparant soit au moins égale à 8 mètres."
+  - statement: The regulation's Titre III lists an emplacement réservé Z at the Impasse de la Gourdillerie, a turning area (aire de retournement) of 490 m² for the commune.
+    evidence:
+      - doc: plu_reglement
+        page: 367
+        quote: "Aire de retournement Commune Impasse de la Gourdillerie 490 m² CC 112, 136, 154"
+  - statement: Under Titre III, construction is prohibited on land, built or not, included in an emplacement réservé, subject to the Code de l’urbanisme.
+    evidence:
+      - doc: plu_reglement
+        page: 366
+        quote: "la construction est interdite sur les terrains bâtis ou non, compris dans un emplacement réservé."
+must_not:
+  - States or implies that new housing (new dwellings) is permitted in zone N, or provides a buildable envelope, height or footprint figures for a new dwelling as if it were allowed.
+  - Treats the admission of the extension of existing dwellings in article N2 as permission to build a new dwelling.
+  - States that the extension of existing dwellings in plain zone N is limited to 20 percent, taking the Nc sector limit as the zone-wide one.
+  - States that the 15 percent footprint limit or the 10 metre ridge-height limit of the sectors Nc, Nca and NL applies to plain zone N.
+  - Admits new housing on the basis of the Nca provision on aménagement d’habitat, which is limited to that sector.
+  - Uses the zone N rules of the Chevry chapter instead of the Vallée chapter.
+must_flag: []

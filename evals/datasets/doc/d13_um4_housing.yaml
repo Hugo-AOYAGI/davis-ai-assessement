@@ -1,0 +1,141 @@
+id: d13_um4_housing
+level: doc
+tests: zone x program grid, Moulon UM4 housing; UM article 10 sets heights per sector (UM3, UM4, UM5) and per destination, the UMG chapter is a different zone
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is UM, sector UM4 (Moulon).
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UM4
+    legend_items:
+      - Secteur à Orientation d'Aménagement et de Programmation
+    parcel_ids: [91272000CP0123]
+    program: new housing
+facts:
+  - statement: In sector UM4, the maximum height of constructions whose main destination is housing is 20 metres.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "pour les constructions à destination principale d’habitation : la hauteur maximale des constructions est limitée à 20 mètres, avec un nombre de niveaux limité à R+5."
+  - statement: In sector UM4, housing is also limited to R+5 (number of storeys).
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "avec un nombre de niveaux limité à R+5"
+  - statement: In sector UM4, constructions with another destination (neither housing nor public service or collective interest) are limited to 18 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "pour les constructions ayant une autre destination : la hauteur maximale des constructions est limitée à 18 mètres."
+  - statement: Zone UM article 9 does not regulate the footprint (emprise au sol) of constructions.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 312
+        quote: "L’emprise au sol des constructions n’est pas réglementée"
+  - statement: Housing parking in zone UM requires 1 space per 35 m² of floor area (surface de plancher), capped at 2 spaces per dwelling.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 315
+        quote: "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement"
+  - statement: Dwellings financed with a State-aided loan require 1 parking space per dwelling in zone UM.
+    evidence:
+      - doc: plu_reglement
+        page: 315
+        quote: "1 place de stationnement par logement, pour les logements financés avec un prêt aidé par l’Etat"
+  - statement: Student residences in zone UM require 1 parking space per 150 m² of floor area.
+    evidence:
+      - doc: plu_reglement
+        page: 315
+        quote: "1 place de stationnement par tranche de 150 m² de surface de plancher, pour les résidences étudiantes."
+  - statement: Housing in zone UM requires bicycle parking only for buildings of more than three dwellings, at 0.75 m² per dwelling up to two main rooms and 1.5 m² per dwelling otherwise.
+    evidence:
+      - doc: plu_reglement
+        page: 316
+        quote: "Pour les constructions à destination d’habitation de plus de trois logements"
+  - statement: For housing in zone UM, at least 85 percent of the motorised parking spaces built on the plot must be integrated into the housing building, a majority of them underground.
+    evidence:
+      - doc: plu_reglement
+        page: 317
+        quote: "85 % minimum des places de stationnement pour les véhicules motorisés réalisées sur le terrain d’assiette des constructions doivent être intégrées à la construction à destination d'habitation dont une majorité en sous-sol."
+  - statement: Zone UM setback from the road alignment (voies et emprises publiques) - a construction may be built on the alignment or set back, and a setback must be at least 1 metre.
+    evidence:
+      - doc: plu_reglement
+        page: 310
+        quote: "Les constructions ou parties de construction peuvent être implantées à l’alignement ou en recul de ce dernier."
+      - doc: plu_reglement
+        page: 311
+        quote: "En cas de recul, ce dernier doit être au moins égal à 1 mètre."
+  - statement: Zone UM side and rear boundaries - constructions may be built on one or several boundaries, or set back from them.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "Les constructions peuvent être implantées soit sur une ou plusieurs limites séparatives, soit en retrait de ces dernières."
+  - statement: Zone UM boundary setback for facades with windows (vues) up to 12 metres high is half the facade height, with a minimum of 5 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "à la moitié de la hauteur des façades ou parties de façade ayant une hauteur au plus égale à 12 mètres, avec un minimum de 5 mètres"
+  - statement: Zone UM boundary setback for facades with windows (vues) higher than 12 metres is 6 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "à 6 mètres pour les façades ou parties de façade ayant une hauteur supérieure à 12 mètres"
+  - statement: Zone UM boundary setback for facades without windows (vues) is at least 3 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 311
+        quote: "Pour les façades ou parties de façade ne comportant pas de vue le retrait doit être au moins égal à 3 mètres."
+  - statement: Zone UM distance between buildings on the same plot is 10 metres if at least one of the facing facades has windows (vues), 3 metres if neither does, unless the buildings are attached.
+    evidence:
+      - doc: plu_reglement
+        page: 312
+        quote: "10 mètres, si au moins l’une des deux façades ou parties de façades concernées comportent des vues"
+      - doc: plu_reglement
+        page: 312
+        quote: "3 mètres, si les deux façades ou parties de façades concernées ne comportent pas de vues"
+  - statement: Zone UM green space - new construction must treat at least 20 percent of the plot area as green space (espace vert) and at least 10 percent as deep soil (pleine terre).
+    evidence:
+      - doc: plu_reglement
+        page: 318
+        quote: "En espace vert 20% au moins de la superficie du terrain."
+      - doc: plu_reglement
+        page: 318
+        quote: "En espace de pleine terre 10% au moins de la superficie du terrain."
+  - statement: Zone UM maximum height is measured from the natural ground before works to the top of the ridge or acroterion, technical structures included except small ones (under 20 percent of the footprint and under 2 metres high).
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "jusqu’au sommet du faîtage ou de l’acrotère, ouvrages techniques compris"
+  - statement: Every project in zone UM must be compatible with the orientations of the OAP (pièce n°3 of the PLU).
+    evidence:
+      - doc: plu_reglement
+        page: 313
+        quote: "Tout projet doit être compatible avec les orientations d’aménagement et de programmation"
+must_not:
+  - States that the maximum height for housing in UM4 is 15 metres (the UM3 limit), 24 metres or 25 metres (UM5 limits) or 31 metres (UM5a hotel).
+  - States that the maximum height for UM4 housing is 18 metres (the limit for other destinations).
+  - Applies the rules of zone UMG (Joliot-Curie, PLU p.320-332) instead of the UM chapter.
+  - States that UM4 housing has no limit on the number of storeys, or a limit other than R+5.
+  - States that UM sets a maximum footprint ratio (percentage of the plot) for housing.
+  - States that housing in zone UM requires a flat 2 parking spaces per dwelling without the 35 m² floor-area tranche.
+must_flag: []

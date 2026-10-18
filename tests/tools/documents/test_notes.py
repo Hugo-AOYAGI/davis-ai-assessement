@@ -46,6 +46,7 @@ def images(tmp_path_factory):
         crop_max_px=500,
         cache_size=2,
         scan_min_coverage=0.8,
+        max_image_bytes=4_000_000,
     )
 
 

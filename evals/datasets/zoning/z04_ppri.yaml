@@ -1,0 +1,25 @@
+# Independent source checks: evals/fixtures/zoning/z04_ppri.oracle.json
+id: z04_ppri
+level: zoning
+tests: PPRi entirely covers an otherwise UH parcel
+status: verified
+built_by: codex_independent_gpu_2021_and_raster_review
+input:
+  address: 32 Rue du Clos, 91190 Gif-sur-Yvette
+  parcel_ids:
+  - 91272000BK0007
+  program: housing
+facts:
+- key: zone
+  critical: true
+  source: gpu_2021
+  expect: UH
+- key: overlays
+  present:
+  - Zone de risques d'inondation (PPRi Vallée de l'Yvette approuvé le 26 septembre
+    2006)
+  absent:
+  - Espaces Boisés Classés
+  - Zone humide
+  source: gpu_2021
+  critical: true

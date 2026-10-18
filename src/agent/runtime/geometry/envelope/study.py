@@ -14,9 +14,9 @@ from agent.runtime.geometry.envelope.levels import (
     Cap,
     Rise,
     SetBackSite,
+    cap_together,
     ground_cap,
     rise,
-    scale_together,
     volume,
 )
 from agent.runtime.geometry.envelope.shapes import largest_part, site_shape, to_contract
@@ -28,10 +28,10 @@ from agent.runtime.geometry.envelope.split import (
 )
 
 LEFT_OUT = "Where setbacks split a footprint into several pieces, only the largest is kept."
-NOTHING_LEFT = "Setbacks consume the whole site: no buildable footprint remains."
+NOTHING_LEFT = "No usable building footprint remains after applying setbacks and area caps."
 BOUND_NOTES = {
     Bound.LARGEST: "Each limit at its smallest allowed distance, 0 where building on it is "
-    "allowed: the legal maximum.",
+    "allowed, before applying any footprint or green-area cap.",
     Bound.WINDOWS: "Every facade facing a limit has windows: each limit at its distance with "
     "windows (else without, else 0 where building on it is allowed).",
 }
@@ -78,8 +78,8 @@ def compute_envelope_study(  # noqa: PLR0913 - the architect's submission, plus 
 
     The bounds (``largest``, ``windows``) come from the rules alone; the proposal splits the
     ``windows`` ground footprint between the buildings as the layout says. Every massing is
-    sliced at ``settings.level_step_m``; ground areas above the footprint-ratio or green cap are
-    scaled down. ``preview_envelope``, ``submit_envelope`` and ``submit_study`` all call this.
+    sliced at ``settings.level_step_m``; footprints above the footprint-ratio or green cap are
+    trimmed and recomputed. Preview and both submission gates use this computation.
 
     Args:
         polygon: The site polygon, in a metric CRS.
@@ -158,10 +158,9 @@ def _bound(context: _Context, bound: Bound) -> Scenario:
     for height, labels in bands.items():
         raised = _raise(context, allowed, ground, height)
         left_out = left_out or raised.left_out
-        scaled, cap_notes = scale_together(
-            [_massing(context, ", ".join(labels), raised, height)], context.cap
-        )
-        massings.extend(scaled)
+        capped, cap_notes = _cap(context, allowed, [raised], [height])
+        left_out = left_out or capped[0].left_out
+        massings.append(_massing(context, ", ".join(labels), capped[0], height))
         notes.extend(cap_notes)
     notes += [ALTERNATIVES] if len(bands) > 1 else []
     notes += [LEFT_OUT] if left_out else []
@@ -205,28 +204,46 @@ def _proposal(context: _Context, layout: Layout) -> Scenario:
                 f"The spacing between buildings ({', '.join(f'{gap:g} m' for gap in gaps)}) "
                 f"does not fit across the footprint ({split.extent_m:.1f} m along the cut)."
             )
-    massings = []
+    rises = []
     for label, part, height in zip(layout.order, parts, heights, strict=True):
-        region, dropped = (None, False) if part is None else _region(context, part)
+        region, dropped = (
+            (None, False) if part is None else largest_part(part, context.settings.min_area_m2)
+        )
         raised = _raise(context, allowed, region, height)
         left_out = left_out or dropped or raised.left_out
-        massings.append(_massing(context, label, raised, height))
+        rises.append(raised)
         if ground is not None and parts[0] is not None and not raised.levels:
             warnings.append(f"{label}: its part of the footprint is empty.")
-    scaled, cap_notes = scale_together(massings, context.cap)
+    capped, cap_notes = _cap(context, allowed, rises, heights)
+    massings = tuple(
+        _massing(context, label, raised, height)
+        for label, raised, height in zip(layout.order, capped, heights, strict=True)
+    )
+    for massing, original in zip(massings, rises, strict=True):
+        if not massing.levels and original.levels:
+            warnings.append(f"{massing.building}: the area cap leaves no usable footprint.")
+    left_out = left_out or any(raised.left_out for raised in capped)
     notes += [*cap_notes, *([LEFT_OUT] if left_out else [])]
     return Scenario(
         name="proposal",
         footprint=to_contract(ground, context.crs),
         footprint_area_m2=0.0 if ground is None else float(ground.area),
-        buildings=tuple(scaled),
+        buildings=massings,
         fits=not warnings,
-        total_volume_m3=sum(massing.volume_m3 for massing in scaled),
+        total_volume_m3=sum(massing.volume_m3 for massing in massings),
         assumptions=tuple(notes),
         warnings=tuple(warnings),
     )
 
 
-def _region(context: _Context, part: BaseGeometry) -> tuple[ShapelyPolygon | None, bool]:
-    """Keep the largest piece of a building's part."""
-    return largest_part(part, context.settings.min_area_m2)
+def _cap(
+    context: _Context, allowed: SetBackSite, rises: Sequence[Rise], heights: Sequence[float]
+) -> tuple[list[Rise], list[str]]:
+    """Trim a scenario to its shared area cap, preserving its setbacks and spacing."""
+    return cap_together(
+        rises,
+        context.cap,
+        lambda region, index: _raise(context, allowed, region, heights[index]),
+        tolerance_m=context.settings.cut_tolerance_m,
+        min_area_m2=context.settings.min_area_m2,
+    )

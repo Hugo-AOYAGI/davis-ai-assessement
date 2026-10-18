@@ -1,0 +1,105 @@
+id: d07_uh_chevry_housing
+level: doc
+tests: zone x program grid, Chevry UH housing with real numeric limits; the Chevry chapter (UH, p.256-268) differs from the Vallee UH chapter (p.99-120) on footprint, road setback, side setbacks and height
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: The regulatory rules for the program in the zone, plus the provisions of every applying legend item. The zone is UH of the Chevry plateau.
+  documents: [plu_reglement]
+  topics: [access, networks, setback_road, setback_side, setback_rear, distance_between_buildings, footprint, height, appearance, parking, green_space, definitions, other]
+  context:
+    zone: UH
+    legend_items: []
+    program: new housing (dwellings)
+facts:
+  - statement: In zone UH of Chevry, the building footprint must not exceed one third (1/3) of the total site area in the zone.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 263
+        quote: "L’emprise au sol des constructions doit être au plus égale à 1/3 de la superficie totale du terrain, dans la zone."
+  - statement: In zone UH of Chevry, buildings must be set back at least 4 metres from the current or planned alignment.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 261
+        quote: "Les constructions doivent être implantées avec un retrait au moins égal à 4 mètres par rapport à l’alignement actuel ou projeté"
+  - statement: In zone UH of Chevry, the maximum height to the ridge (faîtage) is 10 metres in both sectors UHa and UHb.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 263
+        quote: "Hauteur au faîtage 10 m 10 m"
+  - statement: In zone UH of Chevry, housing requires 2 parking spaces per dwelling in the general case, but 3 spaces per dwelling plus 1 visitor space per 3 dwellings in new housing developments (opérations d'ensemble nouvelles such as lotissements or permis groupés); both cases must be stated.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 266
+        quote: "Pour les constructions à destination d'habitation : - 2 places par logement,"
+      - doc: plu_reglement
+        page: 266
+        quote: "Dans les opérations d’ensemble nouvelles (lotissements, permis groupés…) à destination d’habitation : - 3 places par logement - 1place visiteur pour 3 logements"
+  - statement: In zone UH of Chevry, the maximum height to the eaves is 3 metres in sector UHa and 5.50 metres in sector UHb.
+    evidence:
+      - doc: plu_reglement
+        page: 263
+        quote: "Hauteur à l’égout du toit 3 m 5,50 m"
+  - statement: In zone UH of Chevry, the maximum number of levels is R+Combles in sector UHa and R+1+Combles in sector UHb.
+    evidence:
+      - doc: plu_reglement
+        page: 263
+        quote: "Nombre de niveaux R+Combles R+1+Combles"
+  - statement: In zone UH of Chevry, buildings must be at least 2 metres from the side boundaries (limites séparatives) when there are no windows (vues).
+    evidence:
+      - doc: plu_reglement
+        page: 261
+        quote: "2 mètres des limites séparatives s’il n’existe pas de vues"
+  - statement: In zone UH of Chevry, buildings must be at least 4 metres from the side boundaries when there are windows (vues) on the ground floor.
+    evidence:
+      - doc: plu_reglement
+        page: 261
+        quote: "4 mètres des limites séparatives s’il existe des vues en rez-de-chaussée."
+  - statement: In zone UH of Chevry, windows (vues) on an upper floor may be opened only at least 6 metres from the side boundaries.
+    evidence:
+      - doc: plu_reglement
+        page: 262
+        quote: "L’ouverture de vues à l’étage ne pourra se faire qu’à au moins 6 mètres des limites séparatives"
+  - statement: In zone UH of Chevry, article 7 on separative boundaries covers the lateral and the rear (fond de terrain) boundaries alike, so the rear setback is the same as the side setback (2 m without windows, 4 m with windows on the ground floor, 6 m for windows on upper floors).
+    evidence:
+      - doc: plu_reglement
+        page: 261
+        quote: "les limites latérales et de fond de terrain qui séparent le terrain d’assiette de la construction"
+  - statement: In zone UH of Chevry, several buildings on one property must be at least 8 metres apart if at least one of the two facing facades has windows (vues).
+    evidence:
+      - doc: plu_reglement
+        page: 262
+        quote: "8 mètres si au moins l’une des deux façades ou parties de façades concernées comporte des vues"
+  - statement: In zone UH of Chevry, several buildings on one property must be at least 4 metres apart if neither facing facade has windows (vues).
+    evidence:
+      - doc: plu_reglement
+        page: 262
+        quote: "4 mètres si les deux façades ou parties de façades concernées ne comportent pas de vues."
+  - statement: In zone UH of Chevry, at least 50 percent of the parking spaces must be covered and integrated in the volume of the building at ground level.
+    evidence:
+      - doc: plu_reglement
+        page: 266
+        quote: "Au moins 50% des places seront couvertes et intégrées dans le volume de la construction en rez-de-chaussée."
+  - statement: In zone UH of Chevry, one high-stem tree must be planted per 150 m² of land free of construction, with a minimum of 2 trees per site.
+    evidence:
+      - doc: plu_reglement
+        page: 267
+        quote: "Un arbre de haute tige doit être planté par 150 m² de terrain libre de toute construction, avec un minimum de 2 arbres par terrain."
+  - statement: In zone UH of Chevry, housing is admitted under the condition that it fits the architectural and landscape harmony of the place.
+    evidence:
+      - doc: plu_reglement
+        page: 257
+        quote: "Les constructions à usage d’habitation sous condition de s’intégrer dans l’harmonie architecturale et paysagère qui caractérise les lieux."
+must_not:
+  - States that the footprint limit is 20 percent of the site area (the Vallée UH rule), or any figure other than one third.
+  - States that the road setback is 5 metres from the alignment or 9 metres from the road axis (the Vallée UH rule).
+  - States that the eaves height is 7 metres (the Vallée UH rule).
+  - States the parking requirement as 2 spaces per dwelling only, or 3 per dwelling only, without giving both the general rule and the new-development rule.
+  - States that side setbacks are 8 metres with windows or half the facade height with a 2 metre minimum (the Vallée UH rule).
+  - Gives a single height or number of levels for the whole zone without distinguishing the UHa and UHb eaves heights and levels.
+  - Cites the Vallée UH chapter (PDF p.99-120) instead of the Chevry UH chapter (PDF p.256-268) as the source of the limits.

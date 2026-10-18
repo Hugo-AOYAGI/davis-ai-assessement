@@ -17,7 +17,6 @@ class Line(Contract):
     """1-based PDF page index."""
     text: str
     """Spans concatenated, trailing blanks removed."""
-    x0: float
     y0: float
     """Top of the line, in points from the top of the page."""
     size: float

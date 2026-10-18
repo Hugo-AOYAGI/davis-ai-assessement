@@ -1,0 +1,18 @@
+id: s06_clairiere_hamlet
+level: surveyor
+tests: High house number in Hameau de la Clairière; the hamlet name is address context,
+  not a separate cadastral site.
+status: verified
+built_by: codex_independent_ban_cadastre_review
+input:
+  address: 118 Allee de la Clairiere, 91190 Gif-sur-Yvette
+facts:
+- key: choice.parcel_ids
+  expect:
+  - 91272000AK0548
+  critical: true
+  source: ban
+- key: area_m2
+  expect: 323.14
+  tolerance: 0.02
+  source: cadastre

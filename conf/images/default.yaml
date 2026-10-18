@@ -14,6 +14,9 @@ pages:
   ruler_step_px: 100       # ruler tick spacing, in image pixels
   crop_max_px: 3000        # long edge cap of saved evidence crops
   cache_size: 2            # decoded full-resolution pages kept in memory
+  # Larger PNGs are redrawn smaller (rulers recomputed). The API caps an image at 10 MB of
+  # base64, i.e. about 7.8 MB of PNG; this leaves margin for several images per request.
+  max_image_bytes: 4000000
 store:
   _target_: agent.adapters.images.store.ImageStore
   directory:

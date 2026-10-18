@@ -1,0 +1,107 @@
+id: d17_uca_housing
+level: doc
+tests: zone x program grid, UCa housing; the UCa sector overrides the general UC rule on footprint, height, setbacks and spacing, and the UD chapter does not apply
+status: verified
+built_by: claude_sonnet_source_review
+input:
+  label: rules
+  aim: >-
+    The regulatory rules for the program in the zone, plus the provisions of every applying legend
+    item. The zone is UC of the Vallée chapter of the regulation, sector UCa.
+  documents: [plu_reglement]
+  topics:
+    - access
+    - networks
+    - setback_road
+    - setback_side
+    - setback_rear
+    - distance_between_buildings
+    - footprint
+    - height
+    - appearance
+    - parking
+    - green_space
+    - definitions
+    - other
+  context:
+    zone: UCa
+    legend_items: []
+    parcel_ids: [91272000BI0093]
+    program: new housing (ordinary dwellings, not social rental housing or a specialised residence)
+facts:
+  - statement: In sector UCa (Vallée), the footprint of constructions, annexes included, must not exceed 25 percent of the site area.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 57
+        quote: "doit être au plus égale à 25% de la superficie totale du terrain."
+  - statement: In sector UCa, the maximum height of a construction is 12 metres at the eaves or at the acroterion.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 58
+        quote: "12 mètres à l’égout du toit ou l’acrotère."
+  - statement: In sector UCa, the maximum height of a construction is 15 metres at the ridge, except where an overrun is needed for technical structures.
+    evidence:
+      - doc: plu_reglement
+        page: 58
+        quote: "15 mètres au faîtage, faîte ou hauteur plafond, sauf lorsqu’un dépassement est rendu nécessaire pour la réalisation d’ouvrages techniques"
+  - statement: In sector UCa, the number of levels is limited to R+3+C.
+    evidence:
+      - doc: plu_reglement
+        page: 58
+        quote: "Avec un nombre de niveaux maximum de R+3+C"
+  - statement: In sector UCa, constructions must be set back at least 8 metres from the current alignment or the limit that replaces it.
+    critical: true
+    evidence:
+      - doc: plu_reglement
+        page: 54
+        quote: "8 mètres par rapport à l’alignement actuel ou la limite qui s’y substitue"
+  - statement: In sector UCa, constructions must be set back at least 12 metres from the axis of the road.
+    evidence:
+      - doc: plu_reglement
+        page: 54
+        quote: "12 mètres par rapport à l’axe de la voie"
+  - statement: In sector UCa, the setback from a side or rear boundary must be at least the height at the eaves (L=H) with a minimum of 8 metres where the facade has views.
+    evidence:
+      - doc: plu_reglement
+        page: 55
+        quote: "la hauteur de la construction mesurée à l’égout du toit (L=H) avec un minimum de 8 mètres dés lors que la façade concernée comporte de vues"
+  - statement: In sector UCa, the setback from a side or rear boundary is half the height at the eaves (L=1/2H) with a minimum of 4 metres where the facade has no views and is shorter than 15 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 56
+        quote: "la moitié de la hauteur de la construction mesurée à l’égout du toit (L=1/2H) avec un minimum de 4 mètres"
+  - statement: In sectors UCa and UCb, the distance between two buildings on the same property must be at least the height of the taller building at the eaves (L=H), with a minimum of 8 metres, where the facing facade has views.
+    evidence:
+      - doc: plu_reglement
+        page: 56
+        quote: "la hauteur de la construction la plus haute mesurée à l’égout du toit (L=H) avec un minimum de 8 mètres"
+  - statement: In sectors UCa and UCb, where the facing facade has no views, the distance between two buildings on the same property is at least the height of the lower building at the eaves, with a minimum of 8 metres.
+    evidence:
+      - doc: plu_reglement
+        page: 57
+        quote: "la hauteur de la construction la plus basse mesurée à l’égout du toit avec un minimum de 8 mètres"
+  - statement: In zone UC, outside new grouped housing operations (opérations d'ensemble), housing requires 1 parking space per 35 square metres of floor area, capped at 2 spaces per dwelling.
+    evidence:
+      - doc: plu_reglement
+        page: 62
+        quote: "1 place de stationnement par tranche de 35 m² de surface de plancher, dans la limite de 2 places par logement"
+  - statement: In zone UC, new grouped housing operations (opérations d'ensemble such as subdivisions or grouped permits) require 3 parking spaces per dwelling and 1 visitor space per 3 dwellings, instead of the article 12.2 norm.
+    evidence:
+      - doc: plu_reglement
+        page: 63
+        quote: "il sera exigé 3 places par logement et 1 place « visiteurs » pour 3 logements"
+  - statement: In zone UC (sector UCa included), at least 40 percent of the required parking spaces must be covered or built underground, and a single required space must be covered.
+    evidence:
+      - doc: plu_reglement
+        page: 62
+        quote: "40 % au minimum des aires de stationnement exigibles doivent être couvertes, ou réalisées en sous-sol"
+must_flag:
+  - For a UCa facade without views, article UC7 gives the L=1/2H rule with a 4 metre minimum only where the facade is shorter than 15 metres; the regulation states no side-boundary setback for a facade without views that is 15 metres long or more.
+must_not:
+  - States that the footprint limit in UCa is 30 percent of the site area (the general UC rule) or 20 percent (sector UCb).
+  - States that the maximum height in UCa is 10 metres at the eaves or acroterion or 13 metres at the ridge (general UC rule), or 11 metres (sector UCb).
+  - States that the road setback in UCa is 5 metres from the alignment or 9 metres from the road axis (general UC rule).
+  - States that the side-boundary setback in UCa is 1.5 times the height (L=1.5H) where the facade has views, or applies the general UC distance-between-buildings rule of 16 metres.
+  - States that housing in UCa requires a flat 2 parking spaces per dwelling regardless of floor area, ignores the 3 spaces per dwelling plus visitor rule for new grouped housing operations, or applies the rules of the UD or UG chapters.

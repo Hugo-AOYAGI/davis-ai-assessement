@@ -1,4 +1,4 @@
-"""Score one run record against its item: every scorer, then the item pass (``EVALS.md`` §4)."""
+"""Score a run against its item, retaining diagnostics separately from pass criteria."""
 
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -11,6 +11,7 @@ from agent.contracts.study import VerifiedStudy
 from evals.harness.items import Fact, Item, KeyFact, Level
 from evals.harness.judge import Judge
 from evals.harness.matching.grounding import CitationMatcher
+from evals.harness.refusals import refusal_checks
 from evals.harness.report.stats import Ratio
 from evals.harness.runs.record import RunRecord
 from evals.harness.scorers.citations import CitationScore, score_citations
@@ -151,6 +152,33 @@ def score_record(item: Item, record: RunRecord, scoring: Scoring) -> ItemResult:
         has_output=output is not None,
     )
     notes = score_notes(item, output, scoring.judge, matcher=scoring.matcher)
+    if item.expected_refusal is not None:
+        checks = refusal_checks(
+            item.expected_refusal,
+            record.messages,
+            has_output=output is not None,
+            error=record.error,
+        )
+        passed = all(checks.values())
+        fact = FactScore(
+            key_or_statement="expected_refusal",
+            correct=passed,
+            grounded=passed,
+            critical=True,
+            cited=None,
+            detail=str(checks),
+        )
+        return ItemResult(
+            item_id=item.id,
+            level=item.level,
+            passed=passed,
+            run=run,
+            facts=(fact,),
+            notes=notes,
+            trajectory=score_trajectory(
+                record.messages, (), sections=scoring.sections, mode=scoring.mode, cost=record.cost
+            ),
+        )
     if output is None:
         facts = (*_unanswered(item.facts), *notes.statements)
         return ItemResult(
