@@ -5,6 +5,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .langgraph_api/
+.claude/
 data/
 outputs/
 multirun/
