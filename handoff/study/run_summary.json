@@ -1,0 +1,105 @@
+{
+  "run": {
+    "address": "4 rue Joliot Curie, 91190 Gif-sur-Yvette",
+    "overrides": [
+      "policies.tracing.enabled=true",
+      "models.nodes.zoning_analyst.model=claude-haiku-5-5",
+      "~models.nodes.zoning_analyst.effort"
+    ],
+    "wall_time_s": 229.93033769994508,
+    "usage": {
+      "claude-sonnet-5-5": {
+        "input": 60,
+        "output": 31780,
+        "cache_read": 623485,
+        "cache_write": 169431,
+        "cost_usd": 0.8661945
+      },
+      "claude-haiku-5-5": {
+        "input": 30,
+        "output": 8888,
+        "cache_read": 141236,
+        "cache_write": 44070,
+        "cost_usd": 0.01136811
+      }
+    },
+    "usage_by_node": {
+      "orchestrator": {
+        "input": 18,
+        "output": 11529,
+        "cache_read": 150276,
+        "cache_write": 50073,
+        "calls": 8,
+        "cost_usd": 0.2705637
+      },
+      "surveyor": {
+        "input": 12,
+        "output": 1782,
+        "cache_read": 17564,
+        "cache_write": 7502,
+        "calls": 5,
+        "cost_usd": 0.00200559
+      },
+      "zoning_analyst": {
+        "input": 18,
+        "output": 7106,
+        "cache_read": 123672,
+        "cache_write": 36568,
+        "calls": 8,
+        "cost_usd": 0.009362520000000001
+      },
+      "doc_analyst": {
+        "input": 42,
+        "output": 20251,
+        "cache_read": 473209,
+        "cache_write": 119358,
+        "calls": 19,
+        "cost_usd": 0.5956307999999999
+      }
+    },
+    "total_tokens": 1018980,
+    "cost_usd": 0.87756261,
+    "rejected_submissions": 0
+  },
+  "accepted": true,
+  "study": {
+    "parcel_ids": [
+      "91272000CR0247"
+    ],
+    "zone": "UMG",
+    "overlays": [
+      "Limites de zones",
+      "Secteur à Orientation d'Aménagement et de Programmation"
+    ],
+    "oap_applicable": true,
+    "admissibility": [
+      {
+        "building": "Résidence Sociale Étudiante (RSE)",
+        "verdict": "permitted"
+      },
+      {
+        "building": "Résidence Jeunes Actifs",
+        "verdict": "permitted"
+      }
+    ],
+    "envelope": {
+      "site_area_m2": 5951.632500010313,
+      "max_height_m": 20.0,
+      "max_storeys": 6.0,
+      "max_footprint_ratio": null,
+      "min_green_ratio": 0.2,
+      "footprint_area_m2": 4241.440786859832,
+      "max_footprint_area_m2": 4241.440786859832,
+      "min_green_area_m2": 1190.3265000020626,
+      "max_volume_m3": 84828.81573719664
+    },
+    "ambiguities": 8,
+    "evidence_crops": 3,
+    "citations": {
+      "checks": 38,
+      "text_verifiable": 38,
+      "verified": 38,
+      "pass_rate": 1.0
+    }
+  }
+}

@@ -7,6 +7,8 @@ residence for young workers in separate buildings.
 
 ## Explore the submission
 
+- **[Reference parcel study](handoff/study/report.md):** read the complete, auditable regulatory
+  study for 4 rue Joliot Curie (38 verified citations, computed 3D envelope, ambiguities and visual evidence).
 - **[Workflow site](handoff/workflow/index.html):** follow ingestion, the four specialist
   agents, validation and delivery operation by operation. Includes a recorded app demo.
 - **[Evaluation report](handoff/evaluation.html):** compare historical configurations on
@@ -15,7 +17,7 @@ residence for young workers in separate buildings.
 - **The repository:** use the code map below; [CLAUDE.md](CLAUDE.md) describes the current
   architecture and [CODING_STANDARDS.md](CODING_STANDARDS.md) the contribution rules.
 
-The report opens directly. Serve the workflow site over HTTP because it fetches its data.
+The report and study open directly. Serve the workflow site over HTTP because it fetches its data.
 From the repository root, with Python installed:
 
 ```sh
@@ -158,7 +160,7 @@ prompts/           Agent instructions and playbooks
 evals/             Benchmarks, scoring, source evidence and maintenance tools
 tests/             Offline tests
 ressources/        Source PDFs
-handoff/           Workflow site and historical evaluation report
+handoff/           Workflow site, historical evaluation report, and reference study
 ```
 
 ## Checks and evaluations

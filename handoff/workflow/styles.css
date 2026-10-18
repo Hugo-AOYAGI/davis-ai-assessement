@@ -118,6 +118,21 @@ h3.plain{font-family:var(--sans);font-weight:600;letter-spacing:-.03em}
 .scene svg .ink{fill:var(--ink)}
 .scene svg .muted{fill:#d3d8cf}
 .scene svg marker path{fill:var(--stroke)}
+.scene .mechanism-diagram .d-label{font-size:18px;font-weight:550}
+.scene .mechanism-diagram .d-note{font-size:16px;font-weight:430;letter-spacing:0;fill:var(--ink-2)}
+.scene .mechanism-diagram .d-mono{font-family:var(--mono);font-size:16px;font-weight:450;letter-spacing:-.01em}
+.scene .mechanism-diagram .d-data{fill:var(--paper);stroke:var(--line-2);stroke-width:1.5}
+.scene .mechanism-diagram .d-code{fill:var(--paper);stroke:var(--ink-2);stroke-width:1.5}
+.scene .mechanism-diagram .d-model{fill:var(--paper);stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:5 4}
+.scene .mechanism-diagram .d-focus{fill:var(--tint);stroke:var(--green);stroke-width:1.5}
+.scene .mechanism-diagram .d-link,.scene .mechanism-diagram .d-loop{stroke:var(--ink-2);stroke-width:1.5;fill:none}
+.scene .mechanism-diagram .d-loop{stroke-dasharray:5 4}
+.scene .mechanism-diagram .d-outline{stroke:var(--ink-2);stroke-width:1.5;fill:none}
+.scene .mechanism-diagram .d-mask{stroke:var(--green);stroke-width:1.5;fill:var(--tint)}
+.scene .mechanism-diagram .d-match{stroke:var(--green);stroke-width:1.5;fill:none}
+.scene .mechanism-diagram .d-dot{fill:var(--ink-2)}
+.scene .mechanism-diagram .d-bar{fill:var(--line-2);stroke:none}
+.scene .mechanism-diagram marker path{fill:var(--ink-2)}
 .scene-caption{flex:none;margin-top:auto;padding-top:var(--s2);color:var(--muted);font-size:var(--fs-label);text-align:center;text-wrap:balance}
 
 .scene.has-image{padding:var(--s4) var(--s5) var(--s3)}
@@ -234,3 +249,4 @@ dd.path{font-family:var(--mono);font-size:.75rem;line-height:1.6;color:var(--ink
  @keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+@media(max-width:650px){.scene .mechanism-diagram .d-label{font-size:22px}.scene .mechanism-diagram .d-note{font-size:19px}.scene .mechanism-diagram .d-mono{font-size:18px}.scene:not(.has-image){padding-left:8px;padding-right:8px}}

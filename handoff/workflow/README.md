@@ -17,3 +17,9 @@ needed. Keep the complete `assets/` directory, including font licenses and image
 The app demo and screenshots predate submission cleanup. Negative studies can now omit the
 envelope, and area caps trim physical polygons instead of scaling numbers alone. Those
 changes are described in the updated workflow facts; the recording remains historical.
+
+The remaining mechanisms are drawn per operation in `diagrams.js`: solid boxes are code,
+dashed boxes are model reasoning, tables are data, arrows show execution, and plain lines
+show a consistency relationship. One muted green focus identifies what matters in each
+scene. Repair diagrams show a retained draft, a path edit and the same checks running again.
+The diagrams explain implementation; they are not recordings of a tool-call trace.
