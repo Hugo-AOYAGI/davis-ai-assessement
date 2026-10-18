@@ -2,8 +2,7 @@
 
 This repository builds a cited planning-regulation study from PDFs and geographic services.
 Follow [CODING_STANDARDS.md](CODING_STANDARDS.md). [README.md](README.md) is the startup guide;
-[evals/README.md](evals/README.md) defines scoring. Historical local files in ignored `docs/`
-are not architectural authority.
+[evals/README.md](evals/README.md) defines scoring.
 
 ## Current architecture
 
@@ -116,7 +115,7 @@ Declare direct imports directly. Secrets remain in `.env`, never in Git.
 ## Submission
 
 Track maintained source, tests, source PDFs, benchmark evidence, README, this guide, standards
-and `handoff/`. Ignore local `docs/`, `artifacts/`, `sites/`, `data/` and `outputs/`.
+and `handoff/`. Ignore local `artifacts/`, `sites/`, `data/` and `outputs/`.
 Do not add the nested authoring repository under `sites/` as a gitlink. Preserve font licenses
 and source provenance. Rebuild historical report presentation with:
 
