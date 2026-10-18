@@ -52,15 +52,12 @@ def test_overrides_apply():
     assert list(cfg.case.facts) == ["a", "b"]
 
 
-SONNET_NODES = {"zoning_analyst", "judge"}
-
-
 def test_default_models():
     nodes = load_config().models.nodes
-    for node in NODES - SONNET_NODES:
-        assert nodes[node].model == "claude-haiku-5-5"
+    for node in NODES:
+        assert nodes[node].model == "claude-sonnet-5-5"
+    for node in NODES - {"zoning_analyst"}:
         assert "effort" not in nodes[node]
-    assert nodes.judge.model == "claude-sonnet-5-5"
 
 
 def test_zoning_analyst_runs_on_sonnet(monkeypatch: pytest.MonkeyPatch):
@@ -97,14 +94,13 @@ def test_zoning_analyst_has_plan_site():
 def test_node_override_is_isolated():
     cfg = load_config(
         [
-            "models.nodes.doc_analyst.model=claude-sonnet-5-5",
-            "+models.nodes.doc_analyst.effort=medium",
+            "models.nodes.doc_analyst.model=claude-haiku-5-5",
         ]
     )
     nodes = cfg.models.nodes
-    assert nodes.doc_analyst.model == "claude-sonnet-5-5"
-    assert nodes.doc_analyst.effort == "medium"
-    assert nodes.orchestrator.model == "claude-haiku-5-5"
+    assert nodes.doc_analyst.model == "claude-haiku-5-5"
+    assert "effort" not in nodes.doc_analyst
+    assert nodes.orchestrator.model == "claude-sonnet-5-5"
     assert "effort" not in nodes.orchestrator
 
 
